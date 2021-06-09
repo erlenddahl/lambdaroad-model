@@ -8,7 +8,7 @@ using LambdaModel.General;
 
 namespace LambdaModel.Terrain.Tiff
 {
-	public class GeoTiff
+	public class GeoTiff : ITiffReader
 	{
 		public float[,] HeightMap { get; set; }
 		public int Width { get; set; }
@@ -132,9 +132,9 @@ namespace LambdaModel.Terrain.Tiff
             return ((int) Math.Round(pX - StartX, 0), (int) Math.Round(StartY - pY, 0));
         }
 
-        public List<PointUtm> GetAltitudeVector(PointUtm a, PointUtm b)
+        public List<PointUtm> GetAltitudeVector(PointUtm a, PointUtm b, double incMeter = 1)
         {
-            return GetAltitudeVector(a.X,a.Y, b.X, b.Y);
+            return GetAltitudeVector(a.X,a.Y, b.X, b.Y, incMeter);
         }
 
         public List<PointUtm> GetAltitudeVector(double aX, double aY, double bX, double bY, double incMeter = 1)
