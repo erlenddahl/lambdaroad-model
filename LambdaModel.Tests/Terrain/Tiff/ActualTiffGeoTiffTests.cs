@@ -16,7 +16,7 @@ namespace LambdaModel.Tests.Terrain.Tiff
         [TestInitialize]
         public void Init()
         {
-            _geotiff = new GeoTiff(@"C:\Users\Erlend\Desktop\Søppel\2021-06-01 - Lambda-test\DOM\12-14\33-126-145.tif");
+            _geotiff = new GeoTiff(@"..\..\..\..\Data\Testing\33-126-145.tif");
         }
 
         [TestMethod]
@@ -31,17 +31,18 @@ namespace LambdaModel.Tests.Terrain.Tiff
             Assert.AreEqual(396.44, _geotiff.GetAltitude(290963, 7115490), 0.01);
 
             // Upper right corner (.38)
-            Assert.AreEqual(389.32, _geotiff.GetAltitude(305115, 7115561), 0.01);
+            Assert.AreEqual(389.01, _geotiff.GetAltitude(305115, 7115561), 0.01);
 
-            // Lower left corner (.22)
-            Assert.AreEqual(409.13, _geotiff.GetAltitude(290702, 7101318), 0.01);
+            // Lower left corner
+            Assert.AreEqual(409.22, _geotiff.GetAltitude(290702, 7101318), 0.01);
 
             // Lower right corner
-            Assert.AreEqual(496.59, _geotiff.GetAltitude(305178, 7101338), 0.01);
+            Assert.AreEqual(496.60, _geotiff.GetAltitude(305178, 7101338), 0.01);
 
             // Some other random points
-            Assert.AreEqual(395.65, _geotiff.GetAltitude(291571, 7115923), 0.01); // .61
-            Assert.AreEqual(597.93, _geotiff.GetAltitude(299494, 7112667), 0.01); // .89
+            Assert.AreEqual(395.13, _geotiff.GetAltitude(291571, 7115923), 0.01); // .61
+            Assert.AreEqual(598.15, _geotiff.GetAltitude(299494, 7112667), 0.01); // 597.89
+        }
         }
     }
 }

@@ -47,8 +47,8 @@ namespace LambdaModel.Terrain.Tiff
 				var originLon = BitConverter.ToDouble(modelTransformation, 24);
 				var originLat = BitConverter.ToDouble(modelTransformation, 32);
 
-				StartX = originLon + DW / 2.0;
-				StartY = originLat + DH / 2.0;
+				StartX = (int)(originLon + DW / 2d);
+				StartY = (int)(originLat + DH / 2d);
 
 				//var tileByteCountsTag = tiff.GetField(TiffTag.TILEBYTECOUNTS);
 				//var tileByteCounts = tileByteCountsTag[0].TolongArray();
@@ -129,7 +129,7 @@ namespace LambdaModel.Terrain.Tiff
 
         private (int x, int y) ToLocal(double pX, double pY)
         {
-            return ((int) Math.Round(pX - StartX, 0), (int)Math.Round(StartY - pY, 0));
+            return ((int) Math.Round(pX - StartX, 0), (int) Math.Round(StartY - pY, 0));
         }
 
         public List<PointUtm> GetAltitudeVector(PointUtm a, PointUtm b)
