@@ -4,7 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace LambdaModel.Tests.Terrain.TileCacheTests
 {
     [TestClass]
-    public class BasicTests
+    public class GetAltitudeTests
     {
         private TileCache _tiles;
 
