@@ -43,6 +43,14 @@ namespace LambdaModel.Tests.Terrain.Tiff
             Assert.AreEqual(395.13, _geotiff.GetAltitude(291571, 7115923), 0.01); // .61
             Assert.AreEqual(598.15, _geotiff.GetAltitude(299494, 7112667), 0.01); // 597.89
         }
+
+        [TestMethod]
+        public void MatchesWmsTest()
+        {
+            // Corresponds to coordinates in the WMS test file:
+            Assert.AreEqual(462.72, _geotiff.GetAltitude(290426, 7100996), 0.01);
+            Assert.AreEqual(465.52, _geotiff.GetAltitude(290446, 7101028), 0.01);
+            Assert.AreEqual(471.51, _geotiff.GetAltitude(290486, 7101011), 0.01);
         }
     }
 }
