@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using LambdaModel.General;
@@ -51,8 +52,9 @@ namespace LambdaModel.Terrain
 
         private async Task<GeoTiff> GetTiff(double x, double y)
         {
-            var ix = (int) (x - x % _tileSize);
-            var iy = (int) (y - y % _tileSize);
+            var (ix, iy) = ((int)Math.Round(x, 0), (int)Math.Round(y, 0));
+            ix -= ix % _tileSize;
+            iy -= iy % _tileSize;
 
             if (_tiffCache.TryGetValue((ix, iy), out var tiff))
             {
@@ -76,8 +78,33 @@ namespace LambdaModel.Terrain
 
         public List<PointUtm> GetAltitudeVector(double aX, double aY, double bX, double bY, double incMeter = 1)
         {
-            var list = new List<PointUtm>();
-            return list;
+            var v = new List<PointUtm>();
+
+            var dx = bX - aX;
+            var dy = bY - aY;
+            var l = Math.Sqrt(Math.Pow(dx, 2) + Math.Pow(dy, 2));
+
+            var xInc = dx / l * incMeter;
+            var yInc = dy / l * incMeter;
+            var m = 0d;
+
+            var (x, y) = (aX, aY);
+
+            var tiff = GetTiff(x, y).Result;
+
+            while (m <= l)
+            {
+                if (!tiff.Contains(x, y))
+                    tiff = GetTiff(x, y).Result;
+
+                v.Add(new PointUtm(x, y, tiff.GetAltitude(x, y), m));
+
+                m += incMeter;
+                x += xInc;
+                y += yInc;
+            }
+
+            return v;
         }
 
         public void Clear()

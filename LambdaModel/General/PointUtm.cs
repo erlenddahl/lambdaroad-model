@@ -9,7 +9,7 @@ namespace LambdaModel.General
         public double Z;
         public double M;
 
-        public PointUtm(double x, double y, double z, double m = 0)
+        public PointUtm(double x, double y, double z = 0, double m = 0)
         {
             X = x;
             Y = y;

@@ -123,7 +123,7 @@ namespace LambdaModel.Terrain.Tiff
                 throw new Exception("Height map has not been initialized. Did you open the file using the headerOnly flag?");
 
             var (x, y) = ToLocal(pX, pY);
-            if (x < 0 || y < 0 || x > Width || y > Height)
+            if (x < 0 || y < 0 || x >= Width || y >= Height)
                 throw new Exception("Requested point is not inside this TIFF file.");
 
             return HeightMap[y, x];
@@ -166,6 +166,12 @@ namespace LambdaModel.Terrain.Tiff
             }
 
             return v;
+        }
+
+        public bool Contains(double pX, double pY)
+        {
+			var (x, y) = ToLocal(pX, pY);
+            return !(x < 0 || y < 0 || x >= Width || y >= Height);
         }
     }
 }
