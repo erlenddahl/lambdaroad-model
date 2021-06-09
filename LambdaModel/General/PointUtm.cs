@@ -19,12 +19,17 @@ namespace LambdaModel.General
 
         public double Distance2d(PointUtm p)
         {
-            return Math.Sqrt(Math.Pow(X - p.X, 2) + Math.Pow(Y - p.Y, 2));
+            var dx = X - p.X;
+            var dy = Y - p.Y;
+            return Math.Sqrt(dx * dx + dy * dy);
         }
 
         public double Distance3d(PointUtm p)
         {
-            return Math.Sqrt(Math.Pow(X - p.X, 2) + Math.Pow(Y - p.Y, 2) + Math.Pow(Z - p.Z, 2));
+            var dx = X - p.X;
+            var dy = Y - p.Y;
+            var dz = Z - p.Z;
+            return Math.Sqrt(dx * dx + dy * dy + dz * dz);
         }
 
         public double Distance3d(double x, double y, double z)
