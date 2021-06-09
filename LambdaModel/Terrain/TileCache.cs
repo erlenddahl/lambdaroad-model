@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
+﻿using System.Collections.Generic;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 using LambdaModel.General;
 using LambdaModel.Terrain.Tiff;
 
-namespace LambdaModel.Terrain.Wms
+namespace LambdaModel.Terrain
 {
     public class TileCache:ITiffReader
     {
@@ -16,11 +13,17 @@ namespace LambdaModel.Terrain.Wms
         private WebClient _wc;
         private readonly Dictionary<(int x, int y), GeoTiff> _tiffCache = new Dictionary<(int x, int y), GeoTiff>();
 
+        public int TilesDownloaded { get; private set; }
+        public int TilesRetrievedFromCache { get; private set; }
+
         public TileCache(string cacheLocation, int tileSize = 100)
         {
             _cacheLocation = cacheLocation;
             _tileSize = tileSize;
             _wc = new WebClient();
+
+            if (!System.IO.Directory.Exists(_cacheLocation))
+                System.IO.Directory.CreateDirectory(_cacheLocation);
         }
         
         private async Task DownloadTileForCoordinate(int x, int y, string filename)
@@ -28,6 +31,7 @@ namespace LambdaModel.Terrain.Wms
             var bbox = $"{x},{y},{x + _tileSize},{y + _tileSize}";
             var url = $"https://wms.geonorge.no/skwms1/wms.hoyde-dom1?bbox={bbox}&format=image/tiff&service=WMS&version=1.1.1&request=GetMap&srs=EPSG:25833&transparent=true&width={_tileSize}&height={_tileSize}&layers=dom1_33:None";
             await _wc.DownloadFileTaskAsync(url, filename);
+            TilesDownloaded++;
         }
 
         private string GetFilename(double x, double y)
@@ -47,10 +51,14 @@ namespace LambdaModel.Terrain.Wms
 
         private async Task<GeoTiff> GetTiff(double x, double y)
         {
-            var ix = (int) (x % _tileSize);
-            var iy = (int) (y % _tileSize);
+            var ix = (int) (x - x % _tileSize);
+            var iy = (int) (y - y % _tileSize);
 
-            if (_tiffCache.TryGetValue((ix, iy), out var tiff)) return tiff;
+            if (_tiffCache.TryGetValue((ix, iy), out var tiff))
+            {
+                TilesRetrievedFromCache++;
+                return tiff;
+            }
 
             var fn = GetFilename(ix, iy);
             if (!System.IO.File.Exists(fn))
@@ -70,6 +78,15 @@ namespace LambdaModel.Terrain.Wms
         {
             var list = new List<PointUtm>();
             return list;
+        }
+
+        public void Clear()
+        {
+            System.IO.Directory.Delete(_cacheLocation, true);
+            System.IO.Directory.CreateDirectory(_cacheLocation);
+            _tiffCache.Clear();
+            TilesDownloaded = 0;
+            TilesRetrievedFromCache = 0;
         }
     }
 }
