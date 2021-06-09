@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using BitMiracle.LibTiff.Classic;
@@ -25,7 +26,8 @@ namespace LambdaModel.Terrain.Tiff
 
 
 		public GeoTiff(string filePath, bool headerOnly = false)
-		{
+        {
+            if (!File.Exists(filePath)) throw new FileNotFoundException("TIFF file '" + filePath + "' does not exist", filePath);
 			using (var tiff = BitMiracle.LibTiff.Classic.Tiff.Open(filePath, "r"))
 			{
 				if (tiff == null)
