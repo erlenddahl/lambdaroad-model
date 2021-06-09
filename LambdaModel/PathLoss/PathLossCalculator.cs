@@ -6,20 +6,20 @@ namespace LambdaModel.PathLoss
 {
     public class PathLossCalculator
     {
-        public double CalculateLoss(PointUtm[] path, double txHeightAboveTerrain, double rxHeightAboveTerrain)
+        public double CalculateLoss(PointUtm[] path, double txHeightAboveTerrain, double rxHeightAboveTerrain, int rxIndex = -1)
         {
-            var p = GetParameters(path);
+            var p = GetParameters(path, rxIndex);
 
             return 25.1 * Math.Log(p.horizontalDistance) - 1.8e-01 * txHeightAboveTerrain + 1.3e+01 * p.rxa - 1.4e-04 * p.txa - 1.4e-04 * p.rxi - 3.0e-05 * p.txi + 4.9 * p.nobs + 29.3;
         }
 
-        protected (double horizontalDistance, double txa, double rxa, double txi, double rxi, int nobs) GetParameters(PointUtm[] path)
+        protected (double horizontalDistance, double txa, double rxa, double txi, double rxi, int nobs) GetParameters(PointUtm[] path, int rxIndex = -1)
         {
+            if (rxIndex == -1) rxIndex = path.Length - 1;
             var tx = path[0];
-            var rx = path.Last();
+            var rx = path[rxIndex];
 
             var horizontalDistance = tx.Distance2d(rx);
-            var sightLineHeightChangePerMeter = (rx.Z - tx.Z) / horizontalDistance;
 
             var rxa = 0d;
             var txa = 0d;
@@ -27,8 +27,8 @@ namespace LambdaModel.PathLoss
             var txi = 0d;
             var nobs = 0;
 
-            var txObstruction = FindFresnelObstruction(path, true);
-            var rxObstruction = FindFresnelObstruction(path, false);
+            var txObstruction = FindFresnelObstruction(path, true, rxIndex);
+            var rxObstruction = FindFresnelObstruction(path, false, rxIndex);
 
             if (txObstruction.angle < 0 && rxObstruction.angle < 0)
             {
@@ -66,11 +66,12 @@ namespace LambdaModel.PathLoss
             return (horizontalDistance, txa, rxa, txi, rxi, nobs);
         }
 
-        protected (int index, double angle, double distance2d, double distance3d) FindFresnelObstruction(PointUtm[] path, bool direction)
+        protected (int index, double angle, double distance2d, double distance3d) FindFresnelObstruction(PointUtm[] path, bool direction, int rxIndex = -1)
         {
-
-            var fromIx = direction ? 0 : path.Length - 1;
-            var toIx = !direction ? 0 : path.Length - 1;
+            if (rxIndex == -1) rxIndex = path.Length - 1;
+            
+            var fromIx = direction ? 0 : rxIndex;
+            var toIx = !direction ? 0 : rxIndex;
 
             var source = path[fromIx];
             var last = path[toIx];
