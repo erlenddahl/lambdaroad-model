@@ -12,12 +12,14 @@ namespace LambdaModel.Terrain.Tiff
 	public class GeoTiff : ITiffReader
 	{
 		public float[,] HeightMap { get; set; }
-		public int Width { get; set; }
-		public int Height { get; set; }
-		public double StartX { get; set; }
-		public double StartY { get; set; }
-        public double DW { get; set; }
-        public double DH { get; set; }
+		public int Width { get; protected set; }
+        public int Height { get; protected set; }
+        public int StartX { get; protected set; }
+        public int StartY { get; protected set; }
+        public int EndX { get; protected set; }
+        public int EndY { get; protected set; }
+		public double DW { get;  }
+        public double DH { get;  }
 
         protected GeoTiff()
         {
@@ -51,6 +53,7 @@ namespace LambdaModel.Terrain.Tiff
 
 				StartX = (int)(originLon + DW / 2d);
 				StartY = (int)(originLat + DH / 2d);
+                SetEnds();
 
 				//var tileByteCountsTag = tiff.GetField(TiffTag.TILEBYTECOUNTS);
 				//var tileByteCounts = tileByteCountsTag[0].TolongArray();
@@ -112,7 +115,13 @@ namespace LambdaModel.Terrain.Tiff
 			}
 		}
 
-		public float GetAltitude(PointUtm p)
+        protected void SetEnds()
+        {
+            EndX = StartX + Width;
+            EndY = StartY - Height;
+        }
+
+        public float GetAltitude(PointUtm p)
         {
             return GetAltitude(p.X, p.Y);
         }
@@ -123,7 +132,7 @@ namespace LambdaModel.Terrain.Tiff
                 throw new Exception("Height map has not been initialized. Did you open the file using the headerOnly flag?");
 
             var (x, y) = ToLocal(pX, pY);
-            if (x < 0 || y < 0 || x >= Width || y >= Height)
+            if (!Contains(pX, pY))
                 throw new Exception("Requested point is not inside this TIFF file.");
 
             return HeightMap[y, x];
@@ -131,7 +140,7 @@ namespace LambdaModel.Terrain.Tiff
 
         private (int x, int y) ToLocal(double pX, double pY)
         {
-            return ((int) Math.Round(pX - StartX, 0), (int) Math.Round(StartY - pY, 0));
+            return (Round(pX - StartX), Round(StartY - pY));
         }
 
         public List<PointUtm> GetAltitudeVector(PointUtm a, PointUtm b, double incMeter = 1)
@@ -168,10 +177,16 @@ namespace LambdaModel.Terrain.Tiff
             return v;
         }
 
+        private int Round(double num)
+        {
+            return (int) (num + 0.5); // Since coordinates are always positive. If negative, need to use -0.5 in negative cases.
+        }
+
         public bool Contains(double pX, double pY)
         {
-			var (x, y) = ToLocal(pX, pY);
-            return !(x < 0 || y < 0 || x >= Width || y >= Height);
+            var x = Round(pX);
+            var y = Round(pY);
+            return x >= StartX && x < EndX && y > EndY && y <= StartY;
         }
     }
 }
