@@ -62,7 +62,7 @@ namespace LambdaModel.Grid
                 // Otherwise, make sure the Z values in the vector are retrieved up until this point.
                 Tiles.FillAltitudeVector(_vector, i);
 
-                // Calculate the loss for this point, and store it in the resuls matrix
+                // Calculate the loss for this point, and store it in the results matrix
                 Results[xi, yi] = _calc.CalculateLoss(_vector, 100, 2, i - 1);
 
                 calculations++;
