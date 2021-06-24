@@ -2,8 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using LambdaModel.Calculations;
 using LambdaModel.General;
-using LambdaModel.Grid;
 using LambdaModel.PathLoss;
 using LambdaModel.Terrain;
 using LambdaModel.Terrain.Tiff;

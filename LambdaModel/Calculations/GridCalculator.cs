@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using LambdaModel.General;
 using LambdaModel.PathLoss;
 using LambdaModel.Terrain;
 
-namespace LambdaModel.Grid
+namespace LambdaModel.Calculations
 {
     public class GridCalculator
     {
