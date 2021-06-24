@@ -11,7 +11,7 @@ namespace LambdaModel.Tests.Terrain.TileCacheTests
         [TestInitialize]
         public void Init()
         {
-            _tiles = new TileCache(@"..\..\..\..\Data\Testing\CacheTest");
+            _tiles = new TileCache(@"..\..\..\..\Data\Testing\CacheTest2");
         }
 
         [TestMethod]
