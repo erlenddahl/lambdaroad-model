@@ -143,31 +143,30 @@ namespace LambdaModel.Terrain.Tiff
             return (Round(pX - StartX), Round(StartY - pY));
         }
 
-        public List<PointUtm> GetAltitudeVector(PointUtm a, PointUtm b, double incMeter = 1)
+        public PointUtm[] GetAltitudeVector(PointUtm a, PointUtm b, int incMeter = 1)
         {
             return GetAltitudeVector(a.X,a.Y, b.X, b.Y, incMeter);
         }
 
-        public List<PointUtm> GetAltitudeVector(double aX, double aY, double bX, double bY, double incMeter = 1)
+        public PointUtm[] GetAltitudeVector(double aX, double aY, double bX, double bY, int incMeter = 1)
         {
-            var v = new List<PointUtm>();
-
             (aX, aY) = ToLocal(aX, aY);
             (bX, bY) = ToLocal(bX, bY);
             
             var dx = bX - aX;
             var dy = bY - aY;
 			var l = Math.Sqrt(Math.Pow(dx, 2) + Math.Pow(dy, 2));
+            var v = new PointUtm[(int)l + 1];
 
             var xInc = dx / l * incMeter;
             var yInc = dy / l * incMeter;
-            var m = 0d;
+            var m = 0;
 
             var (x, y) = (aX, aY);
 
             while (m <= l)
             {
-                v.Add(new PointUtm(x, y, HeightMap[(int) Math.Round(y), (int) Math.Round(x)], m));
+                v[m] = new PointUtm(x, y, HeightMap[(int) Math.Round(y), (int) Math.Round(x)], m);
 
                 m += incMeter;
                 x += xInc;
