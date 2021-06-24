@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using LambdaModel.General;
+using LambdaModel.Grid;
 using LambdaModel.PathLoss;
 using LambdaModel.Terrain;
 using LambdaModel.Terrain.Tiff;
@@ -17,39 +18,21 @@ namespace LambdaModel.Tests.FullRun.Grid
         public void RunTileCache(int tileSize)
         {
             var tiles = new TileCache(@"..\..\..\..\Data\Testing\CacheTest", tileSize);
-            
-            // Use a station placed in the center of this map tile
-            var stationCoordinates = new PointUtm(299430, 7108499);
-            stationCoordinates.Z = tiles.GetAltitude(stationCoordinates);
-
-            var coverageRadius = 500;
+            var grid = new GridCalculator(tiles, 500, new PointUtm(299430, 7108499));
 
             var start = DateTime.Now;
-            var results = new double[coverageRadius * 2 + 1, coverageRadius * 2 + 1];
 
-            foreach (var (x, y) in SpiralGridEnumerator.Enumerate(coverageRadius))
+            foreach (var (x, y) in SpiralGridEnumerator.Enumerate(grid.Radius))
             {
                 var startLine = DateTime.Now;
-                var vector = tiles.GetVector(stationCoordinates, stationCoordinates.Move(x, y));
-                var calculations = 0;
-                var calc = new PathLossCalculator();
-                for (var i = 2; i < vector.Length; i++)
-                {
-                    var c = vector[i];
-                    var (xi, yi) = ((int) (c.X - stationCoordinates.X) + coverageRadius, (int) (c.Y - stationCoordinates.Y) + coverageRadius);
-                    if (results[xi, yi] != 0) continue;
-                    tiles.FillAltitudeVector(vector, i);
-                    results[xi, yi] = calc.CalculateLoss(vector, 100, 2, i - 1);
-                    calculations++;
-                }
-
+                var calculations = grid.CalculateTo(x, y);
                 var lms = DateTime.Now.Subtract(startLine).TotalMilliseconds;
                 var cprms = calculations / lms;
                 Console.WriteLine($"Vector to ({x}, {y}): {calculations:n0} calculations in {lms:n2} ms ({cprms:n2} c/ms)");
             }
 
             var ms = DateTime.Now.Subtract(start).TotalMilliseconds;
-            Console.WriteLine($"Calculation time: {ms}, {results.Length / ms:n2} c/ms");
+            Console.WriteLine($"Calculation time: {ms}, {grid.Results.Length / ms:n2} c/ms");
         }
 
         [TestMethod]
