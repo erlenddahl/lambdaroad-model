@@ -186,8 +186,8 @@ namespace LambdaModel.Terrain
         {
             var dx = bX - aX;
             var dy = bY - aY;
-            var l = Math.Sqrt(dx*dx + dy*dy);
-            var v = new PointUtm[(int) l + 1];
+            var l = Math.Sqrt(dx * dx + dy * dy);
+            var v = new PointUtm[(int)l + 1];
 
             var xInc = dx / l * incMeter;
             var yInc = dy / l * incMeter;
@@ -205,6 +205,33 @@ namespace LambdaModel.Terrain
             }
 
             return v;
+        }
+
+        public int FillVector(PointUtm[] vector, double aX, double aY, double bX, double bY, int incMeter = 1)
+        {
+            var dx = bX - aX;
+            var dy = bY - aY;
+            var l = Math.Sqrt(dx * dx + dy * dy);
+
+            var xInc = dx / l * incMeter;
+            var yInc = dy / l * incMeter;
+            var m = 0;
+
+            var (x, y) = (aX, aY);
+
+            while (m <= l)
+            {
+                vector[m].X = x;
+                vector[m].Y = y;
+                vector[m].Z = double.MinValue;
+                vector[m].M = m;
+
+                m += incMeter;
+                x += xInc;
+                y += yInc;
+            }
+
+            return (int)l + 1;
         }
 
         public void Clear()
