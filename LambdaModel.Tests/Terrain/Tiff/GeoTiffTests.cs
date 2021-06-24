@@ -17,19 +17,19 @@ namespace LambdaModel.Tests.Terrain.Tiff
             StartY = 1000;
             Width = 10;
             Height = 10;
+            SetEnds();
             HeightMap = new float[,]
             {
-                {1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2},
-                {1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1},
-                {1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1},
-                {1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1},
-                {1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1},
-                {1, 1, 3, 1, 1, 9, 1, 1, 1, 1, 1},
-                {1, 1, 4, 1, 1, 1, 7, 1, 1, 1, 1},
-                {1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1},
-                {1, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1},
-                {1, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1},
-                {3, 1, 6, 1, 1, 1, 1, 1, 1, 1, 4}
+                {1, 1, 2, 1, 1, 1, 1, 1, 1, 2},
+                {1, 1, 2, 1, 1, 1, 1, 1, 1, 1},
+                {1, 1, 2, 1, 1, 1, 1, 1, 1, 1},
+                {1, 1, 3, 1, 1, 1, 1, 1, 1, 1},
+                {1, 1, 3, 1, 1, 1, 1, 1, 1, 1},
+                {1, 1, 3, 1, 1, 9, 1, 1, 1, 1},
+                {1, 1, 4, 1, 1, 1, 7, 1, 1, 1},
+                {1, 1, 4, 1, 1, 1, 1, 1, 1, 1},
+                {1, 1, 5, 1, 1, 1, 1, 1, 1, 1},
+                {3, 1, 6, 1, 1, 1, 1, 1, 1, 4}
             };
         }
 
@@ -37,9 +37,9 @@ namespace LambdaModel.Tests.Terrain.Tiff
         public void GetAltitude_Corners()
         {
             Assert.AreEqual(1, GetAltitude(500, 1000));
-            Assert.AreEqual(2, GetAltitude(510, 1000));
-            Assert.AreEqual(3, GetAltitude(500, 990));
-            Assert.AreEqual(4, GetAltitude(510, 990));
+            Assert.AreEqual(2, GetAltitude(509, 1000));
+            Assert.AreEqual(3, GetAltitude(500, 991));
+            Assert.AreEqual(4, GetAltitude(509, 991));
         }
 
         [TestMethod]
@@ -52,12 +52,12 @@ namespace LambdaModel.Tests.Terrain.Tiff
         [TestMethod]
         public void GetAltitudeVector_TopRow()
         {
-            var correct = new[] { 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2 };
-            var actual = GetAltitudeVector(500, 1000, 510, 1000);
+            var correct = new[] { 1, 1, 2, 1, 1, 1, 1, 1, 1, 2 };
+            var actual = GetAltitudeVector(500, 1000, 509, 1000);
 
-            Assert.AreEqual(correct.Length, actual.Count);
+            Assert.AreEqual(correct.Length, actual.Length);
 
-            for (var i = 0; i < actual.Count; i++)
+            for (var i = 0; i < actual.Length; i++)
             {
                 Assert.AreEqual(correct[i], actual[i].Z, 0.0001);
             }
@@ -67,12 +67,12 @@ namespace LambdaModel.Tests.Terrain.Tiff
         [TestMethod]
         public void GetAltitudeVector_TopRowRightLeft()
         {
-            var correct = new[] { 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1 };
-            var actual = GetAltitudeVector(510, 1000, 500, 1000);
+            var correct = new[] { 2, 1, 1, 1, 1, 1, 1, 2, 1, 1 };
+            var actual = GetAltitudeVector(509, 1000, 500, 1000);
 
-            Assert.AreEqual(correct.Length, actual.Count);
+            Assert.AreEqual(correct.Length, actual.Length);
 
-            for (var i = 0; i < actual.Count; i++)
+            for (var i = 0; i < actual.Length; i++)
             {
                 Assert.AreEqual(correct[i], actual[i].Z, 0.0001);
             }
@@ -82,12 +82,12 @@ namespace LambdaModel.Tests.Terrain.Tiff
         [TestMethod]
         public void GetAltitudeVector_BottomRow()
         {
-            var correct = new[] { 3, 1, 6, 1, 1, 1, 1, 1, 1, 1, 4 };
-            var actual = GetAltitudeVector(500, 990, 510, 990);
+            var correct = new[] { 3, 1, 6, 1, 1, 1, 1, 1, 1, 4 };
+            var actual = GetAltitudeVector(500, 991, 509, 991);
 
-            Assert.AreEqual(correct.Length, actual.Count);
+            Assert.AreEqual(correct.Length, actual.Length);
 
-            for (var i = 0; i < actual.Count; i++)
+            for (var i = 0; i < actual.Length; i++)
             {
                 Assert.AreEqual(correct[i], actual[i].Z, 0.0001);
             }
@@ -97,12 +97,12 @@ namespace LambdaModel.Tests.Terrain.Tiff
         [TestMethod]
         public void GetAltitudeVector_BottomRowRightLeft()
         {
-            var correct = new[] {4, 1, 1, 1, 1, 1, 1, 1, 6, 1, 3};
-            var actual = GetAltitudeVector(510, 990, 500, 990);
+            var correct = new[] {4, 1, 1, 1, 1, 1, 1, 6, 1, 3};
+            var actual = GetAltitudeVector(509, 991, 500, 991);
 
-            Assert.AreEqual(correct.Length, actual.Count);
+            Assert.AreEqual(correct.Length, actual.Length);
 
-            for (var i = 0; i < actual.Count; i++)
+            for (var i = 0; i < actual.Length; i++)
             {
                 Assert.AreEqual(correct[i], actual[i].Z, 0.0001);
             }
@@ -112,12 +112,12 @@ namespace LambdaModel.Tests.Terrain.Tiff
         [TestMethod]
         public void GetAltitudeVector_LeftCol()
         {
-            var correct = new[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3 };
-            var actual = GetAltitudeVector(500, 1000, 500, 990);
+            var correct = new[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 3 };
+            var actual = GetAltitudeVector(500, 1000, 500, 991);
 
-            Assert.AreEqual(correct.Length, actual.Count);
+            Assert.AreEqual(correct.Length, actual.Length);
 
-            for (var i = 0; i < actual.Count; i++)
+            for (var i = 0; i < actual.Length; i++)
             {
                 Assert.AreEqual(correct[i], actual[i].Z, 0.0001);
             }
@@ -127,12 +127,12 @@ namespace LambdaModel.Tests.Terrain.Tiff
         [TestMethod]
         public void GetAltitudeVector_LeftColBottomUp()
         {
-            var correct = new[] {3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-            var actual = GetAltitudeVector(500, 990, 500, 1000);
+            var correct = new[] {3, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+            var actual = GetAltitudeVector(500, 991, 500, 1000);
 
-            Assert.AreEqual(correct.Length, actual.Count);
+            Assert.AreEqual(correct.Length, actual.Length);
 
-            for (var i = 0; i < actual.Count; i++)
+            for (var i = 0; i < actual.Length; i++)
             {
                 Assert.AreEqual(correct[i], actual[i].Z, 0.0001);
             }
@@ -142,12 +142,12 @@ namespace LambdaModel.Tests.Terrain.Tiff
         [TestMethod]
         public void GetAltitudeVector_RightCol()
         {
-            var correct = new[] { 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4 };
-            var actual = GetAltitudeVector(510, 1000, 510, 990);
+            var correct = new[] { 2, 1, 1, 1, 1, 1, 1, 1, 1, 4 };
+            var actual = GetAltitudeVector(509, 1000, 509, 991);
 
-            Assert.AreEqual(correct.Length, actual.Count);
+            Assert.AreEqual(correct.Length, actual.Length);
 
-            for (var i = 0; i < actual.Count; i++)
+            for (var i = 0; i < actual.Length; i++)
             {
                 Assert.AreEqual(correct[i], actual[i].Z, 0.0001);
             }
@@ -157,12 +157,12 @@ namespace LambdaModel.Tests.Terrain.Tiff
         [TestMethod]
         public void GetAltitudeVector_RightColBottomUp()
         {
-            var correct = new[] { 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2 };
-            var actual = GetAltitudeVector(510, 990, 510, 1000);
+            var correct = new[] { 4, 1, 1, 1, 1, 1, 1, 1, 1, 2 };
+            var actual = GetAltitudeVector(509, 991, 509, 1000);
 
-            Assert.AreEqual(correct.Length, actual.Count);
+            Assert.AreEqual(correct.Length, actual.Length);
 
-            for (var i = 0; i < actual.Count; i++)
+            for (var i = 0; i < actual.Length; i++)
             {
                 Assert.AreEqual(correct[i], actual[i].Z, 0.0001);
             }
@@ -172,12 +172,12 @@ namespace LambdaModel.Tests.Terrain.Tiff
         [TestMethod]
         public void DiagonalTopLeftBottomRight()
         {
-            var correct = new[] { 1, 1, 1, 2, 1, 1, 1, 9, 7, 7, 1, 1, 1, 1, 4 };
-            var actual = GetAltitudeVector(500, 1000, 510, 990);
+            var correct = new[] {1, 1, 1, 2, 1, 1, 1, 9, 7, 7, 1, 1, 1};
+            var actual = GetAltitudeVector(500, 1000, 509, 991);
 
-            Assert.AreEqual(correct.Length, actual.Count);
+            Assert.AreEqual(correct.Length, actual.Length);
 
-            for (var i = 0; i < actual.Count; i++)
+            for (var i = 0; i < actual.Length; i++)
             {
                 Assert.AreEqual(correct[i], actual[i].Z, 0.0001);
             }
@@ -187,12 +187,12 @@ namespace LambdaModel.Tests.Terrain.Tiff
         [TestMethod]
         public void DiagonalBottomRightTopLeft()
         {
-            var correct = new[] { 4, 1, 1, 1, 1, 7, 7, 9, 1, 1, 1, 2, 2, 1, 1 };
-            var actual = GetAltitudeVector(510, 990, 500, 1000);
+            var correct = new[] { 4, 1, 1, 1, 7, 9, 9, 1, 1, 1, 2, 1, 1 };
+            var actual = GetAltitudeVector(509, 991, 500, 1000);
 
-            Assert.AreEqual(correct.Length, actual.Count);
+            Assert.AreEqual(correct.Length, actual.Length);
 
-            for (var i = 0; i < actual.Count; i++)
+            for (var i = 0; i < actual.Length; i++)
             {
                 Assert.AreEqual(correct[i], actual[i].Z, 0.0001);
             }
