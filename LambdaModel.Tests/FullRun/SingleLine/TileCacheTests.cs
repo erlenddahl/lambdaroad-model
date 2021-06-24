@@ -25,10 +25,10 @@ namespace LambdaModel.Tests.FullRun.SingleLine
             var tiles = new TileCache(@"..\..\..\..\Data\Testing\CacheTest", tileSize);
 
             // Use a station placed in the center of this map tile
-            var stationCoordinates = new PointUtm(299430, 7108499);
-            stationCoordinates.Z = tiles.GetAltitude(stationCoordinates);
+            var center = new PointUtm(299430, 7108499);
+            center.Z = tiles.GetAltitude(center);
 
-            var vector = tiles.GetAltitudeVector(stationCoordinates, stationCoordinates.Move(5000, 0)).ToArray();
+            var vector = tiles.GetAltitudeVector(center, center.Move(5000, 0)).ToArray();
             var calc = new PathLossCalculator();
             var start = DateTime.Now;
             for (var i = 2; i < vector.Length; i++)
