@@ -32,7 +32,7 @@ namespace LambdaModel.Terrain.Tiff
 			{
 				if (tiff == null)
                 {
-                    throw new Exception("Failed to read TIFF");
+                    throw new Exception("Failed to read TIFF file at '" + filePath + "'");
                 }
 
 				Width = tiff.GetField(TiffTag.IMAGEWIDTH)[0].ToInt();
