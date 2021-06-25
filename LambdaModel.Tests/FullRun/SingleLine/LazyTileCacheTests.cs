@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
-using LambdaModel.General;
 using LambdaModel.PathLoss;
 using LambdaModel.Terrain;
-using LambdaModel.Terrain.Tiff;
 using LambdaModel.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using no.sintef.SpeedModule.Geometry.SimpleStructures;
@@ -12,7 +10,7 @@ using no.sintef.SpeedModule.Geometry.SimpleStructures;
 namespace LambdaModel.Tests.FullRun.SingleLine
 {
     [TestClass]
-    public class TileCacheTests
+    public class LazyTileCacheTests
     {
         private double[] _correct;
 
@@ -24,7 +22,7 @@ namespace LambdaModel.Tests.FullRun.SingleLine
 
         public void RunTileCache(int tileSize)
         {
-            var tiles = new TileCache(@"..\..\..\..\Data\Testing\CacheTest", tileSize, false);
+            var tiles = new TileCache(@"..\..\..\..\Data\Testing\CacheTest", tileSize);
 
             // Use a station placed in the center of this map tile
             var center = new Point3D(299430, 7108499);

@@ -16,6 +16,7 @@ namespace LambdaModel.Terrain
     public class TileCache:ITiffReader
     {
         private readonly string _cacheLocation;
+        private readonly bool _lazyTiffLoading;
         public int TileSize { get; }
         private WebClient _wc;
         private readonly Dictionary<(int x, int y), GeoTiff> _tiffCache = new Dictionary<(int x, int y), GeoTiff>();
@@ -25,10 +26,11 @@ namespace LambdaModel.Terrain
         public int TilesDownloaded { get; private set; }
         public int TilesRetrievedFromCache { get; private set; }
 
-        public TileCache(string cacheLocation, int tileSize = 512, ConsoleInformationPanel cip = null)
+        public TileCache(string cacheLocation, int tileSize = 512, bool lazyTiffLoading = true, ConsoleInformationPanel cip = null)
         {
             _cip = cip;
             _cacheLocation = cacheLocation;
+            _lazyTiffLoading = lazyTiffLoading;
             TileSize = tileSize;
             _wc = new WebClient();
 
@@ -183,7 +185,10 @@ namespace LambdaModel.Terrain
             if (!HasCached(fn))
                 await DownloadTileForCoordinate(ix, iy, fn);
             
-            tiff = new GeoTiff(fn);
+            if(_lazyTiffLoading)
+                tiff = new LazyGeoTiff(fn);
+            else
+                tiff = new GeoTiff(fn);
 
             if (addToCache)
                 _tiffCache.Add((ix, iy), tiff);

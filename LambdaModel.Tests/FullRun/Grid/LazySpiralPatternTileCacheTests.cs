@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
 using LambdaModel.Calculations;
-using LambdaModel.General;
-using LambdaModel.PathLoss;
 using LambdaModel.Terrain;
-using LambdaModel.Terrain.Tiff;
 using LambdaModel.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using no.sintef.SpeedModule.Geometry.SimpleStructures;
@@ -14,11 +8,11 @@ using no.sintef.SpeedModule.Geometry.SimpleStructures;
 namespace LambdaModel.Tests.FullRun.Grid
 {
     [TestClass]
-    public class SpiralPatternTileCacheTests
+    public class LazySpiralPatternTileCacheTests
     {
         public void RunTileCache(int tileSize)
         {
-            var tiles = new TileCache(@"..\..\..\..\Data\Testing\CacheTest", tileSize, false);
+            var tiles = new TileCache(@"..\..\..\..\Data\Testing\CacheTest", tileSize);
             var grid = new GridCalculator(tiles, 1500, new Point3D(299430, 7108499));
 
             var start = DateTime.Now;
