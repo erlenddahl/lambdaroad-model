@@ -51,23 +51,23 @@ namespace LambdaModel.Terrain.Tiff
 
                 var tileSize = tiff.TileSize();
                 var buffer = new byte[tileSize];
-                for (var x = 0; x < Width; x += _tileW)
-                for (var y = 0; y < Height; y += _tileH)
+                for (var tileX = 0; tileX < Width; tileX += _tileW)
+                for (var tileY = 0; tileY < Height; tileY += _tileH)
                 {
-                    tiff.ReadTile(buffer, 0, x, y, 0, 0);
-                    for (var tileX = 0; tileX < _tileW; tileX++)
+                    tiff.ReadTile(buffer, 0, tileX, tileY, 0, 0);
+                    for (var y = 0; y < _tileH; y++)
                     {
-                        var iwhm = y + tileX;
-                        if (iwhm > Width - 1)
+                        var realY = tileY + y;
+                        if (realY > Height - 1)
                             break;
 
-                        for (var tileY = 0; tileY < _tileH; tileY++)
+                        for (var x = 0; x < _tileW; x++)
                         {
-                            var iyhm = x + tileY;
-                            if (iyhm > Height - 1)
+                            var realX = tileX + x;
+                            if (realX > Width - 1)
                                 break;
 
-                            HeightMap[iwhm, iyhm] = BitConverter.ToSingle(buffer, (tileX * _tileH + tileY) * 4);
+                            HeightMap[realY, realX] = BitConverter.ToSingle(buffer, (y * _tileH + x) * 4);
                         }
                     }
                 }
