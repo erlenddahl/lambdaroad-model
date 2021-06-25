@@ -57,31 +57,10 @@ namespace LambdaModel.Terrain.Tiff
                 StartY = (int) (originLat + DH / 2d);
                 SetEnds();
 
-                //var tileByteCountsTag = tiff.GetField(TiffTag.TILEBYTECOUNTS);
-                //var tileByteCounts = tileByteCountsTag[0].TolongArray();
-
-                //var bitsPerSampleTag = tiff.GetField(TiffTag.BITSPERSAMPLE);
-                //var bytesPerSample = bitsPerSampleTag[0].ToInt() / 8;
-
-
                 var tileWidthTag = tiff.GetField(TiffTag.TILEWIDTH);
                 var tileHeightTag = tiff.GetField(TiffTag.TILELENGTH);
                 var tileW = tileWidthTag[0].ToInt();
                 var tileH = tileHeightTag[0].ToInt();
-
-                /*var tileWidthCount = Width / tilew;
-                var remainingWidth = Width - tileWidthCount * tilew;
-                if (remainingWidth > 0)
-                {
-                    tileWidthCount++;
-                }
-
-                var tileHeightCount = Height / tileh;
-                var remainingHeight = Height - tileHeightCount * tileh;
-                if (remainingHeight > 0)
-                {
-                    tileHeightCount++;
-                }*/
 
                 if (headerOnly)
                 {
