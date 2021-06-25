@@ -83,7 +83,6 @@ namespace LambdaModel.Terrain.Tiff
                     tileHeightCount++;
                 }*/
 
-						var buffer = new byte[tileSize];
                 if (headerOnly)
                 {
                     HeightMap = null;
@@ -91,6 +90,7 @@ namespace LambdaModel.Terrain.Tiff
                 }
 
                 var tileSize = tiff.TileSize();
+                var buffer = new byte[tileSize];
                 for (var x = 0; x < Width; x += tileW)
                 for (var y = 0; y < Height; y += tileH)
                 {

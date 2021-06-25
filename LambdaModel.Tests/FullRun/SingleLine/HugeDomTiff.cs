@@ -25,7 +25,7 @@ namespace LambdaModel.Tests.FullRun.SingleLine
         [TestMethod]
         public void Run()
         {
-            var geotiff = new GeoTiff(@"C:\Users\Erlend\Desktop\Søppel\2021-06-01 - Lambda-test\DOM\12-14\33-126-145.tif");
+            var geotiff = new GeoTiff(@"..\..\..\..\Data\Testing\33-126-145.tif");
 
             // Use a station placed in the center of this map tile
             var stationCoordinates = new Point3D(299430, 7108499);
