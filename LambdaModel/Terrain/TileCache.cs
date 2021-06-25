@@ -43,19 +43,27 @@ namespace LambdaModel.Terrain
         {
             var topLeft = center.Move(-radius, -radius);
             var bottomRight = center.Move(radius, radius);
-            var max = (long) (((bottomRight.X - topLeft.X) / TileSize) * ((bottomRight.Y - topLeft.Y) / TileSize));
+            var max = 0;
 
-            for (var x = topLeft.X; x < bottomRight.X + TileSize; x += TileSize)
-            for (var y = topLeft.Y; y < bottomRight.Y + TileSize; y += TileSize)
+            using (var pb = _cip?.SetUnknownProgress("Preloading map tiles"))
             {
-                var (ix, iy) = GetTileCoordinates(x, y);
-                var fn = GetFilename(ix, iy);
-                if (HasCached(fn))
+                for (var x = topLeft.X; x < bottomRight.X + TileSize; x += TileSize)
+                for (var y = topLeft.Y; y < bottomRight.Y + TileSize; y += TileSize)
                 {
-                    _cip?.Increment("Tiles already cached");
-                    max--;
+                    var (ix, iy) = GetTileCoordinates(x, y);
+                    var fn = GetFilename(ix, iy);
+                    if (HasCached(fn))
+                    {
+                        _cip?.Increment("Tiles already cached");
+                    }
+                    else
+                    {
+                        max++;
+                    }
                 }
             }
+
+            if (max < 1) return;
 
             using (var pb = _cip?.SetProgress("Preloading map tiles", max: max))
             {
@@ -120,7 +128,9 @@ namespace LambdaModel.Terrain
 
         private void CheckTiff(string filePath)
         {
-            if (new System.IO.FileInfo(filePath).Length < 500)
+            var size = new System.IO.FileInfo(filePath).Length;
+            if (size < 1) throw new TiffTileDownloadException("Empty tile file.");
+            if (size < 500)
             {
                 var contents = System.IO.File.ReadAllText(filePath);
                 if (!contents.Trim().StartsWith("<")) return;
