@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LambdaModel\LambdaModel.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="ConsoleUtilities">
+      <HintPath>..\Lib\ConsoleUtilities.dll</HintPath>
+    </Reference>
+    <Reference Include="SpeedModule">
+      <HintPath>..\Lib\SpeedModule.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
