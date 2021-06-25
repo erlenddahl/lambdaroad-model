@@ -2,20 +2,21 @@
 using LambdaModel.General;
 using LambdaModel.PathLoss;
 using LambdaModel.Terrain;
+using no.sintef.SpeedModule.Geometry.SimpleStructures;
 
 namespace LambdaModel.Calculations
 {
     public class GridCalculator
     {
-        private readonly PointUtm[] _vector;
+        private readonly Point4D[] _vector;
         private readonly PathLossCalculator _calc;
 
         public TileCache Tiles { get; }
         public int Radius { get; }
-        public PointUtm Center { get; }
+        public Point3D Center { get; }
         public double[,] Results { get; }
 
-        public GridCalculator(TileCache tiles, int radius, PointUtm center)
+        public GridCalculator(TileCache tiles, int radius, Point3D center)
         {
             Tiles = tiles;
             Radius = radius;
@@ -25,9 +26,9 @@ namespace LambdaModel.Calculations
 
             // Initialize a PointUtm array that is to be (re)used as the vector of points from
             // the center to each of the points that should be calculated.
-            _vector = new PointUtm[(int)Math.Sqrt(radius * radius * 2) + 1];
+            _vector = new Point4D[(int)Math.Sqrt(radius * radius * 2) + 1];
             for (var i = 0; i < _vector.Length; i++)
-                _vector[i] = new PointUtm(0, 0);
+                _vector[i] = new Point4D(0, 0);
 
             Results = new double[radius * 2 + 1, radius * 2 + 1];
             _calc = new PathLossCalculator();

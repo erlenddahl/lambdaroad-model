@@ -6,6 +6,8 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using BitMiracle.LibTiff.Classic;
 using LambdaModel.General;
+using LambdaModel.Utilities;
+using no.sintef.SpeedModule.Geometry.SimpleStructures;
 
 namespace LambdaModel.Terrain.Tiff
 {
@@ -121,7 +123,7 @@ namespace LambdaModel.Terrain.Tiff
             EndY = StartY - Height;
         }
 
-        public float GetAltitude(PointUtm p)
+        public float GetAltitude(Point3D p)
         {
             return GetAltitude(p.X, p.Y);
         }
@@ -143,12 +145,12 @@ namespace LambdaModel.Terrain.Tiff
             return (Round(pX - StartX), Round(StartY - pY));
         }
 
-        public PointUtm[] GetAltitudeVector(PointUtm a, PointUtm b, int incMeter = 1)
+        public Point3D[] GetAltitudeVector(Point3D a, Point3D b, int incMeter = 1)
         {
             return GetAltitudeVector(a.X,a.Y, b.X, b.Y, incMeter);
         }
 
-        public PointUtm[] GetAltitudeVector(double aX, double aY, double bX, double bY, int incMeter = 1)
+        public Point3D[] GetAltitudeVector(double aX, double aY, double bX, double bY, int incMeter = 1)
         {
             (aX, aY) = ToLocal(aX, aY);
             (bX, bY) = ToLocal(bX, bY);
@@ -156,7 +158,7 @@ namespace LambdaModel.Terrain.Tiff
             var dx = bX - aX;
             var dy = bY - aY;
 			var l = Math.Sqrt(Math.Pow(dx, 2) + Math.Pow(dy, 2));
-            var v = new PointUtm[(int)l + 1];
+            var v = new Point3D[(int)l + 1];
 
             var xInc = dx / l * incMeter;
             var yInc = dy / l * incMeter;
@@ -166,7 +168,7 @@ namespace LambdaModel.Terrain.Tiff
 
             while (m <= l)
             {
-                v[m] = new PointUtm(x, y, HeightMap[(int) Math.Round(y), (int) Math.Round(x)], m);
+                v[m] = new Point3D(x, y, HeightMap[(int) Math.Round(y), (int) Math.Round(x)]);
 
                 m += incMeter;
                 x += xInc;

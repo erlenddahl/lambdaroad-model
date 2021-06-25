@@ -3,6 +3,7 @@ using System.Linq;
 using LambdaModel.General;
 using LambdaModel.PathLoss;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using no.sintef.SpeedModule.Geometry.SimpleStructures;
 
 namespace LambdaModel.Tests.PathLoss
 {
@@ -15,23 +16,23 @@ namespace LambdaModel.Tests.PathLoss
         {
             var path = new[]
             {
-                new PointUtm(0, 0, 10),
-                new PointUtm(1, 0, 6),
-                new PointUtm(2, 0, 8),
-                new PointUtm(3, 0, 12),
-                new PointUtm(4, 0, 2),
-                new PointUtm(5, 0, 1),
-                new PointUtm(6, 0, 1),
-                new PointUtm(7, 0, 3),
-                new PointUtm(8, 0, 6),
-                new PointUtm(9, 0, 2),
-                new PointUtm(10, 0, 2),
+                new Point3D(0, 0, 10),
+                new Point3D(1, 0, 6),
+                new Point3D(2, 0, 8),
+                new Point3D(3, 0, 12),
+                new Point3D(4, 0, 2),
+                new Point3D(5, 0, 1),
+                new Point3D(6, 0, 1),
+                new Point3D(7, 0, 3),
+                new Point3D(8, 0, 6),
+                new Point3D(9, 0, 2),
+                new Point3D(10, 0, 2),
             };
 
             var tx = path[0];
             var rx = path.Last();
 
-            var sightLineHeightChangePerMeter = (rx.Z - tx.Z) / tx.Distance2d(rx);
+            var sightLineHeightChangePerMeter = (rx.Z - tx.Z) / tx.DistanceTo2D(rx);
 
             Assert.AreEqual(3, FindLosObstruction(path, 0, path.Length - 1, sightLineHeightChangePerMeter));
         }
@@ -41,23 +42,23 @@ namespace LambdaModel.Tests.PathLoss
         {
             var path = new[]
             {
-                new PointUtm(0, 0, 10),
-                new PointUtm(1, 0, 16),
-                new PointUtm(2, 0, 8),
-                new PointUtm(3, 0, 12),
-                new PointUtm(4, 0, 2),
-                new PointUtm(5, 0, 1),
-                new PointUtm(6, 0, 1),
-                new PointUtm(7, 0, 3),
-                new PointUtm(8, 0, 6),
-                new PointUtm(9, 0, 2),
-                new PointUtm(10, 0, 2),
+                new Point3D(0, 0, 10),
+                new Point3D(1, 0, 16),
+                new Point3D(2, 0, 8),
+                new Point3D(3, 0, 12),
+                new Point3D(4, 0, 2),
+                new Point3D(5, 0, 1),
+                new Point3D(6, 0, 1),
+                new Point3D(7, 0, 3),
+                new Point3D(8, 0, 6),
+                new Point3D(9, 0, 2),
+                new Point3D(10, 0, 2),
             };
 
             var tx = path[0];
             var rx = path.Last();
 
-            var sightLineHeightChangePerMeter = (rx.Z - tx.Z) / tx.Distance2d(rx);
+            var sightLineHeightChangePerMeter = (rx.Z - tx.Z) / tx.DistanceTo2D(rx);
 
             Assert.AreEqual(1, FindLosObstruction(path, 0, path.Length - 1, sightLineHeightChangePerMeter));
         }
@@ -67,24 +68,24 @@ namespace LambdaModel.Tests.PathLoss
         {
             var path = new[]
             {
-                new PointUtm(0, 0, 10),
-                new PointUtm(1, 0, 6),
-                new PointUtm(2, 0, 8),
-                new PointUtm(3, 0, 3),
-                new PointUtm(4, 0, 2),
-                new PointUtm(5, 0, 1),
-                new PointUtm(6, 0, 1),
-                new PointUtm(7, 0, 3),
-                new PointUtm(8, 0, 2),
-                new PointUtm(9, 0, 6),
-                new PointUtm(10, 0, 2),
+                new Point3D(0, 0, 10),
+                new Point3D(1, 0, 6),
+                new Point3D(2, 0, 8),
+                new Point3D(3, 0, 3),
+                new Point3D(4, 0, 2),
+                new Point3D(5, 0, 1),
+                new Point3D(6, 0, 1),
+                new Point3D(7, 0, 3),
+                new Point3D(8, 0, 2),
+                new Point3D(9, 0, 6),
+                new Point3D(10, 0, 2),
             };
 
 
             var tx = path[0];
             var rx = path.Last();
 
-            var sightLineHeightChangePerMeter = (rx.Z - tx.Z) / tx.Distance2d(rx);
+            var sightLineHeightChangePerMeter = (rx.Z - tx.Z) / tx.DistanceTo2D(rx);
 
             Assert.AreEqual(9, FindLosObstruction(path, 0, path.Length - 1, sightLineHeightChangePerMeter));
         }
@@ -94,22 +95,22 @@ namespace LambdaModel.Tests.PathLoss
         {
             var path = new[]
             {
-                new PointUtm(0, 0, 10),
-                new PointUtm(1, 0, 6),
-                new PointUtm(2, 0, 8),
-                new PointUtm(3, 0, 12),
-                new PointUtm(4, 0, 2),
-                new PointUtm(5, 0, 1),
-                new PointUtm(6, 0, 1),
-                new PointUtm(7, 0, 3),
-                new PointUtm(8, 0, 6),
-                new PointUtm(9, 0, 2),
-                new PointUtm(10, 0, 2),
+                new Point3D(0, 0, 10),
+                new Point3D(1, 0, 6),
+                new Point3D(2, 0, 8),
+                new Point3D(3, 0, 12),
+                new Point3D(4, 0, 2),
+                new Point3D(5, 0, 1),
+                new Point3D(6, 0, 1),
+                new Point3D(7, 0, 3),
+                new Point3D(8, 0, 6),
+                new Point3D(9, 0, 2),
+                new Point3D(10, 0, 2),
             };
 
             var tx = path[3];
             var rx = path[8];
-            var sightLineHeightChangePerMeter = (rx.Z - tx.Z) / tx.Distance2d(rx);
+            var sightLineHeightChangePerMeter = (rx.Z - tx.Z) / tx.DistanceTo2D(rx);
 
             Assert.AreEqual(-1, FindLosObstruction(path, 3, 8, sightLineHeightChangePerMeter));
         }
@@ -119,22 +120,22 @@ namespace LambdaModel.Tests.PathLoss
         {
             var path = new[]
             {
-                new PointUtm(0, 0, 10),
-                new PointUtm(1, 0, 6),
-                new PointUtm(2, 0, 8),
-                new PointUtm(3, 0, 12),
-                new PointUtm(4, 0, 2),
-                new PointUtm(5, 0, 15),
-                new PointUtm(6, 0, 1),
-                new PointUtm(7, 0, 3),
-                new PointUtm(8, 0, 6),
-                new PointUtm(9, 0, 2),
-                new PointUtm(10, 0, 2),
+                new Point3D(0, 0, 10),
+                new Point3D(1, 0, 6),
+                new Point3D(2, 0, 8),
+                new Point3D(3, 0, 12),
+                new Point3D(4, 0, 2),
+                new Point3D(5, 0, 15),
+                new Point3D(6, 0, 1),
+                new Point3D(7, 0, 3),
+                new Point3D(8, 0, 6),
+                new Point3D(9, 0, 2),
+                new Point3D(10, 0, 2),
             };
 
             var tx = path[3];
             var rx = path[8];
-            var sightLineHeightChangePerMeter = (rx.Z - tx.Z) / tx.Distance2d(rx);
+            var sightLineHeightChangePerMeter = (rx.Z - tx.Z) / tx.DistanceTo2D(rx);
 
             Assert.AreEqual(5, FindLosObstruction(path, 3, 8, sightLineHeightChangePerMeter));
         }
@@ -144,23 +145,23 @@ namespace LambdaModel.Tests.PathLoss
         {
             var path = new[]
             {
-                new PointUtm(0, 0, 10),
-                new PointUtm(1, 0, 6),
-                new PointUtm(2, 0, 8),
-                new PointUtm(3, 0, 12),
-                new PointUtm(4, 0, 2),
-                new PointUtm(5, 0, 1),
-                new PointUtm(6, 0, 1),
-                new PointUtm(7, 0, 3),
-                new PointUtm(8, 0, 6),
-                new PointUtm(9, 0, 2),
-                new PointUtm(10, 0, 2),
+                new Point3D(0, 0, 10),
+                new Point3D(1, 0, 6),
+                new Point3D(2, 0, 8),
+                new Point3D(3, 0, 12),
+                new Point3D(4, 0, 2),
+                new Point3D(5, 0, 1),
+                new Point3D(6, 0, 1),
+                new Point3D(7, 0, 3),
+                new Point3D(8, 0, 6),
+                new Point3D(9, 0, 2),
+                new Point3D(10, 0, 2),
             };
 
             var tx = path[0];
             var rx = path.Last();
 
-            var sightLineHeightChangePerMeter = (rx.Z - tx.Z) / tx.Distance2d(rx);
+            var sightLineHeightChangePerMeter = (rx.Z - tx.Z) / tx.DistanceTo2D(rx);
 
             Assert.AreEqual(8, FindLosObstruction(path, path.Length - 1, 0, -sightLineHeightChangePerMeter));
         }
@@ -170,23 +171,23 @@ namespace LambdaModel.Tests.PathLoss
         {
             var path = new[]
             {
-                new PointUtm(0, 0, 10),
-                new PointUtm(1, 0, 16),
-                new PointUtm(2, 0, 8),
-                new PointUtm(3, 0, 12),
-                new PointUtm(4, 0, 2),
-                new PointUtm(5, 0, 1),
-                new PointUtm(6, 0, 1),
-                new PointUtm(7, 0, 3),
-                new PointUtm(8, 0, 6),
-                new PointUtm(9, 0, 22),
-                new PointUtm(10, 0, 2),
+                new Point3D(0, 0, 10),
+                new Point3D(1, 0, 16),
+                new Point3D(2, 0, 8),
+                new Point3D(3, 0, 12),
+                new Point3D(4, 0, 2),
+                new Point3D(5, 0, 1),
+                new Point3D(6, 0, 1),
+                new Point3D(7, 0, 3),
+                new Point3D(8, 0, 6),
+                new Point3D(9, 0, 22),
+                new Point3D(10, 0, 2),
             };
 
             var tx = path[0];
             var rx = path.Last();
 
-            var sightLineHeightChangePerMeter = (rx.Z - tx.Z) / tx.Distance2d(rx);
+            var sightLineHeightChangePerMeter = (rx.Z - tx.Z) / tx.DistanceTo2D(rx);
 
             Assert.AreEqual(9, FindLosObstruction(path, path.Length - 1, 0, -sightLineHeightChangePerMeter));
         }
@@ -196,23 +197,23 @@ namespace LambdaModel.Tests.PathLoss
         {
             var path = new[]
             {
-                new PointUtm(0, 0, 10),
-                new PointUtm(1, 0, 12),
-                new PointUtm(2, 0, 2),
-                new PointUtm(3, 0, 1),
-                new PointUtm(4, 0, 2),
-                new PointUtm(5, 0, 1),
-                new PointUtm(6, 0, 1),
-                new PointUtm(7, 0, 3),
-                new PointUtm(8, 0, 1),
-                new PointUtm(9, 0, 2),
-                new PointUtm(10, 0, 2),
+                new Point3D(0, 0, 10),
+                new Point3D(1, 0, 12),
+                new Point3D(2, 0, 2),
+                new Point3D(3, 0, 1),
+                new Point3D(4, 0, 2),
+                new Point3D(5, 0, 1),
+                new Point3D(6, 0, 1),
+                new Point3D(7, 0, 3),
+                new Point3D(8, 0, 1),
+                new Point3D(9, 0, 2),
+                new Point3D(10, 0, 2),
             };
 
             var tx = path[0];
             var rx = path.Last();
 
-            var sightLineHeightChangePerMeter = (rx.Z - tx.Z) / tx.Distance2d(rx);
+            var sightLineHeightChangePerMeter = (rx.Z - tx.Z) / tx.DistanceTo2D(rx);
 
             Assert.AreEqual(1, FindLosObstruction(path, path.Length - 1, 0, -sightLineHeightChangePerMeter));
         }

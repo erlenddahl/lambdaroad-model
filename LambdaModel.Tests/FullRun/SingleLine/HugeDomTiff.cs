@@ -5,7 +5,9 @@ using LambdaModel.General;
 using LambdaModel.PathLoss;
 using LambdaModel.Terrain;
 using LambdaModel.Terrain.Tiff;
+using LambdaModel.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using no.sintef.SpeedModule.Geometry.SimpleStructures;
 
 namespace LambdaModel.Tests.FullRun.SingleLine
 {
@@ -26,7 +28,7 @@ namespace LambdaModel.Tests.FullRun.SingleLine
             var geotiff = new GeoTiff(@"C:\Users\Erlend\Desktop\Søppel\2021-06-01 - Lambda-test\DOM\12-14\33-126-145.tif");
 
             // Use a station placed in the center of this map tile
-            var stationCoordinates = new PointUtm(299430, 7108499);
+            var stationCoordinates = new Point3D(299430, 7108499);
             stationCoordinates.Z = geotiff.GetAltitude(stationCoordinates);
 
             var vector = geotiff.GetAltitudeVector(stationCoordinates, stationCoordinates.Move(5000, 0)).ToArray();

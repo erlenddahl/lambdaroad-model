@@ -6,6 +6,7 @@ using LambdaModel.PathLoss;
 using LambdaModel.Terrain;
 using LambdaModel.Terrain.Tiff;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using no.sintef.SpeedModule.Geometry.SimpleStructures;
 
 namespace LambdaModel.Tests.FullRun.Grid
 {
@@ -15,7 +16,7 @@ namespace LambdaModel.Tests.FullRun.Grid
         public void RunTileCache(int tileSize)
         {
             var tiles = new TileCache(@"..\..\..\..\Data\Testing\CacheTest", tileSize);
-            var grid = new GridCalculator(tiles, 500, new PointUtm(299430, 7108499));
+            var grid = new GridCalculator(tiles, 500, new Point3D(299430, 7108499));
 
             var start = DateTime.Now;
             

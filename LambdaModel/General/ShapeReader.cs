@@ -7,15 +7,17 @@ using System.Linq;
 using System.Text;
 using DotSpatial.Data;
 using DotSpatial.Topology;
+using no.sintef.SpeedModule.Geometry;
+using no.sintef.SpeedModule.Geometry.SimpleStructures;
 
 namespace LambdaModel.General
 {
     public class ShapeLink
     {
         public int ID { get; }
-        public PointUtm[] Geometry { get; }
+        public Point4D[] Geometry { get; }
 
-        private ShapeLink(int id, IEnumerable<PointUtm> geometry)
+        private ShapeLink(int id, IEnumerable<Point4D> geometry)
         {
             ID = id;
             Geometry = geometry.ToArray();
@@ -28,7 +30,7 @@ namespace LambdaModel.General
         /// <param name="center"></param>
         /// <param name="radius"></param>
         /// <returns></returns>
-        public static IEnumerable<ShapeLink> ReadLinks(string geometryPath, PointUtm center, double radius)
+        public static IEnumerable<ShapeLink> ReadLinks(string geometryPath, Point3D center, double radius)
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             var cc = new Coordinate(center.X, center.Y);
@@ -58,7 +60,7 @@ namespace LambdaModel.General
                     if (Math.Sqrt(dx * dx + dy * dy) - length > radius)
                         continue;
 
-                    var geometry = new PointUtm[pointCount];
+                    var geometry = new Point4D[pointCount];
                     var pix = 0;
                     var anyInside = false;
                     for (var i = 0; i < pointBytes.Length; i += 24)
@@ -66,7 +68,7 @@ namespace LambdaModel.General
                         var x = BitConverter.ToDouble(pointBytes, i);
                         var y = BitConverter.ToDouble(pointBytes, i + 8);
                         var z = BitConverter.ToDouble(pointBytes, i + 16);
-                        geometry[pix++] = new PointUtm(x, y, z);
+                        geometry[pix++] = new Point4D(x, y, z);
 
                         if (!anyInside)
                         {

@@ -5,7 +5,9 @@ using LambdaModel.General;
 using LambdaModel.PathLoss;
 using LambdaModel.Terrain;
 using LambdaModel.Terrain.Tiff;
+using LambdaModel.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using no.sintef.SpeedModule.Geometry.SimpleStructures;
 
 namespace LambdaModel.Tests.FullRun.SingleLine
 {
@@ -25,7 +27,7 @@ namespace LambdaModel.Tests.FullRun.SingleLine
             var tiles = new TileCache(@"..\..\..\..\Data\Testing\CacheTest", tileSize);
 
             // Use a station placed in the center of this map tile
-            var center = new PointUtm(299430, 7108499);
+            var center = new Point3D(299430, 7108499);
             center.Z = tiles.GetAltitude(center);
 
             var vector = tiles.GetAltitudeVector(center, center.Move(5000, 0)).ToArray();

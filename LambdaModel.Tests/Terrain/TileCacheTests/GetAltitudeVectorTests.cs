@@ -3,6 +3,7 @@ using System.Linq;
 using LambdaModel.General;
 using LambdaModel.Terrain;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using no.sintef.SpeedModule.Geometry.SimpleStructures;
 
 namespace LambdaModel.Tests.Terrain.TileCacheTests
 {
@@ -20,7 +21,7 @@ namespace LambdaModel.Tests.Terrain.TileCacheTests
         [TestMethod]
         public void RandomCoordinateTests()
         {
-            var v = _tiles.GetAltitudeVector(new PointUtm(290344, 7100903), new PointUtm(290763, 7101079));
+            var v = _tiles.GetAltitudeVector(new Point3D(290344, 7100903), new Point3D(290763, 7101079));
 
             foreach (var h in v)
                 Debug.WriteLine(h.Z);
@@ -38,7 +39,7 @@ namespace LambdaModel.Tests.Terrain.TileCacheTests
         [TestMethod]
         public void LeftEdge()
         {
-            var v = _tiles.GetAltitudeVector(new PointUtm(290425, 7100995), new PointUtm(290425, 7100995 + 99));
+            var v = _tiles.GetAltitudeVector(new Point3D(290425, 7100995), new Point3D(290425, 7100995 + 99));
 
             foreach (var h in v)
                 Debug.WriteLine(h.Z);
@@ -56,7 +57,7 @@ namespace LambdaModel.Tests.Terrain.TileCacheTests
         [TestMethod]
         public void BottomEdge()
         {
-            var v = _tiles.GetAltitudeVector(new PointUtm(290425, 7100995), new PointUtm(290425 + 99, 7100995));
+            var v = _tiles.GetAltitudeVector(new Point3D(290425, 7100995), new Point3D(290425 + 99, 7100995));
 
             foreach (var h in v)
                 Debug.WriteLine(h.Z);
@@ -74,7 +75,7 @@ namespace LambdaModel.Tests.Terrain.TileCacheTests
         [TestMethod]
         public void TopEdge()
         {
-            var v = _tiles.GetAltitudeVector(new PointUtm(290425, 7100995 + 99), new PointUtm(290425 + 99, 7100995 + 99));
+            var v = _tiles.GetAltitudeVector(new Point3D(290425, 7100995 + 99), new Point3D(290425 + 99, 7100995 + 99));
 
             foreach (var h in v)
                 Debug.WriteLine(h.Z);
@@ -92,7 +93,7 @@ namespace LambdaModel.Tests.Terrain.TileCacheTests
         [TestMethod]
         public void RightEdge()
         {
-            var v = _tiles.GetAltitudeVector(new PointUtm(290425 + 99, 7100995), new PointUtm(290425 + 99, 7100995 + 99));
+            var v = _tiles.GetAltitudeVector(new Point3D(290425 + 99, 7100995), new Point3D(290425 + 99, 7100995 + 99));
 
             foreach (var h in v)
                 Debug.WriteLine(h.Z);

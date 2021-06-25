@@ -1,25 +1,26 @@
 ﻿using System;
 using System.Linq;
 using LambdaModel.General;
+using no.sintef.SpeedModule.Geometry.SimpleStructures;
 
 namespace LambdaModel.PathLoss
 {
     public class PathLossCalculator
     {
-        public double CalculateLoss(PointUtm[] path, double txHeightAboveTerrain, double rxHeightAboveTerrain, int rxIndex = -1)
+        public double CalculateLoss(Point3D[] path, double txHeightAboveTerrain, double rxHeightAboveTerrain, int rxIndex = -1)
         {
             var p = GetParameters(path, rxIndex);
 
             return 25.1 * Math.Log(p.horizontalDistance) - 1.8e-01 * txHeightAboveTerrain + 1.3e+01 * p.rxa - 1.4e-04 * p.txa - 1.4e-04 * p.rxi - 3.0e-05 * p.txi + 4.9 * p.nobs + 29.3;
         }
 
-        protected (double horizontalDistance, double txa, double rxa, double txi, double rxi, int nobs) GetParameters(PointUtm[] path, int rxIndex = -1)
+        protected (double horizontalDistance, double txa, double rxa, double txi, double rxi, int nobs) GetParameters(Point3D[] path, int rxIndex = -1)
         {
             if (rxIndex == -1) rxIndex = path.Length - 1;
             var tx = path[0];
             var rx = path[rxIndex];
 
-            var horizontalDistance = tx.Distance2d(rx);
+            var horizontalDistance = tx.DistanceTo2D(rx);
 
             var rxa = 0d;
             var txa = 0d;
@@ -43,7 +44,7 @@ namespace LambdaModel.PathLoss
 
                 var txo = path[txObstruction.index];
                 var rxo = path[rxObstruction.index];
-                var hdist = txo.Distance2d(rxo);
+                var hdist = txo.DistanceTo2D(rxo);
 
                 if (FindLosObstruction(path, txObstruction.index, rxObstruction.index, (rxo.Z - txo.Z) / hdist) >= 0)
                 {
@@ -66,7 +67,7 @@ namespace LambdaModel.PathLoss
             return (horizontalDistance, txa, rxa, txi, rxi, nobs);
         }
 
-        protected (int index, double angle, double distance2d, double distance3d) FindFresnelObstruction(PointUtm[] path, bool direction, int rxIndex = -1)
+        protected (int index, double angle, double distance2d, double distance3d) FindFresnelObstruction(Point3D[] path, bool direction, int rxIndex = -1)
         {
             if (rxIndex == -1) rxIndex = path.Length - 1;
             
@@ -83,7 +84,7 @@ namespace LambdaModel.PathLoss
             for (var i = fromIx; i != toIx; i += inc)
             {
                 var dzz = path[i].Z - source.Z;
-                var dxy = source.Distance2d(path[i]);
+                var dxy = source.DistanceTo2D(path[i]);
                 var slope = dzz / dxy;
 
                 if (slope > max.slope)
@@ -100,12 +101,12 @@ namespace LambdaModel.PathLoss
             return (max.index, angle.angle, angle.distance2d, angle.distance3d);
         }
 
-        protected (double angle, double distance2d, double distance3d) GetAngle(PointUtm source, PointUtm last, PointUtm max)
+        protected (double angle, double distance2d, double distance3d) GetAngle(Point3D source, Point3D last, Point3D max)
         {
-            var d2d = source.Distance2d(max);
-            var dx = source.Distance3d(max);
+            var d2d = source.DistanceTo2D(max);
+            var dx = source.DistanceTo(max);
 
-            var horizontalDistance = last.Distance2d(source);
+            var horizontalDistance = last.DistanceTo2D(source);
             var sightLineSlope = (last.Z - source.Z) / horizontalDistance;
             var sightLineAtMax = source.Z + sightLineSlope * d2d;
 
@@ -116,7 +117,7 @@ namespace LambdaModel.PathLoss
             return (angle, d2d, dx);
         }
 
-        protected int FindLosObstruction(PointUtm[] path, int fromIx, int toIx, double sightLineHeightChangePerMeter)
+        protected int FindLosObstruction(Point3D[] path, int fromIx, int toIx, double sightLineHeightChangePerMeter)
         {
             var inc = Math.Sign(toIx - fromIx);
             var source = path[fromIx];
@@ -125,7 +126,7 @@ namespace LambdaModel.PathLoss
 
             for (var i = fromIx; i != toIx; i += inc)
             {
-                var distanceFromTx = source.Distance2d(path[i]);
+                var distanceFromTx = source.DistanceTo2D(path[i]);
                 var sightLineHeight = source.Z + distanceFromTx * sightLineHeightChangePerMeter;
 
                 if (path[i].Z >= sightLineHeight)

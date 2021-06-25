@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using LambdaModel.General;
 using LambdaModel.Terrain.Tiff;
+using LambdaModel.Utilities;
+using no.sintef.SpeedModule.Geometry.SimpleStructures;
 
 namespace LambdaModel.Terrain
 {
@@ -79,7 +81,7 @@ namespace LambdaModel.Terrain
             return System.IO.Path.Combine(_cacheLocation, $"{x},{y}_{_tileSize}x{_tileSize}.tiff");
         }
 
-        public float GetAltitude(PointUtm p)
+        public float GetAltitude(Point3D p)
         {
             return GetAltitude(p.X, p.Y);
         }
@@ -140,12 +142,12 @@ namespace LambdaModel.Terrain
             return tiff;
         }
 
-        public PointUtm[] GetAltitudeVector(PointUtm a, PointUtm b, int incMeter = 1)
+        public Point3D[] GetAltitudeVector(Point3D a, Point3D b, int incMeter = 1)
         {
             return GetAltitudeVector(a.X, a.Y, b.X, b.Y, incMeter);
         }
 
-        public PointUtm[] GetAltitudeVector(double aX, double aY, double bX, double bY, int incMeter = 1)
+        public Point3D[] GetAltitudeVector(double aX, double aY, double bX, double bY, int incMeter = 1)
         {
             var v = GetVector(aX, aY, bX, bY, incMeter);
 
@@ -162,13 +164,12 @@ namespace LambdaModel.Terrain
             return v;
         }
 
-        public void FillAltitudeVector(PointUtm[] vector, int tillIndex)
+        public void FillAltitudeVector(Point3D[] vector, int tillIndex)
         {
-
             GeoTiff tiff = null;
             for (var i = 0; i <= tillIndex; i++)
             {
-                if (vector[i].Z != double.MinValue) continue;
+                if (!double.IsNaN(vector[i].Z)) continue;
 
                 if (tiff?.Contains(vector[i].X, vector[i].Y) != true)
                     tiff = GetTiff(vector[i].X, vector[i].Y).Result;
@@ -177,17 +178,17 @@ namespace LambdaModel.Terrain
             }
         }
 
-        public PointUtm[] GetVector(PointUtm a, PointUtm b, int incMeter = 1)
+        public Point3D[] GetVector(Point3D a, Point3D b, int incMeter = 1)
         {
             return GetVector(a.X, a.Y, b.X, b.Y, incMeter);
         }
 
-        public PointUtm[] GetVector(double aX, double aY, double bX, double bY, int incMeter = 1)
+        public Point3D[] GetVector(double aX, double aY, double bX, double bY, int incMeter = 1)
         {
             var dx = bX - aX;
             var dy = bY - aY;
             var l = Math.Sqrt(dx * dx + dy * dy);
-            var v = new PointUtm[(int)l + 1];
+            var v = new Point3D[(int)l + 1];
 
             var xInc = dx / l * incMeter;
             var yInc = dy / l * incMeter;
@@ -197,7 +198,7 @@ namespace LambdaModel.Terrain
 
             while (m <= l)
             {
-                v[m] = new PointUtm(x, y, double.MinValue, m);
+                v[m] = new Point3D(x, y, double.MinValue);
 
                 m += incMeter;
                 x += xInc;
@@ -207,7 +208,7 @@ namespace LambdaModel.Terrain
             return v;
         }
 
-        public int FillVector(PointUtm[] vector, double aX, double aY, double bX, double bY, int incMeter = 1)
+        public int FillVector(Point4D[] vector, double aX, double aY, double bX, double bY, int incMeter = 1, bool withHeights = false)
         {
             var dx = bX - aX;
             var dy = bY - aY;

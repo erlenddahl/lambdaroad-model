@@ -25,4 +25,7 @@
     <ProjectReference Include="..\LambdaModel\LambdaModel.csproj" />
   </ItemGroup>
 
+    <Reference Include="SpeedModule">
+      <HintPath>..\Lib\SpeedModule.dll</HintPath>
+    </Reference>
 </Project>
