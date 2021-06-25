@@ -59,5 +59,11 @@ namespace LambdaModel.Tests.FullRun.Grid
         {
             RunTileCache(512);
         }
+
+        [TestMethod]
+        public void Size_1000()
+        {
+            RunTileCache(1000);
+        }
     }
 }
