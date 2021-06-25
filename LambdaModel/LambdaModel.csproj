@@ -12,7 +12,13 @@
     <PackageReference Include="System.Text.Encoding.CodePages" Version="5.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="ConsoleUtilities">
+      <HintPath>..\Lib\ConsoleUtilities.dll</HintPath>
+    </Reference>
     <Reference Include="SpeedModule">
       <HintPath>..\Lib\SpeedModule.dll</HintPath>
     </Reference>
+  </ItemGroup>
+
 </Project>
