@@ -20,7 +20,14 @@ namespace LambdaModel.General
         private ShapeLink(int id, IEnumerable<Point4D> geometry)
         {
             ID = id;
-            Geometry = geometry.ToArray();
+
+            var line = new CachedLineTools(geometry.ToArray());
+            Geometry = new Point4D[(int) line.Length + 1];
+            for (var i = 0; i < line.Length; i++)
+            {
+                var pi = line.QueryPointInfo(i);
+                Geometry[i] = new Point4D(pi.X, pi.Y, pi.Z);
+            }
         }
 
         /// <summary>
