@@ -142,7 +142,7 @@ namespace LambdaModel.Terrain.Tiff
 
         private (int x, int y) ToLocal(double pX, double pY)
         {
-            return (Round(pX - StartX), Round(StartY - pY));
+            return (QuickMath.Round(pX - StartX), QuickMath.Round(StartY - pY));
         }
 
         public Point3D[] GetAltitudeVector(Point3D a, Point3D b, int incMeter = 1)
@@ -168,7 +168,7 @@ namespace LambdaModel.Terrain.Tiff
 
             while (m <= l)
             {
-                v[m] = new Point3D(x, y, HeightMap[(int) Math.Round(y), (int) Math.Round(x)]);
+                v[m] = new Point3D(x, y, HeightMap[QuickMath.Round(y), QuickMath.Round(x)]);
 
                 m += incMeter;
                 x += xInc;
@@ -178,15 +178,10 @@ namespace LambdaModel.Terrain.Tiff
             return v;
         }
 
-        private int Round(double num)
-        {
-            return (int) (num + 0.5); // Since coordinates are always positive. If negative, need to use -0.5 in negative cases.
-        }
-
         public bool Contains(double pX, double pY)
         {
-            var x = Round(pX);
-            var y = Round(pY);
+            var x = QuickMath.Round(pX);
+            var y = QuickMath.Round(pY);
             return x >= StartX && x < EndX && y > EndY && y <= StartY;
         }
     }
