@@ -13,15 +13,15 @@ namespace LambdaModel.Terrain.Tiff
 {
 	public class GeoTiff : ITiffReader
 	{
-		public float[,] HeightMap { get; set; }
+        protected int _tileW;
+        protected int _tileH;
+        public float[,] HeightMap { get; set; }
 		public int Width { get; protected set; }
         public int Height { get; protected set; }
         public int StartX { get; protected set; }
         public int StartY { get; protected set; }
         public int EndX { get; protected set; }
         public int EndY { get; protected set; }
-		public double DW { get;  }
-        public double DH { get;  }
 
         protected GeoTiff()
         {
@@ -39,28 +39,7 @@ namespace LambdaModel.Terrain.Tiff
                     throw new Exception("Failed to read TIFF file at '" + filePath + "'");
                 }
 
-                Width = tiff.GetField(TiffTag.IMAGEWIDTH)[0].ToInt();
-                Height = tiff.GetField(TiffTag.IMAGELENGTH)[0].ToInt();
-                HeightMap = new float[Width, Height];
-                var modelPixelScaleTag = tiff.GetField(TiffTag.GEOTIFF_MODELPIXELSCALETAG);
-                var modelTiePointTag = tiff.GetField(TiffTag.GEOTIFF_MODELTIEPOINTTAG);
-
-                var modelPixelScale = modelPixelScaleTag[1].GetBytes();
-                DW = BitConverter.ToDouble(modelPixelScale, 0);
-                DH = BitConverter.ToDouble(modelPixelScale, 8) * -1;
-
-                var modelTransformation = modelTiePointTag[1].GetBytes();
-                var originLon = BitConverter.ToDouble(modelTransformation, 24);
-                var originLat = BitConverter.ToDouble(modelTransformation, 32);
-
-                StartX = (int) (originLon + DW / 2d);
-                StartY = (int) (originLat + DH / 2d);
-                SetEnds();
-
-                var tileWidthTag = tiff.GetField(TiffTag.TILEWIDTH);
-                var tileHeightTag = tiff.GetField(TiffTag.TILELENGTH);
-                var tileW = tileWidthTag[0].ToInt();
-                var tileH = tileHeightTag[0].ToInt();
+                ReadHeader(tiff);
 
                 if (headerOnly)
                 {
@@ -68,29 +47,56 @@ namespace LambdaModel.Terrain.Tiff
                     return;
                 }
 
+                HeightMap = new float[Width, Height];
+
                 var tileSize = tiff.TileSize();
                 var buffer = new byte[tileSize];
-                for (var x = 0; x < Width; x += tileW)
-                for (var y = 0; y < Height; y += tileH)
+                for (var x = 0; x < Width; x += _tileW)
+                for (var y = 0; y < Height; y += _tileH)
                 {
                     tiff.ReadTile(buffer, 0, x, y, 0, 0);
-                    for (var tileX = 0; tileX < tileW; tileX++)
+                    for (var tileX = 0; tileX < _tileW; tileX++)
                     {
                         var iwhm = y + tileX;
                         if (iwhm > Width - 1)
                             break;
 
-                        for (var tileY = 0; tileY < tileH; tileY++)
+                        for (var tileY = 0; tileY < _tileH; tileY++)
                         {
                             var iyhm = x + tileY;
                             if (iyhm > Height - 1)
                                 break;
 
-                            HeightMap[iwhm, iyhm] = BitConverter.ToSingle(buffer, (tileX * tileH + tileY) * 4);
+                            HeightMap[iwhm, iyhm] = BitConverter.ToSingle(buffer, (tileX * _tileH + tileY) * 4);
                         }
                     }
                 }
             }
+        }
+
+        protected void ReadHeader(BitMiracle.LibTiff.Classic.Tiff tiff)
+        {
+            Width = tiff.GetField(TiffTag.IMAGEWIDTH)[0].ToInt();
+            Height = tiff.GetField(TiffTag.IMAGELENGTH)[0].ToInt();
+            var modelPixelScaleTag = tiff.GetField(TiffTag.GEOTIFF_MODELPIXELSCALETAG);
+            var modelTiePointTag = tiff.GetField(TiffTag.GEOTIFF_MODELTIEPOINTTAG);
+
+            var modelPixelScale = modelPixelScaleTag[1].GetBytes();
+            var dw = BitConverter.ToDouble(modelPixelScale, 0);
+            var dh = BitConverter.ToDouble(modelPixelScale, 8) * -1;
+
+            var modelTransformation = modelTiePointTag[1].GetBytes();
+            var originLon = BitConverter.ToDouble(modelTransformation, 24);
+            var originLat = BitConverter.ToDouble(modelTransformation, 32);
+
+            StartX = (int)(originLon + dw / 2d);
+            StartY = (int)(originLat + dh / 2d);
+            SetEnds();
+
+            var tileWidthTag = tiff.GetField(TiffTag.TILEWIDTH);
+            var tileHeightTag = tiff.GetField(TiffTag.TILELENGTH);
+            _tileW = tileWidthTag[0].ToInt();
+            _tileH = tileHeightTag[0].ToInt();
         }
 
         protected void SetEnds()
@@ -113,6 +119,11 @@ namespace LambdaModel.Terrain.Tiff
             if (!Contains(pX, pY))
                 throw new Exception("Requested point is not inside this TIFF file.");
 
+            return GetAltitudeInternal(x, y);
+        }
+
+        protected virtual float GetAltitudeInternal(int x, int y)
+        {
             return HeightMap[y, x];
         }
 
@@ -144,7 +155,7 @@ namespace LambdaModel.Terrain.Tiff
 
             while (m <= l)
             {
-                v[m] = new Point3D(x, y, HeightMap[QuickMath.Round(y), QuickMath.Round(x)]);
+                v[m] = new Point3D(x, y, GetAltitudeInternal(QuickMath.Round(x), QuickMath.Round(y)));
 
                 m += incMeter;
                 x += xInc;
