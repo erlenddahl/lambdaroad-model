@@ -17,14 +17,20 @@ namespace LambdaModel.Calculations
     {
         private readonly Point4D[] _vector;
         private readonly PathLossCalculator _calc;
+        private readonly ConsoleInformationPanel _cip;
 
         public TileCache Tiles { get; }
         public int Radius { get; }
         public Point3D Center { get; }
         public ShapeLink[] RoadLinks { get; }
 
-        public RoadNetworkCalculator(TileCache tiles, string roadShapeLocation, int radius, Point3D center)
+        public RoadNetworkCalculator(TileCache tiles, string roadShapeLocation, int radius, Point3D center, ConsoleInformationPanel cip = null)
         {
+            _cip = cip;
+
+            cip?.Set("Road network source", System.IO.Path.GetFileName(roadShapeLocation));
+            cip?.Set("Calculation radius", radius);
+
             Tiles = tiles;
             Radius = radius;
             Center = center;
@@ -41,11 +47,11 @@ namespace LambdaModel.Calculations
             _calc = new PathLossCalculator();
         }
 
-        public int Calculate(ConsoleInformationPanel cip = null)
+        public int Calculate()
         {
             var calculations = 0;
 
-            using (var pb = cip?.SetProgress("Calculating path loss", 0, RoadLinks.Length, true))
+            using (var pb = _cip?.SetProgress("Calculating path loss", 0, RoadLinks.Length, true))
             {
                 foreach (var link in RoadLinks)
                 {
@@ -54,7 +60,7 @@ namespace LambdaModel.Calculations
                     {
                         if (Center.DistanceTo2D(c) > Radius)
                         {
-                            cip?.Increment("Points outside of radius");
+                            _cip?.Increment("Points outside of radius");
                             continue;
                         }
 
@@ -68,14 +74,14 @@ namespace LambdaModel.Calculations
 
                     pb?.Increment();
                     calculations += linkCalcs;
-                    cip?.Increment("Points calculated", linkCalcs);
+                    _cip?.Increment("Points calculated", linkCalcs);
                 }
             }
 
             return calculations;
         }
 
-        public void SaveResults(string outputLocation, ConsoleInformationPanel cip = null)
+        public void SaveResults(string outputLocation)
         {
             var shp = new FeatureSet(FeatureType.Point);
 
@@ -83,7 +89,7 @@ namespace LambdaModel.Calculations
             table.Columns.Add("Loss", typeof(double));
             table.AcceptChanges();
 
-            using(var pb = cip.SetProgress("Saving results", max:RoadLinks.Length))
+            using(var pb = _cip?.SetProgress("Saving results", max:RoadLinks.Length))
                 foreach (var link in RoadLinks)
                 {
                     foreach (var c in link.Geometry)

@@ -20,27 +20,44 @@ namespace LambdaModel.Terrain
         private WebClient _wc;
         private readonly Dictionary<(int x, int y), GeoTiff> _tiffCache = new Dictionary<(int x, int y), GeoTiff>();
         private int _maxTries = 10;
+        private readonly ConsoleInformationPanel _cip;
 
         public int TilesDownloaded { get; private set; }
         public int TilesRetrievedFromCache { get; private set; }
 
-        public TileCache(string cacheLocation, int tileSize = 512)
+        public TileCache(string cacheLocation, int tileSize = 512, ConsoleInformationPanel cip = null)
         {
+            _cip = cip;
             _cacheLocation = cacheLocation;
             TileSize = tileSize;
             _wc = new WebClient();
+
+            cip?.Set("Tile size", TileSize);
+            cip?.Set("Tile cache", System.IO.Path.GetFileName(_cacheLocation));
 
             if (!System.IO.Directory.Exists(_cacheLocation))
                 System.IO.Directory.CreateDirectory(_cacheLocation);
         }
 
-        public async Task Preload(Point3D center, double radius, ConsoleInformationPanel cip = null)
+        public async Task Preload(Point3D center, double radius)
         {
             var topLeft = center.Move(-radius, -radius);
             var bottomRight = center.Move(radius, radius);
             var max = (long) (((bottomRight.X - topLeft.X) / TileSize) * ((bottomRight.Y - topLeft.Y) / TileSize));
 
-            using (var pb = cip?.SetProgress("Preloading map tiles", 0, max, true))
+            for (var x = topLeft.X; x < bottomRight.X + TileSize; x += TileSize)
+            for (var y = topLeft.Y; y < bottomRight.Y + TileSize; y += TileSize)
+            {
+                var (ix, iy) = GetTileCoordinates(x, y);
+                var fn = GetFilename(ix, iy);
+                if (HasCached(fn))
+                {
+                    _cip?.Increment("Tiles already cached");
+                    max--;
+                }
+            }
+
+            using (var pb = _cip?.SetProgress("Preloading map tiles", max: max))
             {
                 for (var x = topLeft.X; x < bottomRight.X + TileSize; x += TileSize)
                 for (var y = topLeft.Y; y < bottomRight.Y + TileSize; y += TileSize)
@@ -50,17 +67,11 @@ namespace LambdaModel.Terrain
                     if (!HasCached(fn))
                     {
                         await DownloadTileForCoordinate(ix, iy, fn);
-                        cip?.Increment("New tiles downloaded");
+                        _cip?.Increment("New tiles downloaded");
+                        pb?.Increment();
                     }
-                    else
-                    {
-                        cip?.Increment("Tiles already cached");
-                    }
-
-                    pb?.Increment();
                 }
             }
-
         }
         
         /// <summary>
@@ -95,6 +106,9 @@ namespace LambdaModel.Terrain
                     Debug.WriteLine("Failed to retrieve url '" + url + "'; " + ex.Message);
                     System.IO.File.Delete(filePath);
                     lastException = ex;
+
+                    _cip?.Increment(ex is TiffTileTooManyDownloadsException ? "Tile errors (too often)" : "Tile errors (other)");
+
                     await Task.Delay(1000);
                 }
             }
