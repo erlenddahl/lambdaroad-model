@@ -32,49 +32,49 @@ namespace LambdaModel.Terrain.Tiff
 		public GeoTiff(string filePath, bool headerOnly = false)
         {
             if (!File.Exists(filePath)) throw new FileNotFoundException("TIFF file '" + filePath + "' does not exist", filePath);
-			using (var tiff = BitMiracle.LibTiff.Classic.Tiff.Open(filePath, "r"))
-			{
-				if (tiff == null)
+            using (var tiff = BitMiracle.LibTiff.Classic.Tiff.Open(filePath, "r"))
+            {
+                if (tiff == null)
                 {
                     throw new Exception("Failed to read TIFF file at '" + filePath + "'");
                 }
 
-				Width = tiff.GetField(TiffTag.IMAGEWIDTH)[0].ToInt();
-				Height = tiff.GetField(TiffTag.IMAGELENGTH)[0].ToInt();
-				HeightMap = new float[Width, Height];
-				var modelPixelScaleTag = tiff.GetField(TiffTag.GEOTIFF_MODELPIXELSCALETAG);
-				var modelTiePointTag = tiff.GetField(TiffTag.GEOTIFF_MODELTIEPOINTTAG);
+                Width = tiff.GetField(TiffTag.IMAGEWIDTH)[0].ToInt();
+                Height = tiff.GetField(TiffTag.IMAGELENGTH)[0].ToInt();
+                HeightMap = new float[Width, Height];
+                var modelPixelScaleTag = tiff.GetField(TiffTag.GEOTIFF_MODELPIXELSCALETAG);
+                var modelTiePointTag = tiff.GetField(TiffTag.GEOTIFF_MODELTIEPOINTTAG);
 
-				var modelPixelScale = modelPixelScaleTag[1].GetBytes();
-				DW = BitConverter.ToDouble(modelPixelScale, 0);
-				DH = BitConverter.ToDouble(modelPixelScale, 8) * -1;
+                var modelPixelScale = modelPixelScaleTag[1].GetBytes();
+                DW = BitConverter.ToDouble(modelPixelScale, 0);
+                DH = BitConverter.ToDouble(modelPixelScale, 8) * -1;
 
-				var modelTransformation = modelTiePointTag[1].GetBytes();
-				var originLon = BitConverter.ToDouble(modelTransformation, 24);
-				var originLat = BitConverter.ToDouble(modelTransformation, 32);
+                var modelTransformation = modelTiePointTag[1].GetBytes();
+                var originLon = BitConverter.ToDouble(modelTransformation, 24);
+                var originLat = BitConverter.ToDouble(modelTransformation, 32);
 
-				StartX = (int)(originLon + DW / 2d);
-				StartY = (int)(originLat + DH / 2d);
+                StartX = (int) (originLon + DW / 2d);
+                StartY = (int) (originLat + DH / 2d);
                 SetEnds();
 
-				//var tileByteCountsTag = tiff.GetField(TiffTag.TILEBYTECOUNTS);
-				//var tileByteCounts = tileByteCountsTag[0].TolongArray();
+                //var tileByteCountsTag = tiff.GetField(TiffTag.TILEBYTECOUNTS);
+                //var tileByteCounts = tileByteCountsTag[0].TolongArray();
 
-				//var bitsPerSampleTag = tiff.GetField(TiffTag.BITSPERSAMPLE);
-				//var bytesPerSample = bitsPerSampleTag[0].ToInt() / 8;
+                //var bitsPerSampleTag = tiff.GetField(TiffTag.BITSPERSAMPLE);
+                //var bytesPerSample = bitsPerSampleTag[0].ToInt() / 8;
 
 
-				var tilewtag = tiff.GetField(TiffTag.TILEWIDTH);
-				var tilehtag = tiff.GetField(TiffTag.TILELENGTH);
-				var tilew = tilewtag[0].ToInt();
-				var tileh = tilehtag[0].ToInt();
+                var tileWidthTag = tiff.GetField(TiffTag.TILEWIDTH);
+                var tileHeightTag = tiff.GetField(TiffTag.TILELENGTH);
+                var tileW = tileWidthTag[0].ToInt();
+                var tileH = tileHeightTag[0].ToInt();
 
-				/*var tileWidthCount = Width / tilew;
-				var remainingWidth = Width - tileWidthCount * tilew;
-				if (remainingWidth > 0)
-				{
-					tileWidthCount++;
-				}
+                /*var tileWidthCount = Width / tilew;
+                var remainingWidth = Width - tileWidthCount * tilew;
+                if (remainingWidth > 0)
+                {
+                    tileWidthCount++;
+                }
 
                 var tileHeightCount = Height / tileh;
                 var remainingHeight = Height - tileHeightCount * tileh;
@@ -83,39 +83,36 @@ namespace LambdaModel.Terrain.Tiff
                     tileHeightCount++;
                 }*/
 
-				if (headerOnly)
-				{
-					HeightMap = null;
-					return;
-				}
-
-				var tileSize = tiff.TileSize();
-				for (var x = 0; x < Width; x += tilew)
-				{
-					for (var y = 0; y < Height; y += tileh)
-					{
 						var buffer = new byte[tileSize];
-						tiff.ReadTile(buffer, 0, x, y, 0, 0);
-						for (var tileX = 0; tileX < tilew; tileX++)
-						{
-							var iwhm = y + tileX;
-							if (iwhm > Width - 1)
-								break;
+                if (headerOnly)
+                {
+                    HeightMap = null;
+                    return;
+                }
 
-							for (var tileY = 0; tileY < tileh; tileY++)
-							{
-								var iyhm = x + tileY;
+                var tileSize = tiff.TileSize();
+                for (var x = 0; x < Width; x += tileW)
+                for (var y = 0; y < Height; y += tileH)
+                {
+                    tiff.ReadTile(buffer, 0, x, y, 0, 0);
+                    for (var tileX = 0; tileX < tileW; tileX++)
+                    {
+                        var iwhm = y + tileX;
+                        if (iwhm > Width - 1)
+                            break;
 
-								if (iyhm > Height - 1)
-									break;
+                        for (var tileY = 0; tileY < tileH; tileY++)
+                        {
+                            var iyhm = x + tileY;
+                            if (iyhm > Height - 1)
+                                break;
 
-								HeightMap[iwhm, iyhm] = BitConverter.ToSingle(buffer, (tileX * tileh + tileY) * 4);
-							}
-						}
-					}
-				}
-			}
-		}
+                            HeightMap[iwhm, iyhm] = BitConverter.ToSingle(buffer, (tileX * tileH + tileY) * 4);
+                        }
+                    }
+                }
+            }
+        }
 
         protected void SetEnds()
         {
