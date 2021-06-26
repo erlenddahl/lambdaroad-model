@@ -70,7 +70,7 @@ namespace LambdaModel.Calculations
                         var vectorLength = Tiles.FillVector(_vector, Center.X, Center.Y, c.X, c.Y, withHeights: true);
 
                         // Calculate the loss for this point, and store it in the results matrix
-                        c.M = _calc.CalculateLoss(_vector, 100, 2, vectorLength);
+                        c.M = _calc.CalculateLoss(_vector, 100, 2, vectorLength - 1);
                         linkCalcs++;
                     }
 
