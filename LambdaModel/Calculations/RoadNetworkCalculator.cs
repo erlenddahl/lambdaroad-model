@@ -36,6 +36,8 @@ namespace LambdaModel.Calculations
             Center = center;
             RoadLinks = ShapeLink.ReadLinks(roadShapeLocation, Center, radius).ToArray();
 
+            cip?.Set("Relevant road links", RoadLinks.Length);
+
             center.Z = tiles.GetAltitude(center);
 
             // Initialize a PointUtm array that is to be (re)used as the vector of points from
