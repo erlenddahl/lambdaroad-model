@@ -171,5 +171,10 @@ namespace LambdaModel.Terrain.Tiff
             var y = QuickMath.Round(pY);
             return x >= StartX && x < EndX && y > EndY && y <= StartY;
         }
+
+        public virtual void Dispose()
+        {
+            HeightMap = null;
+        }
     }
 }

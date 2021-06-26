@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using BitMiracle.LibTiff.Classic;
@@ -14,7 +15,6 @@ namespace LambdaModel.Terrain.Tiff
 	public class LazyGeoTiff : GeoTiff
 	{
         private readonly BitMiracle.LibTiff.Classic.Tiff _tiff;
-        private readonly byte[] _buffer;
 
         protected LazyGeoTiff()
         {
@@ -42,9 +42,9 @@ namespace LambdaModel.Terrain.Tiff
 
             _buffer = new byte[_tiff.TileSize()];
         }
-
-        private int _previousTileX = -1;
-        private int _previousTileY = -1;
+        
+        private byte[] _buffer;
+        private readonly Dictionary<(int x, int y), byte[]> _readBuffers = new Dictionary<(int x, int y), byte[]>();
 
         protected override float GetAltitudeInternal(int x, int y)
         {
@@ -54,19 +54,28 @@ namespace LambdaModel.Terrain.Tiff
             var tileX = x - xInTile;
             var tileY = y - yInTile;
 
-            if (_previousTileX != tileX || _previousTileY != tileY)
+            if (!_readBuffers.TryGetValue((tileX, tileY), out var buffer))
+            {
                 _tiff.ReadTile(_buffer, 0, tileX, tileY, 0, 0);
+                buffer = _buffer.ToArray();
+                _readBuffers.Add((tileX, tileY), buffer);
+            }
 
-            _previousTileX = tileX;
-            _previousTileY = tileY;
-
-            return BitConverter.ToSingle(_buffer, (yInTile * _tileH + xInTile) * 4);
+            return BitConverter.ToSingle(buffer, (yInTile * _tileH + xInTile) * 4);
         }
 
         public void Close()
         {
             _tiff.Close();
             _tiff.Dispose();
+            _readBuffers.Clear();
+            _buffer = null;
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            Close();
         }
     }
 }

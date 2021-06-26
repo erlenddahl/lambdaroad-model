@@ -19,12 +19,11 @@ namespace LambdaModel.Terrain
         private readonly bool _lazyTiffLoading;
         public int TileSize { get; }
         private WebClient _wc;
-        private readonly Dictionary<(int x, int y), GeoTiff> _tiffCache = new Dictionary<(int x, int y), GeoTiff>();
+        private readonly LruCache<(int x, int y), GeoTiff> _tiffCache = new LruCache<(int x, int y), GeoTiff>(3000, 100);
         private int _maxTries = 10;
         private readonly ConsoleInformationPanel _cip;
 
         public int TilesDownloaded { get; private set; }
-        public int TilesRetrievedFromCache { get; private set; }
 
         public TileCache(string cacheLocation, int tileSize = 512, bool lazyTiffLoading = true, ConsoleInformationPanel cip = null)
         {
@@ -36,9 +35,12 @@ namespace LambdaModel.Terrain
 
             cip?.Set("Tile size", TileSize);
             cip?.Set("Tile cache", System.IO.Path.GetFileName(_cacheLocation));
+            _cip?.Set("Memcache options", _tiffCache.MaxItems + " / " + _tiffCache.RemoveItemsWhenFull);
 
             if (!System.IO.Directory.Exists(_cacheLocation))
                 System.IO.Directory.CreateDirectory(_cacheLocation);
+
+            _tiffCache.OnRemoved = tiff => tiff.Dispose();
         }
 
         public async Task Preload(Point3D center, double radius)
@@ -175,10 +177,7 @@ namespace LambdaModel.Terrain
             var (ix, iy) = GetTileCoordinates(x, y);
 
             if (_tiffCache.TryGetValue((ix, iy), out var tiff))
-            {
-                TilesRetrievedFromCache++;
                 return tiff;
-            }
 
             var fn = GetFilename(ix, iy);
 
@@ -191,7 +190,14 @@ namespace LambdaModel.Terrain
                 tiff = new GeoTiff(fn);
 
             if (addToCache)
+            {
                 _tiffCache.Add((ix, iy), tiff);
+
+                _cip?.Set("Tiles retrieved from memcache", _tiffCache.RetrievedFromCache);
+                _cip?.Set("Tiles removed from memcache", _tiffCache.RemovedFromCache);
+                _cip?.Set("Tiles added to memcache", _tiffCache.AddedToCache);
+                _cip?.Set("Tiles in memcache", _tiffCache.CurrentlyInCache);
+            }
 
             return tiff;
         }
@@ -332,7 +338,6 @@ namespace LambdaModel.Terrain
             System.IO.Directory.CreateDirectory(_cacheLocation);
             _tiffCache.Clear();
             TilesDownloaded = 0;
-            TilesRetrievedFromCache = 0;
         }
     }
 }
