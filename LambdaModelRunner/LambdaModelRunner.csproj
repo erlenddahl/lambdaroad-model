@@ -6,6 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="DotSpatial.Mono" Version="1.9.0" />
+    <PackageReference Include="DotSpatial.Projections" Version="1.9.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\LambdaModel\LambdaModel.csproj" />
   </ItemGroup>
 

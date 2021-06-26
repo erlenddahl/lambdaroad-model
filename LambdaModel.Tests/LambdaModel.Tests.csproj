@@ -9,6 +9,8 @@
   <ItemGroup>
     <PackageReference Include="BitMiracle.LibTiff.NET" Version="2.4.639" />
     <PackageReference Include="DotSpatial.Data" Version="1.9.0" />
+    <PackageReference Include="DotSpatial.Mono" Version="1.9.0" />
+    <PackageReference Include="DotSpatial.Projections" Version="1.9.0" />
     <PackageReference Include="DotSpatial.Topology" Version="1.9.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.10.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="2.2.4" />
