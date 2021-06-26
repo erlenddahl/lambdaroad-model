@@ -19,7 +19,7 @@ namespace LambdaModel.Terrain
         private readonly bool _lazyTiffLoading;
         public int TileSize { get; }
         private WebClient _wc;
-        private readonly LruCache<(int x, int y), GeoTiff> _tiffCache = new LruCache<(int x, int y), GeoTiff>(3000, 100);
+        private readonly LruCache<(int x, int y), GeoTiff> _tiffCache = new LruCache<(int x, int y), GeoTiff>(6000, 100);
         private int _maxTries = 10;
         private readonly ConsoleInformationPanel _cip;
 

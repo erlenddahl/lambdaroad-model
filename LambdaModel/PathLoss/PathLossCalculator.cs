@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using LambdaModel.General;
+using LambdaModel.Utilities;
 using no.sintef.SpeedModule.Geometry.SimpleStructures;
 
 namespace LambdaModel.PathLoss
@@ -10,8 +11,19 @@ namespace LambdaModel.PathLoss
         public double CalculateLoss(Point3D[] path, double txHeightAboveTerrain, double rxHeightAboveTerrain, int rxIndex = -1)
         {
             var p = GetParameters(path, rxIndex);
-
             return 25.1 * Math.Log(p.horizontalDistance) - 1.8e-01 * txHeightAboveTerrain + 1.3e+01 * p.rxa - 1.4e-04 * p.txa - 1.4e-04 * p.rxi - 3.0e-05 * p.txi + 4.9 * p.nobs + 29.3;
+        }
+
+        public double CalculateMinPossibleLoss(double horizontalDistance, double txHeightAboveTerrain)
+        {
+            // RangeTxa: -0,00007 - -0,00000         RangeRxa: 0,00411 - 10,20096
+            // RangeTxi: -0,25720 - -0,00003         RangeRxi: -4,26540 - -0,00014
+
+            // Running approximately 200 000 point calculations on approximately 1 700 random road links showed that
+            // nothing usually shrank the path loss by more than -5.
+            // This means that the minimum possible loss is decided by horizontal distance, tx height, and -5.
+
+            return 25.1 * Math.Log(horizontalDistance) - 1.8e-01 * txHeightAboveTerrain - 5;
         }
 
         protected (double horizontalDistance, double txa, double rxa, double txi, double rxi, int nobs) GetParameters(Point3D[] path, int rxIndex = -1)

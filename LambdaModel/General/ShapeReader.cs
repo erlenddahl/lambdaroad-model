@@ -15,11 +15,17 @@ namespace LambdaModel.General
     public class ShapeLink
     {
         public int ID { get; }
+        public int Cx { get; }
+        public int Cy { get; }
+        public int Length { get; }
         public Point4D[] Geometry { get; }
 
-        private ShapeLink(int id, IEnumerable<Point4D> geometry)
+        private ShapeLink(int id, IEnumerable<Point4D> geometry, int cx, int cy, int length)
         {
             ID = id;
+            Cx = cx;
+            Cy = cy;
+            Length = length;
 
             var line = new CachedLineTools(geometry.ToArray());
             Geometry = new Point4D[(int) line.Length + 1];
@@ -53,9 +59,12 @@ namespace LambdaModel.General
                 {
                     var ix = reader.ReadInt32();
 
-                    var dx = reader.ReadInt32() - cc.X;
-                    var dy = reader.ReadInt32() - cc.Y;
+                    var cx = reader.ReadInt32();
+                    var cy = reader.ReadInt32();
                     var length = reader.ReadInt32();
+
+                    var dx = cx - cc.X;
+                    var dy = cy - cc.Y;
 
                     var name = reader.ReadString();
 
@@ -87,7 +96,7 @@ namespace LambdaModel.General
                     }
 
                     if (anyInside)
-                        yield return new ShapeLink(ix, geometry);
+                        yield return new ShapeLink(ix, geometry, cx, cy, length);
                 }
             }
         }

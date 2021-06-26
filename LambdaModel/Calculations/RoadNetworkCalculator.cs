@@ -22,9 +22,10 @@ namespace LambdaModel.Calculations
         public TileCache Tiles { get; }
         public int Radius { get; }
         public Point3D Center { get; }
-        public ShapeLink[] RoadLinks { get; }
+        public ShapeLink[] RoadLinks { get; set; }
+        public double TxHeightAboveTerrain { get; set; }
 
-        public RoadNetworkCalculator(TileCache tiles, string roadShapeLocation, int radius, Point3D center, ConsoleInformationPanel cip = null)
+        public RoadNetworkCalculator(TileCache tiles, string roadShapeLocation, int radius, Point3D center, double txHeightAboveTerrain, ConsoleInformationPanel cip = null)
         {
             _cip = cip;
 
@@ -34,6 +35,7 @@ namespace LambdaModel.Calculations
             Tiles = tiles;
             Radius = radius;
             Center = center;
+            TxHeightAboveTerrain = txHeightAboveTerrain;
             RoadLinks = ShapeLink.ReadLinks(roadShapeLocation, Center, radius).ToArray();
 
             cip?.Set("Relevant road links", RoadLinks.Length);
@@ -47,6 +49,28 @@ namespace LambdaModel.Calculations
                 _vector[i] = new Point4D(0, 0);
 
             _calc = new PathLossCalculator();
+        }
+
+        /// <summary>
+        /// Check all links and removes those that has too much path loss due to distance alone.
+        /// </summary>
+        /// <returns></returns>
+        public void RemoveLinksTooFarAway(int maxPathLoss)
+        {
+            using (var pb = _cip?.SetProgress("Checking road link min possible path loss", max: RoadLinks.Length))
+            {
+                var linkIdsToRemove = new HashSet<int>(RoadLinks.Where(p =>
+                {
+                    var minDistToCenter = Center.DistanceTo2D(p.Cx, p.Cy) - p.Length;
+                    var minPossiblePathLoss = _calc.CalculateMinPossibleLoss(minDistToCenter, TxHeightAboveTerrain);
+                    pb?.Increment();
+                    return minPossiblePathLoss > maxPathLoss;
+                }).Select(p => p.ID));
+
+                RoadLinks = RoadLinks.Where(p => !linkIdsToRemove.Contains(p.ID)).ToArray();
+
+                _cip.Set("Road links removed", linkIdsToRemove.Count);
+            }
         }
 
         public int Calculate()
@@ -70,7 +94,7 @@ namespace LambdaModel.Calculations
                         var vectorLength = Tiles.FillVector(_vector, Center.X, Center.Y, c.X, c.Y, withHeights: true);
 
                         // Calculate the loss for this point, and store it in the results matrix
-                        c.M = _calc.CalculateLoss(_vector, 100, 2, vectorLength - 1);
+                        c.M = _calc.CalculateLoss(_vector, TxHeightAboveTerrain, 2, vectorLength - 1);
                         linkCalcs++;
                     }
 
