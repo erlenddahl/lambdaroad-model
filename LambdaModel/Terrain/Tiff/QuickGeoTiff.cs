@@ -24,7 +24,6 @@ namespace LambdaModel.Terrain.Tiff
 
 		public QuickGeoTiff(string filePath)
         {
-            if (!File.Exists(filePath)) throw new FileNotFoundException("TIFF file '" + filePath + "' does not exist", filePath);
             var quickFile = filePath.ChangeExtension(".bin");
 
             if (!File.Exists(quickFile))
@@ -60,6 +59,8 @@ namespace LambdaModel.Terrain.Tiff
 
         private void GenerateQuickFile(string filePath, string quickFile)
         {
+            if (!File.Exists(filePath)) throw new FileNotFoundException("TIFF file '" + filePath + "' does not exist", filePath);
+
             using (var writer = new BinaryWriter(File.Create(quickFile)))
             using (var tiff = new GeoTiff(filePath))
             {
