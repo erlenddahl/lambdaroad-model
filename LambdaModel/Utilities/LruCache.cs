@@ -34,37 +34,48 @@ namespace LambdaModel.Utilities
             if (result)
             {
                 RetrievedFromCache++;
-                _retrievedKeys[_retrievedKeyIndex++] = key;
-                if (_retrievedKeyIndex >= _retrievedKeys.Length)
-                    _retrievedKeyIndex = 0;
+                MarkRetrieved(key);
             }
 
             return result;
         }
 
+        private void MarkRetrieved(K key)
+        {
+            _retrievedKeys[_retrievedKeyIndex++] = key;
+            if (_retrievedKeyIndex >= _retrievedKeys.Length)
+                _retrievedKeyIndex = 0;
+        }
+
         public void Add(K key, T value)
         {
-            _cache.Add(key, value);
-            AddedToCache++;
-
-            if (_cache.Count > MaxItems)
+            if (_cache.Count == MaxItems)
                 RemoveLeastRecentlyUsed(RemoveItemsWhenFull);
+            
+            _cache.Add(key, value);
+            MarkRetrieved(key);
+            AddedToCache++;
         }
 
         private void RemoveLeastRecentlyUsed(int remove)
         {
-            var lastRecentlyUsed = new HashSet<K>(_retrievedKeys.GroupBy(p => p).OrderBy(p => p.Count()).Select(p => p.Key).Take(remove));
+            var lastRecentlyUsed = _retrievedKeys.GroupBy(p => p).OrderBy(p => p.Count()).Select(p => p.Key);
+            var removeIds = new HashSet<K>();
             foreach (var key in lastRecentlyUsed)
             {
                 if (!_cache.TryGetValue(key, out var v)) continue;
+
+                removeIds.Add(key);
                 OnRemoved?.Invoke(v);
                 _cache.Remove(key);
                 RemovedFromCache++;
+
+                if (removeIds.Count >= remove) break;
             }
 
             for (var i = 0; i < _retrievedKeys.Length; i++)
             {
-                if (lastRecentlyUsed.Contains(_retrievedKeys[i]))
+                if (removeIds.Contains(_retrievedKeys[i]))
                     _retrievedKeys[i] = default;
             }
         }
