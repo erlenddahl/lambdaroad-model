@@ -24,6 +24,7 @@ namespace LambdaModel.Terrain
         private readonly ConsoleInformationPanel _cip;
 
         public int TilesDownloaded { get; private set; }
+        public int TilesRetrievedFromCache => _tiffCache.RetrievedFromCache;
 
         public TileCache(string cacheLocation, int tileSize = 512, bool lazyTiffLoading = true, ConsoleInformationPanel cip = null)
         {
