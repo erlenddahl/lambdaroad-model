@@ -32,13 +32,8 @@ namespace LambdaModel.Terrain.Tiff
             }
 
             ReadHeader(_tiff);
-            HeightMap = new float[0, 0];
-
             if (headerOnly)
-            {
-                HeightMap = null;
                 return;
-            }
 
             _buffer = new byte[_tiff.TileSize()];
         }
@@ -64,18 +59,13 @@ namespace LambdaModel.Terrain.Tiff
             return BitConverter.ToSingle(buffer, (yInTile * _tileH + xInTile) * 4);
         }
 
-        public void Close()
+        public override void Dispose()
         {
             _tiff.Close();
             _tiff.Dispose();
             _readBuffers.Clear();
             _buffer = null;
-        }
-
-        public override void Dispose()
-        {
             base.Dispose();
-            Close();
         }
     }
 }
