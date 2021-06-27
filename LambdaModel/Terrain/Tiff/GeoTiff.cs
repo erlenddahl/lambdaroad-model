@@ -93,16 +93,11 @@ namespace LambdaModel.Terrain.Tiff
             _tileH = tileHeightTag[0].ToInt();
         }
 
-        public override float GetAltitude(double pX, double pY)
+        protected override float GetAltitudeInternal(int x, int y)
         {
             if (HeightMap == null)
                 throw new Exception("Height map has not been initialized. Did you open the file using the headerOnly flag?");
 
-            return base.GetAltitude(pX, pY);
-        }
-
-        protected override float GetAltitudeInternal(int x, int y)
-        {
             return HeightMap[y, x];
         }
 
