@@ -16,21 +16,21 @@ namespace LambdaModel.Terrain
     public class TileCache:ITiffReader
     {
         private readonly string _cacheLocation;
-        private readonly bool _lazyTiffLoading;
         public int TileSize { get; }
         private WebClient _wc;
-        private readonly LruCache<(int x, int y), GeoTiff> _tiffCache = new LruCache<(int x, int y), GeoTiff>(6000, 100);
+        private readonly LruCache<(int x, int y), TiffReaderBase> _tiffCache = new LruCache<(int x, int y), TiffReaderBase>(1000, 5);
         private int _maxTries = 10;
         private readonly ConsoleInformationPanel _cip;
+
+        public Func<string, TiffReaderBase> CreateTiff = fn => new QuickGeoTiff(fn);
 
         public int TilesDownloaded { get; private set; }
         public int TilesRetrievedFromCache => _tiffCache.RetrievedFromCache;
 
-        public TileCache(string cacheLocation, int tileSize = 512, bool lazyTiffLoading = true, ConsoleInformationPanel cip = null)
+        public TileCache(string cacheLocation, int tileSize = 512, ConsoleInformationPanel cip = null)
         {
             _cip = cip;
             _cacheLocation = cacheLocation;
-            _lazyTiffLoading = lazyTiffLoading;
             TileSize = tileSize;
             _wc = new WebClient();
 
@@ -173,7 +173,7 @@ namespace LambdaModel.Terrain
             return GetTiff(x, y).Result.GetAltitude(x, y);
         }
 
-        private async Task<GeoTiff> GetTiff(double x, double y, bool addToCache = true)
+        private async Task<TiffReaderBase> GetTiff(double x, double y, bool addToCache = true)
         {
             var (ix, iy) = GetTileCoordinates(x, y);
 
@@ -185,10 +185,7 @@ namespace LambdaModel.Terrain
             if (!HasCached(fn))
                 await DownloadTileForCoordinate(ix, iy, fn);
             
-            if(_lazyTiffLoading)
-                tiff = new LazyGeoTiff(fn);
-            else
-                tiff = new GeoTiff(fn);
+            tiff = CreateTiff(fn);
 
             if (addToCache)
             {
@@ -238,7 +235,7 @@ namespace LambdaModel.Terrain
         {
             var v = GetVector(aX, aY, bX, bY, incMeter);
 
-            GeoTiff tiff = null;
+            TiffReaderBase tiff = null;
 
             foreach(var p in v)
             {
@@ -253,7 +250,7 @@ namespace LambdaModel.Terrain
 
         public void FillAltitudeVector(Point3D[] vector, int tillIndex)
         {
-            GeoTiff tiff = null;
+            TiffReaderBase tiff = null;
             for (var i = 0; i <= tillIndex; i++)
             {
                 if (!double.IsNaN(vector[i].Z)) continue;
@@ -306,8 +303,8 @@ namespace LambdaModel.Terrain
             var m = 0;
 
             var (x, y) = (aX, aY);
-            
-            GeoTiff tiff = null;
+
+            TiffReaderBase tiff = null;
 
             while (m <= l)
             {

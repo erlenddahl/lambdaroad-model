@@ -18,7 +18,7 @@ namespace LambdaModel.Tests.FullRun.Grid
     {
         public void RunTileCache(int tileSize)
         {
-            var tiles = new TileCache(@"..\..\..\..\Data\Testing\CacheTest", tileSize, false);
+            var tiles = new TileCache(@"..\..\..\..\Data\Testing\CacheTest", tileSize);
             var grid = new GridCalculator(tiles, 500, new Point3D(299430, 7108499));
 
             var start = DateTime.Now;

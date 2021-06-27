@@ -1,6 +1,7 @@
 ﻿using System;
 using LambdaModel.Calculations;
 using LambdaModel.Terrain;
+using LambdaModel.Terrain.Tiff;
 using LambdaModel.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using no.sintef.SpeedModule.Geometry.SimpleStructures;
@@ -12,7 +13,10 @@ namespace LambdaModel.Tests.FullRun.Grid
     {
         public void RunTileCache(int tileSize)
         {
-            var tiles = new TileCache(@"..\..\..\..\Data\Testing\CacheTest", tileSize);
+            var tiles = new TileCache(@"..\..\..\..\Data\Testing\CacheTest", tileSize)
+            {
+                CreateTiff = fn => new LazyGeoTiff(fn)
+            };
             var grid = new GridCalculator(tiles, 500, new Point3D(299430, 7108499));
 
             var start = DateTime.Now;
