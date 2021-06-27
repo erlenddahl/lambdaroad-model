@@ -9,15 +9,15 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace LambdaModel.Tests.Terrain.Tiff
 {
     [TestClass]
-    public class ActualTiffGeoTiffTests
+    public class QuickGeoTiffTests
     {
-        private GeoTiff _geotiff;
+        private QuickGeoTiff _geotiff;
 
         [TestInitialize]
         public void Init()
         {
             var start = DateTime.Now;
-            _geotiff = new GeoTiff(@"..\..\..\..\Data\Testing\33-126-145.tif");
+            _geotiff = new QuickGeoTiff(@"..\..\..\..\Data\Testing\33-126-145.tif");
             Console.WriteLine($"Read time : {DateTime.Now.Subtract(start).TotalMilliseconds:n5} ms");
         }
 
