@@ -26,7 +26,7 @@ namespace LambdaModel.Tests.FullRun.RoadNetwork
             Console.WriteLine($"Calculations: {calculations:n0}, {(calculations / secs):n2} c/s");
 
             start = DateTime.Now;
-            road.SaveResults(@"..\..\..\..\Data\RoadNetwork\test-results-huge.shp");
+            road.SaveResults(@"..\..\..\..\Data\RoadNetwork\test-results-tiny.shp");
             Console.WriteLine($"Saving time: {DateTime.Now.Subtract(start).TotalSeconds:n2} seconds.");
         }
     }
