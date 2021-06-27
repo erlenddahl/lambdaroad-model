@@ -17,7 +17,7 @@ namespace LambdaModel.Tests.FullRun.RoadNetwork
         public void TinyTest()
         {
             var tiles = new TileCache(@"..\..\..\..\Data\Testing\CacheTest", 512);
-            var road = new RoadNetworkCalculator(tiles, @"..\..\..\..\Data\RoadNetwork\2021-05-28_smaller.shp", 50_000, new Point3D(271327, 7040324));
+            var road = new RoadNetworkCalculator(tiles, @"..\..\..\..\Data\RoadNetwork\2021-05-28_smaller.shp", 500, new Point3D(271327, 7040324), 100);
 
             var start = DateTime.Now;
             var calculations = road.Calculate();
