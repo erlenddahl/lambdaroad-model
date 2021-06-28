@@ -316,10 +316,11 @@ namespace LambdaModel.Terrain
                     if (tiff?.Contains(vector[m].X, vector[m].Y) != true)
                         tiff = GetTiff(vector[m].X, vector[m].Y).Result;
 
-                    vector[m].Z = tiff.GetAltitude(vector[m]);
+                    vector[m].Z = tiff.GetAltitudeNoCheck(vector[m].X, vector[m].Y);
                 }
                 else
                     vector[m].Z = double.NaN;
+
                 vector[m].M = m;
 
                 m += incMeter;

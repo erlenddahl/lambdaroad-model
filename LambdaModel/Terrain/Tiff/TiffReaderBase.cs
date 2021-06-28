@@ -40,6 +40,11 @@ namespace LambdaModel.Terrain.Tiff
             return GetAltitudeInternal(x, y);
         }
 
+        public float GetAltitudeNoCheck(double pX, double pY)
+        {
+            return GetAltitudeInternal((int)(pX - StartX + 0.5), (int)(StartY - pY + 0.5));
+        }
+
         protected abstract float GetAltitudeInternal(int x, int y);
 
         protected (int x, int y) ToLocal(double pX, double pY)
