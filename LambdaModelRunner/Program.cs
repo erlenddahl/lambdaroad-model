@@ -18,7 +18,6 @@ namespace LambdaModelRunner
              * TODOS:
              * Order road links by angle in order to use spiral sequence
              * Then by distance from center?
-             * Eliminate links by checking (center? random samples? all points?) path loss from distance alone; if too big, skip
              * Eliminate further by looking at fresnel obstructions and eliminating once we know path loss gets too big
              */
 
@@ -44,12 +43,13 @@ namespace LambdaModelRunner
                 var tileSize = 512;
                 var txHeightAboveTerrain = 100;
 
-                var tiles = new TileCache(@"..\..\..\..\Data\Testing\CacheTest", tileSize, true, cip);
-
-                await tiles.Preload(center, radius);
+                var tiles = new TileCache(@"..\..\..\..\Data\Testing\CacheTest", tileSize, cip);
 
                 var road = new RoadNetworkCalculator(tiles, @"..\..\..\..\Data\RoadNetwork\2021-05-28_smaller.shp", radius, center, txHeightAboveTerrain, cip);
                 road.RemoveLinksTooFarAway(200);
+
+                //TODO: Preload with new radius (no need to download outside of links)
+                await tiles.Preload(center, radius);
 
                 var start = DateTime.Now;
                 var calculations = road.Calculate();
@@ -59,7 +59,7 @@ namespace LambdaModelRunner
                 cip.Set("Calculations per second", $"{(calculations / secs):n2} c/s");
 
                 start = DateTime.Now;
-                road.SaveResults(@"..\..\..\..\Data\RoadNetwork\test-results-huge.shp");
+                road.SaveResults(@"..\..\..\..\Data\RoadNetwork\test-results-huge-2.shp");
                 cip.Set("Saving time", $"{DateTime.Now.Subtract(start).TotalSeconds:n2} seconds.");
             }
 
