@@ -15,18 +15,19 @@ namespace LambdaModel.Tests.PathLoss
         {
             var path = new[]
             {
-                new Point3D(0, 0, 1),
-                new Point3D(1, 0, 0),
-                new Point3D(2, 0, 0),
-                new Point3D(3, 0, 0),
-                new Point3D(4, 0, 0),
-                new Point3D(5, 0, 0),
-                new Point3D(6, 0, 0),
-                new Point3D(7, 0, 0),
-                new Point3D(8, 0, 0),
-                new Point3D(9, 0, 0),
-                new Point3D(10, 0, 1),
+                new Point4D(0, 0, 1),
+                new Point4D(1, 0, 0),
+                new Point4D(2, 0, 0),
+                new Point4D(3, 0, 0),
+                new Point4D(4, 0, 0),
+                new Point4D(5, 0, 0),
+                new Point4D(6, 0, 0),
+                new Point4D(7, 0, 0),
+                new Point4D(8, 0, 0),
+                new Point4D(9, 0, 0),
+                new Point4D(10, 0, 1),
             };
+            InitializePath(path);
 
             var p = GetParameters(path);
 
@@ -41,18 +42,19 @@ namespace LambdaModel.Tests.PathLoss
         {
             var path = new[]
             {
-                new Point3D(0, 0, 1),
-                new Point3D(1, 0, 0),
-                new Point3D(2, 0, 0),
-                new Point3D(3, 0, 5),
-                new Point3D(4, 0, 0),
-                new Point3D(5, 0, 0),
-                new Point3D(6, 0, 0),
-                new Point3D(7, 0, 0),
-                new Point3D(8, 0, 0),
-                new Point3D(9, 0, 0),
-                new Point3D(10, 0, 1),
+                new Point4D(0, 0, 1),
+                new Point4D(1, 0, 0),
+                new Point4D(2, 0, 0),
+                new Point4D(3, 0, 5),
+                new Point4D(4, 0, 0),
+                new Point4D(5, 0, 0),
+                new Point4D(6, 0, 0),
+                new Point4D(7, 0, 0),
+                new Point4D(8, 0, 0),
+                new Point4D(9, 0, 0),
+                new Point4D(10, 0, 1),
             };
+            InitializePath(path);
 
             var p = GetParameters(path);
 
@@ -67,18 +69,19 @@ namespace LambdaModel.Tests.PathLoss
         {
             var path = new[]
             {
-                new Point3D(0, 0, 1),
-                new Point3D(1, 0, 0),
-                new Point3D(2, 0, 0),
-                new Point3D(3, 0, 5),
-                new Point3D(4, 0, 0),
-                new Point3D(5, 0, 0),
-                new Point3D(6, 0, 4),
-                new Point3D(7, 0, 0),
-                new Point3D(8, 0, 0),
-                new Point3D(9, 0, 0),
-                new Point3D(10, 0, 1),
+                new Point4D(0, 0, 1),
+                new Point4D(1, 0, 0),
+                new Point4D(2, 0, 0),
+                new Point4D(3, 0, 5),
+                new Point4D(4, 0, 0),
+                new Point4D(5, 0, 0),
+                new Point4D(6, 0, 4),
+                new Point4D(7, 0, 0),
+                new Point4D(8, 0, 0),
+                new Point4D(9, 0, 0),
+                new Point4D(10, 0, 1),
             };
+            InitializePath(path);
 
             var p = GetParameters(path);
 
@@ -93,18 +96,19 @@ namespace LambdaModel.Tests.PathLoss
         {
             var path = new[]
             {
-                new Point3D(0, 0, 1),
-                new Point3D(1, 0, 0),
-                new Point3D(2, 0, 0),
-                new Point3D(3, 0, 5),
-                new Point3D(4, 0, 0),
-                new Point3D(5, 0, 6),
-                new Point3D(6, 0, 6),
-                new Point3D(7, 0, 0),
-                new Point3D(8, 0, 0),
-                new Point3D(9, 0, 0),
-                new Point3D(10, 0, 1),
+                new Point4D(0, 0, 1),
+                new Point4D(1, 0, 0),
+                new Point4D(2, 0, 0),
+                new Point4D(3, 0, 5),
+                new Point4D(4, 0, 0),
+                new Point4D(5, 0, 6),
+                new Point4D(6, 0, 6),
+                new Point4D(7, 0, 0),
+                new Point4D(8, 0, 0),
+                new Point4D(9, 0, 0),
+                new Point4D(10, 0, 1),
             };
+            InitializePath(path);
 
             var p = GetParameters(path);
 

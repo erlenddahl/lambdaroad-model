@@ -8,7 +8,7 @@ namespace LambdaModel.Terrain
     {
         float GetAltitude(Point3D p);
         float GetAltitude(double pX, double pY);
-        Point3D[] GetAltitudeVector(Point3D a, Point3D b, int incMeter = 1);
-        Point3D[] GetAltitudeVector(double aX, double aY, double bX, double bY, int incMeter = 1);
+        Point4D[] GetAltitudeVector(Point3D a, Point3D b, int incMeter = 1);
+        Point4D[] GetAltitudeVector(double aX, double aY, double bX, double bY, int incMeter = 1);
     }
 }
