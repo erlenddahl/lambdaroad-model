@@ -103,7 +103,8 @@ namespace LambdaModel.PathLoss
             var source = path[fromIx];
             var last = path[toIx];
 
-            var distanceScale = inc * DistanceScale;
+            var distanceBetweenPoints = DistanceScale;
+            var distance = 0;
 
             // Go through each point at the height profile from rx to tx (or the other way around),
             // and find the point that has the largest slope from the source to the height profile.
@@ -111,8 +112,8 @@ namespace LambdaModel.PathLoss
             for (var i = fromIx + inc; i != toIx; i += inc)
             {
                 var dzz = path[i].Z - source.Z;
-                var dxy = distanceScale * (i - fromIx);
-                var slope = dzz / dxy;
+                distance += distanceBetweenPoints;
+                var slope = dzz / distance;
 
                 if (slope > maxSlope)
                 {
