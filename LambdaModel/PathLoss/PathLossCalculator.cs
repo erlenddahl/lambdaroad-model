@@ -10,8 +10,20 @@ namespace LambdaModel.PathLoss
     {
         public double CalculateLoss(Point4D[] path, double txHeightAboveTerrain, double rxHeightAboveTerrain, int rxIndex = -1)
         {
+            InitializePath(path, rxIndex);
             var p = GetParameters(path, rxIndex);
             return 25.1 * Math.Log(p.horizontalDistance) - 1.8e-01 * txHeightAboveTerrain + 1.3e+01 * p.rxa - 1.4e-04 * p.txa - 1.4e-04 * p.rxi - 3.0e-05 * p.txi + 4.9 * p.nobs + 29.3;
+        }
+
+        protected void InitializePath(Point4D[] path, int rxIndex = -1)
+        {
+            var actualRxIndex = rxIndex < 0 ? path.Length - 1 : rxIndex;
+            path[0].CumulativeDistance = 0;
+            for (var i = 1; i <= actualRxIndex; i++)
+            {
+                if (!path[i].CumulativeDistance.HasValue)
+                    path[i].CumulativeDistance = path[i - 1].CumulativeDistance + path[i - 1].DistanceTo2D(path[i]);
+            }
         }
 
         public double CalculateMinPossibleLoss(double horizontalDistance, double txHeightAboveTerrain)
@@ -29,8 +41,10 @@ namespace LambdaModel.PathLoss
         protected (double horizontalDistance, double txa, double rxa, double txi, double rxi, int nobs) GetParameters(Point4D[] path, int rxIndex = -1)
         {
             if (rxIndex == -1) rxIndex = path.Length - 1;
+            var tx = path[0];
+            var rx = path[rxIndex];
 
-            var horizontalDistance = rxIndex;
+            var horizontalDistance = rx.CumulativeDistance.Value;
 
             var rxa = 0d;
             var txa = 0d;
@@ -38,24 +52,25 @@ namespace LambdaModel.PathLoss
             var txi = 0d;
             var nobs = 0;
 
-            var (txObstruction, rxObstruction) = FindFresnelObstruction(path, rxIndex);
+            var txObstruction = FindFresnelObstruction(path, true, rxIndex);
+            var rxObstruction = FindFresnelObstruction(path, false, rxIndex);
 
-            if (txObstruction.Angle < 0 && rxObstruction.Angle < 0)
+            if (txObstruction.angle < 0 && rxObstruction.angle < 0)
             {
                 nobs = 0; // Clear line of sight, no obstructions
             }
-            else if (txObstruction.Index == rxObstruction.Index)
+            else if (txObstruction.index == rxObstruction.index)
                 nobs = 1; // A single obstruction
             else
             {
 
                 // Two or more obstructions. Find LOS crossing obstructions between the two already detected obstructions to determine if there is three or more.
 
-                var txo = path[txObstruction.Index];
-                var rxo = path[rxObstruction.Index];
+                var txo = path[txObstruction.index];
+                var rxo = path[rxObstruction.index];
                 var hdist = txo.DistanceTo2D(rxo);
 
-                if (HasLosObstruction(path, txObstruction.Index, rxObstruction.Index, (rxo.Z - txo.Z) / hdist))
+                if (FindLosObstruction(path, txObstruction.index, rxObstruction.index, (rxo.Z - txo.Z) / hdist) >= 0)
                 {
                     nobs = 3; // There is at least one obstruction between txo and rxo, making no clear line of sight between the obstructions
                 }
@@ -67,57 +82,63 @@ namespace LambdaModel.PathLoss
 
             if (nobs != 0)
             {
-                txi = txObstruction.Distance3d;
-                rxi = rxObstruction.Distance3d;
-                txa = txObstruction.Angle;
-                rxa = rxObstruction.Angle;
+                txi = txObstruction.distance3d;
+                rxi = rxObstruction.distance3d;
+                txa = txObstruction.angle;
+                rxa = rxObstruction.angle;
             }
 
             return (horizontalDistance, txa, rxa, txi, rxi, nobs);
         }
 
-        protected (FresnelResult tx, FresnelResult rx) FindFresnelObstruction(Point4D[] path, int rxIndex = -1)
+        protected (int index, double angle, double distance2d, double distance3d) FindFresnelObstruction(Point4D[] path, bool direction, int rxIndex = -1)
         {
             if (rxIndex == -1) rxIndex = path.Length - 1;
 
-            var tx = path[0];
-            var rx = path[rxIndex];
-            var totalDistance = rxIndex;
+            int fromIx, toIx, inc;
 
-            var ground = Math.Min(tx.Z, rx.Z);
+            if (direction)
+            {
+                fromIx = 0;
+                toIx = rxIndex;
+                inc = 1;
+            }
+            else
+            {
+                fromIx = rxIndex;
+                toIx = 0;
+                inc = -1;
+            }
+
+            var source = path[fromIx];
+            var last = path[toIx];
+
+            fromIx += inc;
 
             // Go through each point at the height profile from rx to tx (or the other way around),
             // and find the point that has the largest slope from the source to the height profile.
-            var (maxSlopeTx, maxIndexTx) = (double.MinValue, -1);
-            var (maxSlopeRx, maxIndexRx) = (double.MinValue, -1);
-            for (var i = 1; i < rxIndex; i++)
+            var (maxSlope, maxIndex) = (double.MinValue, -1);
+            for (var i = fromIx; i != toIx; i += inc)
             {
+                var dzz = path[i].Z - source.Z;
+                var dxy = inc * (path[i].CumulativeDistance.Value - source.CumulativeDistance.Value);
+                var slope = dzz / dxy;
 
-                if (!(path[i].Z >= path[i - 1].Z && path[i].Z >= path[i + 1].Z))
-                    continue;
-
-                var altitudeDiff = path[i].Z - ground;
-
-                var distanceFromTx = i;
-                var distanceToRx = totalDistance - distanceFromTx;
-                
-                var slopeTx = altitudeDiff / distanceFromTx;
-                var slopeRx = altitudeDiff / distanceToRx;
-
-                if (slopeTx > maxSlopeTx)
+                if (slope > maxSlope)
                 {
-                    (maxSlopeTx, maxIndexTx) = (slopeTx, i);
-                }
-                if (slopeRx > maxSlopeRx)
-                {
-                    (maxSlopeRx, maxIndexRx) = (slopeRx, i);
+                    (maxSlope, maxIndex) = (slope, i);
                 }
             }
 
-            return (new FresnelResult(maxIndexTx, path, tx, rx), new FresnelResult(maxIndexRx, path, rx, tx));
+            if (maxIndex <= 0) return (-1, 0, 0, 0);
+
+            var point = path[maxIndex];
+            var (angle, distance2d, distance3d) = GetAngle(source, last, point);
+
+            return (maxIndex, angle, distance2d, distance3d);
         }
 
-        private static (double angle, double distance3d) GetAngle(Point3D source, Point3D last, Point3D max)
+        protected (double angle, double distance2d, double distance3d) GetAngle(Point3D source, Point3D last, Point3D max)
         {
             var d2d = source.DistanceTo2D(max);
             var dx = source.DistanceTo(max);
@@ -130,49 +151,26 @@ namespace LambdaModel.PathLoss
 
             var angle = Math.Atan(dz / dx);
 
-            return (angle, dx);
+            return (angle, d2d, dx);
         }
 
-        public struct FresnelResult
+        protected int FindLosObstruction(Point4D[] path, int fromIx, int toIx, double sightLineHeightChangePerMeter)
         {
-            public int Index;
-            public double Angle;
-            public double Distance3d;
-
-            public FresnelResult(int index, Point4D[] path, Point3D source, Point3D target)
-            {
-                Index = index;
-
-                if (index >= 0)
-                {
-                    var point = path[index];
-                    (Angle, Distance3d) = GetAngle(source, target, point);
-                }
-                else
-                {
-                    Angle = -1;
-                    Distance3d = -1;
-                }
-            }
-        }
-
-        protected bool HasLosObstruction(Point4D[] path, int fromIx, int toIx, double sightLineHeightChangePerMeter)
-        {
+            var inc = Math.Sign(toIx - fromIx);
             var source = path[fromIx];
-            var minHeight = Math.Min(source.Z, path[toIx].Z);
 
-            for (var i = fromIx + 1; i < toIx; i++)
+            fromIx += inc;
+
+            for (var i = fromIx; i != toIx; i += inc)
             {
-                if (path[i].Z < minHeight) continue;
-
-                var distanceFromTx = i - fromIx;
+                var distanceFromTx = inc * (path[i].CumulativeDistance.Value - source.CumulativeDistance.Value);
                 var sightLineHeight = source.Z + distanceFromTx * sightLineHeightChangePerMeter;
 
                 if (path[i].Z >= sightLineHeight)
-                    return true;
+                    return i;
             }
 
-            return false;
+            return -1;
         }
     }
 }

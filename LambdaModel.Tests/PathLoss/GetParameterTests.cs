@@ -27,6 +27,7 @@ namespace LambdaModel.Tests.PathLoss
                 new Point4D(9, 0, 0),
                 new Point4D(10, 0, 1),
             };
+            InitializePath(path);
 
             var p = GetParameters(path);
 
@@ -53,6 +54,7 @@ namespace LambdaModel.Tests.PathLoss
                 new Point4D(9, 0, 0),
                 new Point4D(10, 0, 1),
             };
+            InitializePath(path);
 
             var p = GetParameters(path);
 
@@ -79,6 +81,7 @@ namespace LambdaModel.Tests.PathLoss
                 new Point4D(9, 0, 0),
                 new Point4D(10, 0, 1),
             };
+            InitializePath(path);
 
             var p = GetParameters(path);
 
@@ -105,6 +108,7 @@ namespace LambdaModel.Tests.PathLoss
                 new Point4D(9, 0, 0),
                 new Point4D(10, 0, 1),
             };
+            InitializePath(path);
 
             var p = GetParameters(path);
 
