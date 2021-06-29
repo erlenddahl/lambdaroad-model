@@ -97,6 +97,24 @@ namespace LambdaModel.Terrain.Tiff
             return x >= StartX && x < EndX && y > EndY && y <= StartY;
         }
 
+        public GeoTiff GetSubset(int topLeftX, int topLeftY, int size)
+        {
+            var tiff = new GeoTiff
+            {
+                HeightMap = new float[size, size], 
+                StartX = topLeftX, 
+                StartY = topLeftY,
+                Width = size,
+                Height = size
+            };
+            tiff.SetEnds();
+            for (var y = topLeftY - size + 1; y <= topLeftY; y++)
+            for (var x = topLeftX; x < topLeftX + size; x++)
+                tiff.HeightMap[topLeftY - y, x - topLeftX] = GetAltitudeNoCheck(x, y);
+
+            return tiff;
+        }
+
         public abstract void Dispose();
     }
 }

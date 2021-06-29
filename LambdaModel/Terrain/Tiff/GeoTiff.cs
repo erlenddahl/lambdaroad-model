@@ -17,7 +17,7 @@ namespace LambdaModel.Terrain.Tiff
         protected int _tileH;
         public float[,] HeightMap { get; set; }
 
-        protected GeoTiff()
+        public GeoTiff()
         {
 
         }
