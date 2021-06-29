@@ -81,7 +81,7 @@ namespace LambdaModel.PathLoss
             return (horizontalDistance, txa, rxa, txi, rxi, nobs);
         }
 
-        protected (int index, double angle, double distance2d, double distance3d) FindFresnelObstruction(Point4D[] path, bool direction, int rxIndex = -1)
+        protected (int index, double angle, double distance3d) FindFresnelObstruction(Point4D[] path, bool direction, int rxIndex = -1)
         {
             if (rxIndex == -1) rxIndex = path.Length - 1;
 
@@ -121,15 +121,15 @@ namespace LambdaModel.PathLoss
                 }
             }
 
-            if (maxIndex <= 0) return (-1, 0, 0, 0);
+            if (maxIndex <= 0) return (-1, 0, 0);
 
             var point = path[maxIndex];
-            var (angle, distance2d, distance3d) = GetAngle(source, last, point);
+            var (angle, distance3d) = GetAngle(source, last, point);
 
-            return (maxIndex, angle, distance2d, distance3d);
+            return (maxIndex, angle, distance3d);
         }
 
-        protected (double angle, double distance2d, double distance3d) GetAngle(Point3D source, Point3D last, Point3D max)
+        protected (double angle, double distance3d) GetAngle(Point3D source, Point3D last, Point3D max)
         {
             var d2d = source.DistanceTo2D(max);
             var dx = source.DistanceTo(max);
@@ -142,7 +142,7 @@ namespace LambdaModel.PathLoss
 
             var angle = Math.Atan(dz / dx);
 
-            return (angle, d2d, dx);
+            return (angle, dx);
         }
 
         protected int FindLosObstruction(Point4D[] path, int fromIx, int toIx, double sightLineHeightChangePerMeter)
