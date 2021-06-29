@@ -42,6 +42,8 @@ namespace LambdaModel.PathLoss
             var txi = 0d;
             var nobs = 0;
 
+            // Tested twice; combining this into a single call that calculates the fresnel obstructions both ways simultaneously
+            // is slower than doing it once in each direction.
             var txObstruction = FindFresnelObstruction(path, true, rxIndex);
             var rxObstruction = FindFresnelObstruction(path, false, rxIndex);
 
@@ -111,8 +113,11 @@ namespace LambdaModel.PathLoss
             var (maxSlope, maxIndex) = (double.MinValue, -1);
             for (var i = fromIx + inc; i != toIx; i += inc)
             {
-                var dzz = path[i].Z - source.Z;
+                // Checking if this is a top (z >= previousZ && z >= nextZ) seems to be a much more expensive operation
+                // than just performing the calculations below for all points.
+
                 distance += distanceBetweenPoints;
+                var dzz = path[i].Z - source.Z;
                 var slope = dzz / distance;
 
                 if (slope > maxSlope)

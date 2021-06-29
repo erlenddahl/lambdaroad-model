@@ -14,7 +14,7 @@ namespace LambdaModel.Terrain.Tiff
 {
 	public class QuickGeoTiff : TiffReaderBase
     {
-        private float[,] _heightMap;
+        private float[,] _heightMap; // Have tested -- a flattened 1d array is not measurably faster than this
 
         protected QuickGeoTiff()
         {
