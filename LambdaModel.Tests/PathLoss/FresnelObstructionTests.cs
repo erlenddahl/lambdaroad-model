@@ -26,7 +26,6 @@ namespace LambdaModel.Tests.PathLoss
                 new Point4D(9, 0, 0),
                 new Point4D(10, 0, 1),
             };
-            InitializePath(path);
 
             var r = FindFresnelObstruction(path, true);
             Assert.AreEqual(3, r.index);
@@ -52,7 +51,6 @@ namespace LambdaModel.Tests.PathLoss
                 new Point4D(9, 0, 0),
                 new Point4D(10, 0, 1),
             };
-            InitializePath(path);
 
             var r = FindFresnelObstruction(path, true);
             Assert.AreEqual(3, r.index);
@@ -78,7 +76,6 @@ namespace LambdaModel.Tests.PathLoss
                 new Point4D(9, 0, 2),
                 new Point4D(10, 0, 2),
             };
-            InitializePath(path);
 
             var r = FindFresnelObstruction(path, true);
             Assert.AreEqual(3, r.index);
@@ -101,7 +98,6 @@ namespace LambdaModel.Tests.PathLoss
                 new Point4D(9, 0, 2),
                 new Point4D(10, 0, 2),
             };
-            InitializePath(path);
 
             var r = FindFresnelObstruction(path, false);
             Assert.AreEqual(8, r.index);

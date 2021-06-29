@@ -28,7 +28,6 @@ namespace LambdaModel.Tests.PathLoss
                 new Point4D(9, 0, 2),
                 new Point4D(10, 0, 2),
             };
-            InitializePath(path);
 
             var tx = path[0];
             var rx = path.Last();
@@ -55,7 +54,6 @@ namespace LambdaModel.Tests.PathLoss
                 new Point4D(9, 0, 2),
                 new Point4D(10, 0, 2),
             };
-            InitializePath(path);
 
             var tx = path[0];
             var rx = path.Last();
@@ -82,7 +80,6 @@ namespace LambdaModel.Tests.PathLoss
                 new Point4D(9, 0, 6),
                 new Point4D(10, 0, 2),
             };
-            InitializePath(path);
 
             var tx = path[0];
             var rx = path.Last();
@@ -109,7 +106,6 @@ namespace LambdaModel.Tests.PathLoss
                 new Point4D(9, 0, 2),
                 new Point4D(10, 0, 2),
             };
-            InitializePath(path);
 
             var tx = path[3];
             var rx = path[8];
@@ -135,7 +131,6 @@ namespace LambdaModel.Tests.PathLoss
                 new Point4D(9, 0, 2),
                 new Point4D(10, 0, 2),
             };
-            InitializePath(path);
 
             var tx = path[3];
             var rx = path[8];
@@ -161,7 +156,6 @@ namespace LambdaModel.Tests.PathLoss
                 new Point4D(9, 0, 2),
                 new Point4D(10, 0, 2),
             };
-            InitializePath(path);
 
             var tx = path[0];
             var rx = path.Last();
@@ -188,7 +182,6 @@ namespace LambdaModel.Tests.PathLoss
                 new Point4D(9, 0, 22),
                 new Point4D(10, 0, 2),
             };
-            InitializePath(path);
 
             var tx = path[0];
             var rx = path.Last();
@@ -215,7 +208,6 @@ namespace LambdaModel.Tests.PathLoss
                 new Point4D(9, 0, 2),
                 new Point4D(10, 0, 2),
             };
-            InitializePath(path);
 
             var tx = path[0];
             var rx = path.Last();
