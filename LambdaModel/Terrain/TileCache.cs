@@ -179,7 +179,7 @@ namespace LambdaModel.Terrain
             return GetTiffInternal(ix, iy);
         }
 
-        private Task<TiffReaderBase> GetTiff(int x, int y, bool addToCache = true)
+        private Task<TiffReaderBase> GetTiff(int x, int y)
         {
             var (ix, iy) = (x - x % TileSize, y - y % TileSize);
             return GetTiffInternal(ix, iy);
