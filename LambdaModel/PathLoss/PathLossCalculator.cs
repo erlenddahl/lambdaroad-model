@@ -145,18 +145,31 @@ namespace LambdaModel.PathLoss
             return (angle, dx);
         }
 
+        /// <summary>
+        /// Draws a straight line between the two points at fromIx and toIx, and checks if any points between them
+        /// crosses this line (obstructs line of sight).
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="fromIx"></param>
+        /// <param name="toIx"></param>
+        /// <param name="sightLineHeightChangePerMeter"></param>
+        /// <returns></returns>
         protected int FindLosObstruction(Point4D[] path, int fromIx, int toIx, double sightLineHeightChangePerMeter)
         {
             var inc = Math.Sign(toIx - fromIx);
-            var source = path[fromIx];
-
-            var sightLineHeight = source.Z;
+            
+            // Calculate how much the sight line height changes for every point.
             var sightLineHeightChangePerPoint = DistanceScale * sightLineHeightChangePerMeter;
+
+            // The sight line starts at the Z value of the first point.
+            var sightLineHeight = path[fromIx].Z;
 
             for (var i = fromIx + inc; i != toIx; i += inc)
             {
+                // For every point, the sight line increases (or decreases if the change is negative) by a constant value.
                 sightLineHeight += sightLineHeightChangePerPoint;
 
+                // If the point at this location is above the current sight line altitude, return it.
                 if (path[i].Z >= sightLineHeight)
                     return i;
             }
