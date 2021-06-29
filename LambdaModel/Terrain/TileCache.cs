@@ -311,6 +311,7 @@ namespace LambdaModel.Terrain
 
         public void Clear()
         {
+            throw new Exception("Do you really want to do this?");
             System.IO.Directory.Delete(_cacheLocation, true);
             System.IO.Directory.CreateDirectory(_cacheLocation);
             _tiffCache.Clear();
