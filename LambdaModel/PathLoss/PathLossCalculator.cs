@@ -149,12 +149,12 @@ namespace LambdaModel.PathLoss
             var inc = Math.Sign(toIx - fromIx);
             var source = path[fromIx];
 
-            var distanceScale = inc * DistanceScale;
+            var sightLineHeight = source.Z;
+            var sightLineHeightChangePerPoint = DistanceScale * sightLineHeightChangePerMeter;
 
             for (var i = fromIx + inc; i != toIx; i += inc)
             {
-                var distanceFromTx = distanceScale * (i - fromIx);
-                var sightLineHeight = source.Z + distanceFromTx * sightLineHeightChangePerMeter;
+                sightLineHeight += sightLineHeightChangePerPoint;
 
                 if (path[i].Z >= sightLineHeight)
                     return i;
