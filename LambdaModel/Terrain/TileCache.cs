@@ -173,10 +173,20 @@ namespace LambdaModel.Terrain
             return GetTiff(x, y).Result.GetAltitude(x, y);
         }
 
-        private async Task<TiffReaderBase> GetTiff(double x, double y, bool addToCache = true)
+        private Task<TiffReaderBase> GetTiff(double x, double y)
         {
             var (ix, iy) = GetTileCoordinates(x, y);
+            return GetTiffInternal(ix, iy);
+        }
 
+        private Task<TiffReaderBase> GetTiff(int x, int y, bool addToCache = true)
+        {
+            var (ix, iy) = (x - x % TileSize, y - y % TileSize);
+            return GetTiffInternal(ix, iy);
+        }
+
+        private async Task<TiffReaderBase> GetTiffInternal(int ix, int iy)
+        {
             if (_tiffCache.TryGetValue((ix, iy), out var tiff))
                 return tiff;
 
@@ -184,18 +194,15 @@ namespace LambdaModel.Terrain
 
             if (!HasCached(fn))
                 await DownloadTileForCoordinate(ix, iy, fn);
-            
+
             tiff = CreateTiff(fn);
+            
+            _tiffCache.Add((ix, iy), tiff);
 
-            if (addToCache)
-            {
-                _tiffCache.Add((ix, iy), tiff);
-
-                _cip?.Set("Tiles retrieved from memcache", _tiffCache.RetrievedFromCache);
-                _cip?.Set("Tiles removed from memcache", _tiffCache.RemovedFromCache);
-                _cip?.Set("Tiles added to memcache", _tiffCache.AddedToCache);
-                _cip?.Set("Tiles in memcache", _tiffCache.CurrentlyInCache);
-            }
+            _cip?.Set("Tiles retrieved from memcache", _tiffCache.RetrievedFromCache);
+            _cip?.Set("Tiles removed from memcache", _tiffCache.RemovedFromCache);
+            _cip?.Set("Tiles added to memcache", _tiffCache.AddedToCache);
+            _cip?.Set("Tiles in memcache", _tiffCache.CurrentlyInCache);
 
             return tiff;
         }
@@ -308,20 +315,25 @@ namespace LambdaModel.Terrain
 
             while (m <= l)
             {
-                vector[m].X = x;
-                vector[m].Y = y;
+                var vm = vector[m];
+
+                vm.X = x;
+                vm.Y = y;
+
+                vm.RoundedX = QuickMath.Round(x);
+                vm.RoundedY = QuickMath.Round(y);
 
                 if (withHeights)
                 {
-                    if (tiff?.Contains(vector[m].X, vector[m].Y) != true)
-                        tiff = GetTiff(vector[m].X, vector[m].Y).Result;
+                    if (tiff?.Contains(vm.RoundedX, vm.RoundedY) != true)
+                        tiff = GetTiff(vm.RoundedX, vm.RoundedY).Result;
 
-                    vector[m].Z = tiff.GetAltitudeNoCheck(vector[m].X, vector[m].Y);
+                    vm.Z = tiff.GetAltitudeNoCheck(vm.RoundedX, vm.RoundedY);
                 }
                 else
-                    vector[m].Z = double.NaN;
+                    vm.Z = double.NaN;
 
-                vector[m].M = m;
+                vm.M = m;
 
                 m += incMeter;
                 x += xInc;

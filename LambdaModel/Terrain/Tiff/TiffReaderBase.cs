@@ -12,13 +12,13 @@ using no.sintef.SpeedModule.Geometry.SimpleStructures;
 namespace LambdaModel.Terrain.Tiff
 {
 	public abstract class TiffReaderBase: ITiffReader, IDisposable
-	{
-		public int Width { get; protected set; }
-        public int Height { get; protected set; }
-        public int StartX { get; protected set; }
-        public int StartY { get; protected set; }
-        public int EndX { get; protected set; }
-        public int EndY { get; protected set; }
+    {
+        public int Width;
+        public int Height;
+        public int StartX;
+        public int StartY;
+        public int EndX;
+        public int EndY;
 
         protected void SetEnds()
         {
@@ -40,9 +40,9 @@ namespace LambdaModel.Terrain.Tiff
             return GetAltitudeInternal(x, y);
         }
 
-        public float GetAltitudeNoCheck(double pX, double pY)
+        public float GetAltitudeNoCheck(int pX, int pY)
         {
-            return GetAltitudeInternal((int)(pX - StartX + 0.5), (int)(StartY - pY + 0.5));
+            return GetAltitudeInternal(pX - StartX, StartY - pY);
         }
 
         protected abstract float GetAltitudeInternal(int x, int y);
@@ -89,6 +89,11 @@ namespace LambdaModel.Terrain.Tiff
         {
             var x = QuickMath.Round(pX);
             var y = QuickMath.Round(pY);
+            return x >= StartX && x < EndX && y > EndY && y <= StartY;
+        }
+
+        public bool Contains(int x, int y)
+        {
             return x >= StartX && x < EndX && y > EndY && y <= StartY;
         }
 
