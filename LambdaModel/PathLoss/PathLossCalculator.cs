@@ -8,22 +8,12 @@ namespace LambdaModel.PathLoss
 {
     public class PathLossCalculator
     {
+        public int DistanceScale { get; set; } = 1;
+
         public double CalculateLoss(Point4D[] path, double txHeightAboveTerrain, double rxHeightAboveTerrain, int rxIndex = -1)
         {
-            InitializePath(path, rxIndex);
             var p = GetParameters(path, rxIndex);
             return 25.1 * Math.Log(p.horizontalDistance) - 1.8e-01 * txHeightAboveTerrain + 1.3e+01 * p.rxa - 1.4e-04 * p.txa - 1.4e-04 * p.rxi - 3.0e-05 * p.txi + 4.9 * p.nobs + 29.3;
-        }
-
-        protected void InitializePath(Point4D[] path, int rxIndex = -1)
-        {
-            var actualRxIndex = rxIndex < 0 ? path.Length - 1 : rxIndex;
-            path[0].CumulativeDistance = 0;
-            for (var i = 1; i <= actualRxIndex; i++)
-            {
-                if (!path[i].CumulativeDistance.HasValue)
-                    path[i].CumulativeDistance = path[i - 1].CumulativeDistance + path[i - 1].DistanceTo2D(path[i]);
-            }
         }
 
         public double CalculateMinPossibleLoss(double horizontalDistance, double txHeightAboveTerrain)
@@ -44,7 +34,7 @@ namespace LambdaModel.PathLoss
             var tx = path[0];
             var rx = path[rxIndex];
 
-            var horizontalDistance = rx.CumulativeDistance.Value;
+            var horizontalDistance = rxIndex * DistanceScale;
 
             var rxa = 0d;
             var txa = 0d;
@@ -113,15 +103,15 @@ namespace LambdaModel.PathLoss
             var source = path[fromIx];
             var last = path[toIx];
 
-            fromIx += inc;
+            var distanceScale = inc * DistanceScale;
 
             // Go through each point at the height profile from rx to tx (or the other way around),
             // and find the point that has the largest slope from the source to the height profile.
             var (maxSlope, maxIndex) = (double.MinValue, -1);
-            for (var i = fromIx; i != toIx; i += inc)
+            for (var i = fromIx + inc; i != toIx; i += inc)
             {
                 var dzz = path[i].Z - source.Z;
-                var dxy = inc * (path[i].CumulativeDistance.Value - source.CumulativeDistance.Value);
+                var dxy = distanceScale * (i - fromIx);
                 var slope = dzz / dxy;
 
                 if (slope > maxSlope)
@@ -159,11 +149,11 @@ namespace LambdaModel.PathLoss
             var inc = Math.Sign(toIx - fromIx);
             var source = path[fromIx];
 
-            fromIx += inc;
+            var distanceScale = inc * DistanceScale;
 
-            for (var i = fromIx; i != toIx; i += inc)
+            for (var i = fromIx + inc; i != toIx; i += inc)
             {
-                var distanceFromTx = inc * (path[i].CumulativeDistance.Value - source.CumulativeDistance.Value);
+                var distanceFromTx = distanceScale * (i - fromIx);
                 var sightLineHeight = source.Z + distanceFromTx * sightLineHeightChangePerMeter;
 
                 if (path[i].Z >= sightLineHeight)
