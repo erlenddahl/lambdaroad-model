@@ -269,11 +269,6 @@ namespace LambdaModel.Terrain
             }
         }
 
-        public Point4D[] GetVector(Point3D a, Point3D b, int incMeter = 1)
-        {
-            return GetVector(a.X, a.Y, b.X, b.Y, incMeter);
-        }
-
         public Point4D[] GetVector(double aX, double aY, double bX, double bY, int incMeter = 1)
         {
             var dx = bX - aX;

@@ -31,8 +31,6 @@ namespace LambdaModel.PathLoss
         protected (double horizontalDistance, double txa, double rxa, double txi, double rxi, int nobs) GetParameters(Point4D[] path, int rxIndex = -1)
         {
             if (rxIndex == -1) rxIndex = path.Length - 1;
-            var tx = path[0];
-            var rx = path[rxIndex];
 
             var horizontalDistance = rxIndex * DistanceScale;
 
