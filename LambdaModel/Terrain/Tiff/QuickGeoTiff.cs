@@ -61,8 +61,13 @@ namespace LambdaModel.Terrain.Tiff
         {
             if (!File.Exists(filePath)) throw new FileNotFoundException("TIFF file '" + filePath + "' does not exist", filePath);
 
-            using (var writer = new BinaryWriter(File.Create(quickFile)))
             using (var tiff = new GeoTiff(filePath))
+                WriteQuickTiff(tiff, quickFile);
+        }
+
+        public static void WriteQuickTiff(GeoTiff tiff, string quickFile)
+        {
+            using (var writer = new BinaryWriter(File.Create(quickFile)))
             {
                 writer.Write(tiff.StartX);
                 writer.Write(tiff.StartY);
@@ -74,7 +79,7 @@ namespace LambdaModel.Terrain.Tiff
                     writer.Write(tiff.HeightMap[y, x]);
             }
         }
-        
+
         protected override float GetAltitudeInternal(int x, int y)
         {
             return _heightMap[y, x];
