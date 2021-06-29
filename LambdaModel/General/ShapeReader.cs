@@ -95,7 +95,7 @@ namespace LambdaModel.General
                         }
                     }
 
-                    if (anyInside)
+                    if (anyInside && length > 1)
                         yield return new ShapeLink(ix, geometry, cx, cy, length);
                 }
             }
