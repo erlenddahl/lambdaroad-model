@@ -23,7 +23,7 @@ namespace LambdaModel.Tests.FullRun.SingleLine
 
         public void RunTileCache(int tileSize)
         {
-            var tiles = new TileCache(@"..\..\..\..\Data\Testing\CacheTest", tileSize)
+            var tiles = new OnlineTileCache(@"..\..\..\..\Data\Testing\CacheTest", tileSize)
             {
                 CreateTiff = fn => new LazyGeoTiff(fn)
             };

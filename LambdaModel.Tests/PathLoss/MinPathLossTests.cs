@@ -18,7 +18,7 @@ namespace LambdaModel.Tests.PathLoss
         [TestMethod]
         public void RunTileCache()
         {
-            var tiles = new TileCache(@"..\..\..\..\Data\Testing\CacheTest", 512)
+            var tiles = new OnlineTileCache(@"..\..\..\..\Data\Testing\CacheTest", 512)
             {
                 CreateTiff = fn => new LazyGeoTiff(fn)
             };

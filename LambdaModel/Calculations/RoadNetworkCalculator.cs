@@ -20,13 +20,13 @@ namespace LambdaModel.Calculations
         private readonly PathLossCalculator _calc;
         private readonly ConsoleInformationPanel _cip;
 
-        public TileCache Tiles { get; }
+        public OnlineTileCache Tiles { get; }
         public int Radius { get; }
         public Point3D Center { get; }
         public ShapeLink[] RoadLinks { get; set; }
         public double TxHeightAboveTerrain { get; set; }
 
-        public RoadNetworkCalculator(TileCache tiles, string roadShapeLocation, int radius, Point3D center, double txHeightAboveTerrain, ConsoleInformationPanel cip = null)
+        public RoadNetworkCalculator(OnlineTileCache tiles, string roadShapeLocation, int radius, Point3D center, double txHeightAboveTerrain, ConsoleInformationPanel cip = null)
         {
             _cip = cip;
 

@@ -6,12 +6,12 @@ namespace LambdaModel.Tests.Terrain.TileCacheTests
     [TestClass]
     public class GetAltitudeTests
     {
-        private TileCache _tiles;
+        private OnlineTileCache _tiles;
 
         [TestInitialize]
         public void Init()
         {
-            _tiles = new TileCache(@"..\..\..\..\Data\Testing\CacheTest");
+            _tiles = new OnlineTileCache(@"..\..\..\..\Data\Testing\CacheTest");
         }
 
         [TestMethod]

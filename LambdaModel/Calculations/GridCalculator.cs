@@ -11,12 +11,12 @@ namespace LambdaModel.Calculations
         private readonly Point4D[] _vector;
         private readonly PathLossCalculator _calc;
 
-        public TileCache Tiles { get; }
+        public OnlineTileCache Tiles { get; }
         public int Radius { get; }
         public Point3D Center { get; }
         public double[,] Results { get; }
 
-        public GridCalculator(TileCache tiles, int radius, Point3D center)
+        public GridCalculator(OnlineTileCache tiles, int radius, Point3D center)
         {
             Tiles = tiles;
             Radius = radius;

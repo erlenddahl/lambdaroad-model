@@ -13,26 +13,22 @@ using no.sintef.SpeedModule.Geometry.SimpleStructures;
 
 namespace LambdaModel.Terrain
 {
-    public class TileCache:ITiffReader
+    public abstract class TileCacheBase : ITiffReader
     {
-        private readonly string _cacheLocation;
+        protected readonly string _cacheLocation;
         public int TileSize { get; }
-        private WebClient _wc;
-        private readonly LruCache<(int x, int y), TiffReaderBase> _tiffCache = new LruCache<(int x, int y), TiffReaderBase>(1000, 5);
-        private int _maxTries = 10;
-        private readonly ConsoleInformationPanel _cip;
+        protected readonly LruCache<(int x, int y), TiffReaderBase> _tiffCache = new LruCache<(int x, int y), TiffReaderBase>(1000, 5);
+        protected readonly ConsoleInformationPanel _cip;
 
         public Func<string, TiffReaderBase> CreateTiff = fn => new QuickGeoTiff(fn);
 
-        public int TilesDownloaded { get; private set; }
         public int TilesRetrievedFromCache => _tiffCache.RetrievedFromCache;
 
-        public TileCache(string cacheLocation, int tileSize = 512, ConsoleInformationPanel cip = null)
+        public TileCacheBase(string cacheLocation, int tileSize = 512, ConsoleInformationPanel cip = null)
         {
             _cip = cip;
             _cacheLocation = cacheLocation;
             TileSize = tileSize;
-            _wc = new WebClient();
 
             cip?.Set("Tile size", TileSize);
             cip?.Set("Tile cache", System.IO.Path.GetFileName(_cacheLocation));
@@ -44,95 +40,7 @@ namespace LambdaModel.Terrain
             _tiffCache.OnRemoved = tiff => tiff.Dispose();
         }
 
-        public async Task<bool> Preload(int ix, int iy)
-        {
-            var fn = GetFilename(ix, iy);
-            if (!HasCached(fn))
-            {
-                await DownloadTileForCoordinate(ix, iy, fn);
-                return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Downloads a TIFF file starting at the given coordinates with the 2D size tileSize (set in the constructor), saves it to the given path.
-        /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="filePath"></param>
-        /// <returns></returns>
-        private async Task DownloadTileForCoordinate(int x, int y, string filePath)
-        {
-            var bbox = $"{x},{y},{x + TileSize},{y + TileSize}";
-            var url = $"https://wms.geonorge.no/skwms1/wms.hoyde-dom1?bbox={bbox}&format=image/tiff&service=WMS&version=1.1.1&request=GetMap&srs=EPSG:25833&transparent=true&width={TileSize}&height={TileSize}&layers=dom1_33:None";
-
-            Exception lastException = null;
-            for (var i = 0; i < _maxTries; i++)
-            {
-                try
-                {
-                    lastException = null;
-
-                    await _wc.DownloadFileTaskAsync(url, filePath);
-
-                    // File contents may be XML, containing among other stuff "Overforbruk på kort tid" and "Vent litt, prøv igjen".
-                    // Probably better to use bigger files to reduce chance of this. Testing shows that 100x100 is marginally faster than 50x50 anyway, probably more so when running grid instead of line.
-                    CheckTiff(filePath);
-
-                    _cip?.Increment("New tiles downloaded");
-
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine("Failed to retrieve url '" + url + "'; " + ex.Message);
-                    System.IO.File.Delete(filePath);
-                    lastException = ex;
-
-                    _cip?.Increment(ex is TiffTileTooManyDownloadsException ? "Tile errors (too often)" : "Tile errors (other)");
-
-                    await Task.Delay(1000);
-                }
-            }
-
-            if (lastException != null) throw lastException;
-            
-            TilesDownloaded++;
-        }
-
-        private void CheckTiff(string filePath)
-        {
-            var size = new System.IO.FileInfo(filePath).Length;
-            if (size < 1) throw new TiffTileDownloadException("Empty tile file.");
-            if (size < 500)
-            {
-                var contents = System.IO.File.ReadAllText(filePath);
-                if (!contents.Trim().StartsWith("<")) return;
-                try
-                {
-                    var xml = XElement.Parse(contents);
-                    var message = xml.Element("ServiceException").Value;
-                    if (message.Contains("Overforbruk p"))
-                        throw new TiffTileTooManyDownloadsException(message);
-                    throw new TiffTileDownloadException(message);
-                }
-                catch (TiffTileDownloadException)
-                {
-                    throw;
-                }
-                catch (Exception ex)
-                {
-                    throw new Exception("Unknown TIFF parsing exception: " + ex.Message, ex);
-                }
-            }
-        }
-
-        private string GetFilename(double x, double y)
-        {
-            return System.IO.Path.Combine(_cacheLocation, $"{x},{y}_{TileSize}x{TileSize}.tiff");
-        }
+        protected abstract string GetFilename(int x, int y);
 
         public float GetAltitude(Point3D p)
         {
@@ -147,27 +55,23 @@ namespace LambdaModel.Terrain
         private Task<TiffReaderBase> GetTiff(double x, double y)
         {
             var (ix, iy) = GetTileCoordinates(x, y);
-            return GetTiffInternal(ix, iy);
+            return GetTiffByInternalCoordinates(ix, iy);
         }
 
         private Task<TiffReaderBase> GetTiff(int x, int y)
         {
             var (ix, iy) = (x - x % TileSize, y - y % TileSize);
-            return GetTiffInternal(ix, iy);
+            return GetTiffByInternalCoordinates(ix, iy);
         }
 
-        private async Task<TiffReaderBase> GetTiffInternal(int ix, int iy)
+        protected async Task<TiffReaderBase> GetTiffByInternalCoordinates(int ix, int iy)
         {
             if (_tiffCache.TryGetValue((ix, iy), out var tiff))
                 return tiff;
 
             var fn = GetFilename(ix, iy);
-
-            if (!HasCached(fn))
-                await DownloadTileForCoordinate(ix, iy, fn);
-
             tiff = CreateTiff(fn);
-            
+
             _tiffCache.Add((ix, iy), tiff);
 
             _cip?.Set("Tiles retrieved from memcache", _tiffCache.RetrievedFromCache);
@@ -176,24 +80,6 @@ namespace LambdaModel.Terrain
             _cip?.Set("Tiles in memcache", _tiffCache.CurrentlyInCache);
 
             return tiff;
-        }
-
-        private bool HasCached(string fn)
-        {
-            if (!System.IO.File.Exists(fn)) return false;
-            if (new System.IO.FileInfo(fn).Length >= 500) return true;
-
-            try
-            {
-                CheckTiff(fn);
-                return true;
-            }
-            catch (TiffTileTooManyDownloadsException ex)
-            {
-                System.IO.File.Delete(fn);
-                return false;
-            }
-
         }
 
         public (int ix, int iy) GetTileCoordinates(double x, double y)
@@ -309,13 +195,12 @@ namespace LambdaModel.Terrain
             return (int)l + 1;
         }
 
-        public void Clear()
+        public virtual void Clear()
         {
             throw new Exception("Do you really want to do this?");
             System.IO.Directory.Delete(_cacheLocation, true);
             System.IO.Directory.CreateDirectory(_cacheLocation);
             _tiffCache.Clear();
-            TilesDownloaded = 0;
         }
     }
 }

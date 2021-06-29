@@ -24,7 +24,7 @@ namespace LambdaModel.Tests.FullRun.SingleLine
 
         public void RunTileCache(int tileSize)
         {
-            var tiles = new TileCache(@"..\..\..\..\Data\Testing\CacheTest", tileSize);
+            var tiles = new OnlineTileCache(@"..\..\..\..\Data\Testing\CacheTest", tileSize);
 
             // Use a station placed in the center of this map tile
             var center = new Point3D(299430, 7108499);
