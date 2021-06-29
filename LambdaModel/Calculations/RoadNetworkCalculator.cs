@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using ConsoleUtilities.ConsoleInfoPanel;
 using DotSpatial.Data;
 using DotSpatial.Topology;
@@ -44,7 +45,7 @@ namespace LambdaModel.Calculations
 
             // Initialize a PointUtm array that is to be (re)used as the vector of points from
             // the center to each of the points that should be calculated.
-            _vector = new Point4D[(int)Math.Sqrt((long)radius * radius * 2L) + 1];
+            _vector = new Point4D[(int) Math.Sqrt((long) radius * radius * 2L) + 1];
             for (var i = 0; i < _vector.Length; i++)
                 _vector[i] = new Point4D(0, 0);
 
@@ -95,6 +96,7 @@ namespace LambdaModel.Calculations
 
                         // Calculate the loss for this point, and store it in the results matrix
                         c.M = _calc.CalculateLoss(_vector, TxHeightAboveTerrain, 2, vectorLength - 1);
+
                         linkCalcs++;
                     }
 
@@ -115,7 +117,7 @@ namespace LambdaModel.Calculations
             table.Columns.Add("Loss", typeof(double));
             table.AcceptChanges();
 
-            using(var pb = _cip?.SetProgress("Saving results", max:RoadLinks.Length))
+            using (var pb = _cip?.SetProgress("Saving results", max: RoadLinks.Length))
                 foreach (var link in RoadLinks)
                 {
                     foreach (var c in link.Geometry)
@@ -129,6 +131,32 @@ namespace LambdaModel.Calculations
                 }
 
             shp.SaveAs(outputLocation, true);
+        }
+
+        public async Task PreloadMapTiles()
+        {
+            var tiles = new HashSet<(int x, int y)>();
+            using (var pb = _cip?.SetProgress("Preparing tile preload", max: RoadLinks.Length))
+                foreach (var link in RoadLinks)
+                {
+                    foreach (var c in link.Geometry)
+                    {
+                        var vectorLength = Tiles.FillVector(_vector, Center.X, Center.Y, c.X, c.Y, withHeights: false);
+                        for (var i = 0; i < vectorLength; i++)
+                            tiles.Add(Tiles.GetTileCoordinates(_vector[i].X, _vector[i].Y));
+                    }
+
+                    pb?.Increment();
+                }
+
+            using (var pb = _cip?.SetProgress("Preloading map tiles", max: tiles.Count))
+            {
+                foreach (var t in tiles)
+                {
+                    if (await Tiles.Preload(t.x, t.y))
+                    pb?.Increment();
+                }
+            }
         }
     }
 }

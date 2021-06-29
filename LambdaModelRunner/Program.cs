@@ -48,8 +48,7 @@ namespace LambdaModelRunner
                 var road = new RoadNetworkCalculator(tiles, @"..\..\..\..\Data\RoadNetwork\2021-05-28_smaller.shp", radius, center, txHeightAboveTerrain, cip);
                 road.RemoveLinksTooFarAway(200);
 
-                //TODO: Preload with new radius (no need to download outside of links)
-                await tiles.Preload(center, radius);
+                await road.PreloadMapTiles();
 
                 var start = DateTime.Now;
                 var calculations = road.Calculate();

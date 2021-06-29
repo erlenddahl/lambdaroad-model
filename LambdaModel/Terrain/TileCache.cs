@@ -44,49 +44,18 @@ namespace LambdaModel.Terrain
             _tiffCache.OnRemoved = tiff => tiff.Dispose();
         }
 
-        public async Task Preload(Point3D center, double radius)
+        public async Task<bool> Preload(int ix, int iy)
         {
-            var topLeft = center.Move(-radius, -radius);
-            var bottomRight = center.Move(radius, radius);
-            var max = 0;
-
-            using (var pb = _cip?.SetUnknownProgress("Preloading map tiles"))
+            var fn = GetFilename(ix, iy);
+            if (!HasCached(fn))
             {
-                for (var x = topLeft.X; x < bottomRight.X + TileSize; x += TileSize)
-                for (var y = topLeft.Y; y < bottomRight.Y + TileSize; y += TileSize)
-                {
-                    var (ix, iy) = GetTileCoordinates(x, y);
-                    var fn = GetFilename(ix, iy);
-                    if (HasCached(fn))
-                    {
-                        _cip?.Increment("Tiles already cached");
-                    }
-                    else
-                    {
-                        max++;
-                    }
-                }
+                await DownloadTileForCoordinate(ix, iy, fn);
+                return true;
             }
 
-            if (max < 1) return;
-
-            using (var pb = _cip?.SetProgress("Preloading map tiles", max: max))
-            {
-                for (var x = topLeft.X; x < bottomRight.X + TileSize; x += TileSize)
-                for (var y = topLeft.Y; y < bottomRight.Y + TileSize; y += TileSize)
-                {
-                    var (ix, iy) = GetTileCoordinates(x, y);
-                    var fn = GetFilename(ix, iy);
-                    if (!HasCached(fn))
-                    {
-                        await DownloadTileForCoordinate(ix, iy, fn);
-                        _cip?.Increment("New tiles downloaded");
-                        pb?.Increment();
-                    }
-                }
-            }
+            return false;
         }
-        
+
         /// <summary>
         /// Downloads a TIFF file starting at the given coordinates with the 2D size tileSize (set in the constructor), saves it to the given path.
         /// </summary>
@@ -111,6 +80,8 @@ namespace LambdaModel.Terrain
                     // File contents may be XML, containing among other stuff "Overforbruk på kort tid" and "Vent litt, prøv igjen".
                     // Probably better to use bigger files to reduce chance of this. Testing shows that 100x100 is marginally faster than 50x50 anyway, probably more so when running grid instead of line.
                     CheckTiff(filePath);
+
+                    _cip?.Increment("New tiles downloaded");
 
                     break;
                 }
@@ -225,7 +196,7 @@ namespace LambdaModel.Terrain
 
         }
 
-        private (int ix, int iy) GetTileCoordinates(double x, double y)
+        public (int ix, int iy) GetTileCoordinates(double x, double y)
         {
             var (ix, iy) = (QuickMath.Round(x), QuickMath.Round(y));
             ix -= ix % TileSize;
