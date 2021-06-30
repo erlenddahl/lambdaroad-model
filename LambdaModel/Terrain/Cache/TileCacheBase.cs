@@ -154,34 +154,53 @@ namespace LambdaModel.Terrain.Cache
             var m = 0;
 
             var (x, y) = (aX, aY);
+            var (rx, ry) = (QuickMath.Round(x), QuickMath.Round(y));
 
-            TiffReaderBase tiff = null;
-
-            while (m <= l)
+            if (withHeights)
             {
-                var vm = vector[m];
-
-                vm.X = x;
-                vm.Y = y;
-
-                vm.RoundedX = QuickMath.Round(x);
-                vm.RoundedY = QuickMath.Round(y);
-
-                if (withHeights)
+                while (m <= l)
                 {
-                    if (tiff?.Contains(vm.RoundedX, vm.RoundedY) != true)
-                        tiff = GetTiff(vm.RoundedX, vm.RoundedY);
+                    var tiff = GetTiff(x, y);
 
-                    vm.Z = tiff.GetAltitudeNoCheck(vm.RoundedX, vm.RoundedY);
+                    var (startX, startY, endX, endY) = (tiff.StartX, tiff.StartY, tiff.EndX, tiff.EndY);
+
+                    while (m < l && rx >= startX && rx < endX && ry >= startY && ry < endY)
+                    {
+                        var vm = vector[m];
+
+                        vm.X = x;
+                        vm.Y = y;
+                        vm.RoundedX = rx;
+                        vm.RoundedY = ry;
+                        vm.Z = tiff.GetAltitudeNoCheck(rx, ry);
+                        vm.M = m;
+
+                        m += incMeter;
+                        x += xInc;
+                        y += yInc;
+                        rx = QuickMath.Round(x);
+                        ry = QuickMath.Round(y);
+                    }
                 }
-                else
+            }
+            else
+            {
+                while (m <= l)
+                {
+                    var vm = vector[m];
+
+                    vm.X = x;
+                    vm.Y = y;
                     vm.Z = double.NaN;
+                    vm.M = m;
 
-                vm.M = m;
+                    vm.RoundedX = QuickMath.Round(x);
+                    vm.RoundedY = QuickMath.Round(y);
 
-                m += incMeter;
-                x += xInc;
-                y += yInc;
+                    m += incMeter;
+                    x += xInc;
+                    y += yInc;
+                }
             }
 
             return (int)l + 1;
