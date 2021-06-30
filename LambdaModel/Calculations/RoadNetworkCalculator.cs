@@ -20,13 +20,13 @@ namespace LambdaModel.Calculations
         private readonly PathLossCalculator _calc;
         private readonly ConsoleInformationPanel _cip;
 
-        public OnlineTileCache Tiles { get; }
+        public ITiffReader Tiles { get; }
         public int Radius { get; }
         public Point3D Center { get; }
         public ShapeLink[] RoadLinks { get; set; }
         public double TxHeightAboveTerrain { get; set; }
 
-        public RoadNetworkCalculator(OnlineTileCache tiles, string roadShapeLocation, int radius, Point3D center, double txHeightAboveTerrain, ConsoleInformationPanel cip = null)
+        public RoadNetworkCalculator(ITiffReader tiles, string roadShapeLocation, int radius, Point3D center, double txHeightAboveTerrain, ConsoleInformationPanel cip = null)
         {
             _cip = cip;
 
@@ -37,7 +37,7 @@ namespace LambdaModel.Calculations
             Radius = radius;
             Center = center;
             TxHeightAboveTerrain = txHeightAboveTerrain;
-            RoadLinks = ShapeLink.ReadLinks(roadShapeLocation, Center, radius).OrderBy(p => Center.DistanceTo2D(p.Cx, p.Cy)).ToArray();
+            RoadLinks = ShapeLink.ReadLinks(roadShapeLocation, Center, radius).ToArray();//.OrderBy(p => Center.DistanceTo2D(p.Cx, p.Cy)).ToArray();
 
             cip?.Set("Relevant road links", RoadLinks.Length);
 

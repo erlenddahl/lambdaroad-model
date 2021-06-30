@@ -123,6 +123,43 @@ namespace LambdaModel.Terrain.Tiff
             return tiff;
         }
 
+        public int FillVector(Point4D[] vector, double aX, double aY, double bX, double bY, int incMeter = 1, bool withHeights = false)
+        {
+            var dx = bX - aX;
+            var dy = bY - aY;
+            var l = Math.Sqrt(dx * dx + dy * dy);
+
+            var xInc = dx / l * incMeter;
+            var yInc = dy / l * incMeter;
+            var m = 0;
+
+            var (x, y) = (aX, aY);
+
+            while (m <= l)
+            {
+                var vm = vector[m];
+
+                vm.X = x;
+                vm.Y = y;
+
+                vm.RoundedX = QuickMath.Round(x);
+                vm.RoundedY = QuickMath.Round(y);
+
+                if (withHeights)
+                    vm.Z = GetAltitudeNoCheck(vm.RoundedX, vm.RoundedY);
+                else
+                    vm.Z = double.NaN;
+
+                vm.M = m;
+
+                m += incMeter;
+                x += xInc;
+                y += yInc;
+            }
+
+            return (int)l + 1;
+        }
+
         public abstract void Dispose();
     }
 }
