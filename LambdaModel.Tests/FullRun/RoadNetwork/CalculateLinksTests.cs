@@ -13,11 +13,10 @@ namespace LambdaModel.Tests.FullRun.RoadNetwork
     [TestClass]
     public class CalculateLinksTests
     {
-        [TestMethod]
-        public void TinyTest()
+        public void TinyTest(int tileSize)
         {
-            var tiles = new OnlineTileCache(@"..\..\..\..\Data\Testing\CacheTest", 512);
-            var road = new RoadNetworkCalculator(tiles, @"..\..\..\..\Data\RoadNetwork\2021-05-28_smaller.shp", 500, new Point3D(271327, 7040324), 100);
+            var tiles = new OnlineTileCache(@"..\..\..\..\Data\Testing\CacheTest", tileSize);
+            var road = new RoadNetworkCalculator(tiles, @"..\..\..\..\Data\RoadNetwork\2021-05-28_smaller.shp", 1000, new Point3D(271327, 7040324), 100);
 
             var start = DateTime.Now;
             var calculations = road.Calculate();
@@ -28,6 +27,30 @@ namespace LambdaModel.Tests.FullRun.RoadNetwork
             start = DateTime.Now;
             road.SaveResults(@"..\..\..\..\Data\RoadNetwork\test-results-tiny.shp");
             Console.WriteLine($"Saving time: {DateTime.Now.Subtract(start).TotalSeconds:n2} seconds.");
+        }
+
+        [TestMethod]
+        public void Size_050()
+        {
+            TinyTest(50);
+        }
+
+        [TestMethod]
+        public void Size_100()
+        {
+            TinyTest(100);
+        }
+
+        [TestMethod]
+        public void Size_256()
+        {
+            TinyTest(256);
+        }
+
+        [TestMethod]
+        public void Size_512()
+        {
+            TinyTest(512);
         }
     }
 }
