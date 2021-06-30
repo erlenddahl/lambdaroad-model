@@ -81,7 +81,10 @@ namespace LambdaModel.Terrain
             return tiff;
         }
 
-        public abstract T GetTileKey(double x, double y);
+        public virtual T GetTileKey(double x, double y)
+        {
+            return GetTileKey(QuickMath.Round(x), QuickMath.Round(y));
+        }
 
         public abstract T GetTileKey(int x, int y);
 

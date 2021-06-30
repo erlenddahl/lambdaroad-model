@@ -116,14 +116,6 @@ namespace LambdaModel.Terrain
             return fn;
         }
 
-        public override (int x, int y) GetTileKey(double x, double y)
-        {
-            var (ix, iy) = (QuickMath.Round(x), QuickMath.Round(y));
-            ix -= ix % TileSize;
-            iy -= iy % TileSize;
-            return (ix, iy);
-        }
-
         public override (int x, int y) GetTileKey(int x, int y)
         {
             var ix = x - x % TileSize;
