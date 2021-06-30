@@ -131,31 +131,5 @@ namespace LambdaModel.Calculations
                 }
             shp.SaveAs(outputLocation, true);
         }
-
-        public async Task PreloadMapTiles()
-        {
-            var tiles = new HashSet<(int x, int y)>();
-            using (var pb = _cip?.SetProgress("Preparing tile preload", max: RoadLinks.Length))
-                foreach (var link in RoadLinks)
-                {
-                    foreach (var c in link.Geometry)
-                    {
-                        var vectorLength = Tiles.FillVector(_vector, Center.X, Center.Y, c.X, c.Y, Tiles.TileSize, false);
-                        for (var i = 0; i < vectorLength; i++)
-                            tiles.Add(Tiles.GetTileKey(_vector[i].X, _vector[i].Y));
-                    }
-
-                    pb?.Increment();
-                }
-
-            using (var pb = _cip?.SetProgress("Preloading map tiles", max: tiles.Count))
-            {
-                foreach (var t in tiles)
-                {
-                    if (await Tiles.Preload(t.x, t.y))
-                    pb?.Increment();
-                }
-            }
-        }
     }
 }
