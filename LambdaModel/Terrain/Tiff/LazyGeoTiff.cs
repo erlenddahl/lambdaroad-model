@@ -22,7 +22,7 @@ namespace LambdaModel.Terrain.Tiff
         }
 
 
-        public LazyGeoTiff(string filePath, bool headerOnly = false)
+        public LazyGeoTiff(string filePath, bool headerOnly = false, int maxCacheItems = 20, int removeCacheItemsWhenFull = 5)
         {
             if (!File.Exists(filePath)) throw new FileNotFoundException("TIFF file '" + filePath + "' does not exist", filePath);
             _tiff = BitMiracle.LibTiff.Classic.Tiff.Open(filePath, "r");
@@ -36,10 +36,12 @@ namespace LambdaModel.Terrain.Tiff
                 return;
 
             _buffer = new byte[_tiff.TileSize()];
+
+            _readBuffers = new LruCache<(int x, int y), byte[]>(maxCacheItems, removeCacheItemsWhenFull);
         }
-        
+
         private byte[] _buffer;
-        private readonly Dictionary<(int x, int y), byte[]> _readBuffers = new Dictionary<(int x, int y), byte[]>();
+        private readonly LruCache<(int x, int y), byte[]> _readBuffers;
 
         protected override float GetAltitudeInternal(int x, int y)
         {

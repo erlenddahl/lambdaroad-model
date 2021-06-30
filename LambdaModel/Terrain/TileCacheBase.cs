@@ -24,11 +24,12 @@ namespace LambdaModel.Terrain
 
         public int TilesRetrievedFromCache => _tiffCache.RetrievedFromCache;
 
-        public TileCacheBase(string cacheLocation, int tileSize = 512, ConsoleInformationPanel cip = null)
+        public TileCacheBase(string cacheLocation, int tileSize = 512, ConsoleInformationPanel cip = null, int maxCacheItems = 1000, int removeCacheItemsWhenFull = 5)
         {
             _cip = cip;
             _cacheLocation = cacheLocation;
             TileSize = tileSize;
+            _tiffCache = new LruCache<T, TiffReaderBase>(maxCacheItems, removeCacheItemsWhenFull);
 
             cip?.Set("Tile size", TileSize);
             cip?.Set("Tile cache", System.IO.Path.GetFileName(_cacheLocation));
