@@ -46,6 +46,29 @@ namespace LambdaModel.Tests.FullRun.SingleLine
         }
 
         [TestMethod]
+        public void RunQuickly()
+        {
+            var geotiff = new QuickGeoTiff(@"..\..\..\..\Data\Testing\33-126-145.tif");
+
+            // Use a station placed in the center of this map tile
+            var stationCoordinates = new Point3D(299430, 7108499);
+            stationCoordinates.Z = geotiff.GetAltitude(stationCoordinates);
+
+            var vector = geotiff.GetAltitudeVector(stationCoordinates, stationCoordinates.Move(5000, 0)).ToArray();
+            var calc = new PathLossCalculator();
+            var start = DateTime.Now;
+            for (var i = 2; i < vector.Length; i++)
+            {
+                var loss = calc.CalculateLoss(vector.Take(i).ToArray(), 100, 2);
+                Debug.WriteLine(loss);
+                Assert.AreEqual(_correct[i - 2], loss, 0.01);
+            }
+
+            var ms = DateTime.Now.Subtract(start).TotalMilliseconds;
+            Console.WriteLine("Calculation time: " + ms);
+        }
+
+        [TestMethod]
         public void RunLazily()
         {
             var geotiff = new LazyGeoTiff(@"..\..\..\..\Data\Testing\33-126-145.tif");

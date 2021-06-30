@@ -18,6 +18,9 @@ namespace LambdaModel.Terrain
             _source = source;
             _destination = destination;
             _tileSize = tileSize;
+
+            if (!System.IO.Directory.Exists(_destination))
+                System.IO.Directory.CreateDirectory(_destination);
         }
 
         public void Generate(ConsoleInformationPanel cip)
@@ -31,11 +34,11 @@ namespace LambdaModel.Terrain
                     {
                         if (tiff.Width % _tileSize != 0 || tiff.Height % _tileSize != 0) throw new Exception($"Invalid file size: {tiff.Width} x {tiff.Height}");
                         for (var x = tiff.StartX; x < tiff.EndX; x += _tileSize)
-                        for (var y = tiff.EndY; y < tiff.StartY; y += _tileSize)
+                        for (var y = tiff.StartY; y < tiff.EndY; y += _tileSize)
                         {
                             Debug.WriteLine(file + ";" + tiff.Width + ";" + tiff.Height + ";" + tiff.Width % _tileSize + ";" + tiff.Height % _tileSize + ";" + tiff.StartX + ";" + tiff.StartY + ";" + tiff.StartX % _tileSize + ";" + tiff.StartY % _tileSize + ";" + x + ";" + y + ";" + x % _tileSize + ";" + y % _tileSize);
                             var fn = System.IO.Path.Combine(_destination, $"{x},{y}_{_tileSize}x{_tileSize}.bin");
-                            using (var tile = tiff.GetSubset(x, y + _tileSize, _tileSize))
+                            using (var tile = tiff.GetSubset(x, y, _tileSize))
                                 QuickGeoTiff.WriteQuickTiff(tile, fn);
                         }
                     }

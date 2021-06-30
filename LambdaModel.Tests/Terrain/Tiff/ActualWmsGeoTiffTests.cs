@@ -42,7 +42,7 @@ namespace LambdaModel.Tests.Terrain.Tiff
         [TestMethod]
         public void TopLeftCorner()
         {
-            Assert.AreEqual(453.67, _geotiff.GetAltitude(290425, 7100995 + 99), 0.01);
+            Assert.AreEqual(453.67, _geotiff.GetAltitude(290425, 7101094), 0.01);
         }
 
         [TestMethod]

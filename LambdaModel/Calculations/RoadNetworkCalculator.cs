@@ -129,7 +129,6 @@ namespace LambdaModel.Calculations
 
                     pb?.Increment();
                 }
-
             shp.SaveAs(outputLocation, true);
         }
 
@@ -141,7 +140,7 @@ namespace LambdaModel.Calculations
                 {
                     foreach (var c in link.Geometry)
                     {
-                        var vectorLength = Tiles.FillVector(_vector, Center.X, Center.Y, c.X, c.Y, withHeights: false);
+                        var vectorLength = Tiles.FillVector(_vector, Center.X, Center.Y, c.X, c.Y, Tiles.TileSize, false);
                         for (var i = 0; i < vectorLength; i++)
                             tiles.Add(Tiles.GetTileCoordinates(_vector[i].X, _vector[i].Y));
                     }

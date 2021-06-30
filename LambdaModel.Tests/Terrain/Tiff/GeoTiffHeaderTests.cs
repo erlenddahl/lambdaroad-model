@@ -16,9 +16,9 @@ namespace LambdaModel.Tests.Terrain.Tiff
             Assert.AreEqual(size, tiff.Width);
             Assert.AreEqual(bounds[2], tiff.EndX);
 
-            Assert.AreEqual(bounds[3], tiff.StartY);
+            Assert.AreEqual(bounds[1], tiff.StartY);
             Assert.AreEqual(size, tiff.Height);
-            Assert.AreEqual(bounds[1], tiff.EndY);
+            Assert.AreEqual(bounds[3], tiff.EndY);
         }
 
         [TestMethod]

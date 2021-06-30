@@ -29,14 +29,14 @@ namespace LambdaModel.Tests.FullRun.RoadNetwork
         public void ALotHere()
         {
             var links = ShapeLink.ReadLinks(@"..\..\..\..\Data\RoadNetwork\2021-05-28_smaller.shp", new Point3D(288608.1, 7033525.3), 1000).ToArray();
-            Assert.AreEqual(42, links.Length);
+            Assert.AreEqual(40, links.Length);
         }
 
         [TestMethod]
         public void MoreHere()
         {
             var links = ShapeLink.ReadLinks(@"..\..\..\..\Data\RoadNetwork\2021-05-28_smaller.shp", new Point3D(271868.3, 7041337.0), 5_000).ToArray();
-            Assert.AreEqual(8492, links.Length);
+            Assert.AreEqual(8317, links.Length);
         }
     }
 }

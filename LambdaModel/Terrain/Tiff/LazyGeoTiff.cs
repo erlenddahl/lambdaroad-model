@@ -43,6 +43,8 @@ namespace LambdaModel.Terrain.Tiff
 
         protected override float GetAltitudeInternal(int x, int y)
         {
+            y = Height - y - 1;
+
             var xInTile = x % _tileW;
             var yInTile = y % _tileH;
 

@@ -17,13 +17,21 @@ namespace LambdaModel.Terrain.Tiff
         public int Height;
         public int StartX;
         public int StartY;
+
+        /// <summary>
+        /// Non-inclusive end-coordinate
+        /// </summary>
         public int EndX;
+
+        /// <summary>
+        /// Non-inclusive end-coordinate
+        /// </summary>
         public int EndY;
 
         protected void SetEnds()
         {
             EndX = StartX + Width;
-            EndY = StartY - Height;
+            EndY = StartY + Height;
         }
 
         public float GetAltitude(Point3D p)
@@ -42,14 +50,14 @@ namespace LambdaModel.Terrain.Tiff
 
         public float GetAltitudeNoCheck(int pX, int pY)
         {
-            return GetAltitudeInternal(pX - StartX, StartY - pY);
+            return GetAltitudeInternal(pX - StartX, pY - StartY);
         }
 
         protected abstract float GetAltitudeInternal(int x, int y);
 
         protected (int x, int y) ToLocal(double pX, double pY)
         {
-            return (QuickMath.Round(pX - StartX), QuickMath.Round(StartY - pY));
+            return (QuickMath.Round(pX - StartX), QuickMath.Round(pY - StartY));
         }
 
         public Point4D[] GetAltitudeVector(Point3D a, Point3D b, int incMeter = 1)
@@ -89,28 +97,28 @@ namespace LambdaModel.Terrain.Tiff
         {
             var x = QuickMath.Round(pX);
             var y = QuickMath.Round(pY);
-            return x >= StartX && x < EndX && y > EndY && y <= StartY;
+            return x >= StartX && x < EndX && y >= StartY && y < EndY;
         }
 
         public bool Contains(int x, int y)
         {
-            return x >= StartX && x < EndX && y > EndY && y <= StartY;
+            return x >= StartX && x < EndX && y >= StartY && y < EndY;
         }
 
-        public GeoTiff GetSubset(int topLeftX, int topLeftY, int size)
+        public GeoTiff GetSubset(int bottomLeftX, int bottomLeftY, int size)
         {
             var tiff = new GeoTiff
             {
                 HeightMap = new float[size, size], 
-                StartX = topLeftX, 
-                StartY = topLeftY,
+                StartX = bottomLeftX, 
+                StartY = bottomLeftY,
                 Width = size,
                 Height = size
             };
             tiff.SetEnds();
-            for (var y = topLeftY - size + 1; y <= topLeftY; y++)
-            for (var x = topLeftX; x < topLeftX + size; x++)
-                tiff.HeightMap[topLeftY - y, x - topLeftX] = GetAltitudeNoCheck(x, y);
+            for (var y = bottomLeftY; y < bottomLeftY + size; y++)
+            for (var x = bottomLeftX; x < bottomLeftX + size; x++)
+                tiff.HeightMap[size - y + bottomLeftY - 1, x - bottomLeftX] = GetAltitudeNoCheck(x, y);
 
             return tiff;
         }

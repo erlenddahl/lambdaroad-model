@@ -14,7 +14,7 @@ namespace LambdaModel.Tests.Terrain.Tiff
         public void Initialize()
         {
             StartX = 500;
-            StartY = 1000;
+            StartY = 991;
             Width = 10;
             Height = 10;
             SetEnds();
@@ -47,8 +47,8 @@ namespace LambdaModel.Tests.Terrain.Tiff
             Assert.AreEqual(Width, tiff.Width);
             Assert.AreEqual(Height, tiff.Height);
 
-            for (var x = StartX; x <= EndX; x++)
-            for (var y = StartY; y <= EndY; y++)
+            for (var x = StartX; x < EndX; x++)
+            for (var y = StartY; y < EndY; y++)
                 Assert.AreEqual(GetAltitude(x, y), tiff.GetAltitude(x, y));
         }
 
@@ -60,12 +60,12 @@ namespace LambdaModel.Tests.Terrain.Tiff
             Assert.AreEqual(500, tiff.StartX);
             Assert.AreEqual(998, tiff.StartY);
             Assert.AreEqual(503, tiff.EndX);
-            Assert.AreEqual(995, tiff.EndY);
+            Assert.AreEqual(1001, tiff.EndY);
             Assert.AreEqual(3, tiff.Width);
             Assert.AreEqual(3, tiff.Height);
 
-            for (var x = tiff.StartX; x <= tiff.EndX; x++)
-            for (var y = tiff.StartY; y <= tiff.EndY; y++)
+            for (var x = tiff.StartX; x < tiff.EndX; x++)
+            for (var y = tiff.StartY; y < tiff.EndY; y++)
                 Assert.AreEqual(GetAltitude(x, y), tiff.GetAltitude(x, y));
         }
 
@@ -77,29 +77,29 @@ namespace LambdaModel.Tests.Terrain.Tiff
             Assert.AreEqual(508, tiff.StartX);
             Assert.AreEqual(999, tiff.StartY);
             Assert.AreEqual(510, tiff.EndX);
-            Assert.AreEqual(997, tiff.EndY);
+            Assert.AreEqual(1001, tiff.EndY);
             Assert.AreEqual(2, tiff.Width);
             Assert.AreEqual(2, tiff.Height);
 
-            for (var x = tiff.StartX; x <= tiff.EndX; x++)
-            for (var y = tiff.StartY; y <= tiff.EndY; y++)
+            for (var x = tiff.StartX; x < tiff.EndX; x++)
+            for (var y = tiff.StartY; y < tiff.EndY; y++)
                 Assert.AreEqual(GetAltitude(x, y), tiff.GetAltitude(x, y));
         }
 
         [TestMethod]
         public void Subset_BottomLeft_4()
         {
-            var tiff = GetSubset(500, 995, 4);
+            var tiff = GetSubset(500, 991, 4);
 
             Assert.AreEqual(500, tiff.StartX);
-            Assert.AreEqual(995, tiff.StartY);
+            Assert.AreEqual(991, tiff.StartY);
             Assert.AreEqual(504, tiff.EndX);
-            Assert.AreEqual(991, tiff.EndY);
+            Assert.AreEqual(995, tiff.EndY);
             Assert.AreEqual(4, tiff.Width);
             Assert.AreEqual(4, tiff.Height);
 
-            for (var x = tiff.StartX; x <= tiff.EndX; x++)
-            for (var y = tiff.StartY; y <= tiff.EndY; y++)
+            for (var x = tiff.StartX; x < tiff.EndX; x++)
+            for (var y = tiff.StartY; y < tiff.EndY; y++)
                 Assert.AreEqual(GetAltitude(x, y), tiff.GetAltitude(x, y));
         }
 
@@ -111,29 +111,29 @@ namespace LambdaModel.Tests.Terrain.Tiff
             Assert.AreEqual(509, tiff.StartX);
             Assert.AreEqual(991, tiff.StartY);
             Assert.AreEqual(510, tiff.EndX);
-            Assert.AreEqual(990, tiff.EndY);
+            Assert.AreEqual(992, tiff.EndY);
             Assert.AreEqual(1, tiff.Width);
             Assert.AreEqual(1, tiff.Height);
 
-            for (var x = tiff.StartX; x <= tiff.EndX; x++)
-            for (var y = tiff.StartY; y <= tiff.EndY; y++)
+            for (var x = tiff.StartX; x < tiff.EndX; x++)
+            for (var y = tiff.StartY; y < tiff.EndY; y++)
                 Assert.AreEqual(GetAltitude(x, y), tiff.GetAltitude(x, y));
         }
 
         [TestMethod]
         public void Subset_SomewhereInside_5()
         {
-            var tiff = GetSubset(502, 998, 5);
+            var tiff = GetSubset(502, 994, 5);
 
             Assert.AreEqual(502, tiff.StartX);
-            Assert.AreEqual(998, tiff.StartY);
+            Assert.AreEqual(994, tiff.StartY);
             Assert.AreEqual(507, tiff.EndX);
-            Assert.AreEqual(993, tiff.EndY);
+            Assert.AreEqual(999, tiff.EndY);
             Assert.AreEqual(5, tiff.Width);
             Assert.AreEqual(5, tiff.Height);
 
-            for (var x = tiff.StartX; x <= tiff.EndX; x++)
-            for (var y = tiff.StartY; y <= tiff.EndY; y++)
+            for (var x = tiff.StartX; x < tiff.EndX; x++)
+            for (var y = tiff.StartY; y < tiff.EndY; y++)
                 Assert.AreEqual(GetAltitude(x, y), tiff.GetAltitude(x, y));
         }
 

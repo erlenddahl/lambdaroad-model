@@ -83,8 +83,8 @@ namespace LambdaModel.Terrain.Tiff
             var originLon = BitConverter.ToDouble(modelTransformation, 24);
             var originLat = BitConverter.ToDouble(modelTransformation, 32);
 
-            StartX = (int)(originLon + dw / 2d);
-            StartY = (int)(originLat + dh / 2d);
+            StartX = (int)originLon;
+            StartY = (int)(originLat - Height);
             SetEnds();
 
             var tileWidthTag = tiff.GetField(TiffTag.TILEWIDTH);
@@ -98,7 +98,7 @@ namespace LambdaModel.Terrain.Tiff
             if (HeightMap == null)
                 throw new Exception("Height map has not been initialized. Did you open the file using the headerOnly flag?");
 
-            return HeightMap[y, x];
+            return HeightMap[Height - y - 1, x];
         }
 
 

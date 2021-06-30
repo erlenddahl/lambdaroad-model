@@ -17,7 +17,7 @@ namespace LambdaModel.Tests.FullRun.Grid
             {
                 CreateTiff = fn => new LazyGeoTiff(fn)
             };
-            var grid = new GridCalculator(tiles, 500, new Point3D(299430, 7108499));
+            var grid = new GridCalculator(tiles, 100, new Point3D(299430, 7108499));
 
             var start = DateTime.Now;
 
