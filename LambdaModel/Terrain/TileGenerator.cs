@@ -1,45 +1,65 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using ConsoleUtilities.ConsoleInfoPanel;
 using LambdaModel.Terrain.Tiff;
+using LambdaModel.Utilities;
 
 namespace LambdaModel.Terrain
 {
-    public class TileGenerator
+    public class TileGenerator : TileCacheBase<string>, IDisposable
     {
         private readonly string _source;
         private readonly string _destination;
         private readonly int _tileSize;
+        private readonly ConsoleInformationPanel _cip;
+        private readonly (string Path, GeoTiff Tiff)[] _files;
 
-        public TileGenerator(string source, string destination, int tileSize)
+        public TileGenerator(string source, string destination, int tileSize, ConsoleInformationPanel cip) : base(source, tileSize, cip, 6, 1)
         {
             _source = source;
             _destination = destination;
             _tileSize = tileSize;
+            _cip = cip;
 
             if (!System.IO.Directory.Exists(_destination))
                 System.IO.Directory.CreateDirectory(_destination);
+
+            _files = System.IO.Directory
+                .GetFiles(_source, "*.tif")
+                .Select(p => (Path: p, Tiff: new GeoTiff(p, true)))
+                .ToArray();
+
+            CreateTiff = fn => new LazyGeoTiff(fn, false, 100, 10);
         }
 
-        public void Generate(ConsoleInformationPanel cip)
+        public void Generate()
         {
-            var files = System.IO.Directory.GetFiles(_source, "*.tif");
-            using (var pb = cip.SetProgress("Generating tiles", max: files.Length))
+            using (var pb = _cip.SetProgress("Generating tiles", max: _files.Length))
             {
-                foreach (var file in files)
+                foreach (var f in _files)
                 {
-                    using (var tiff = new GeoTiff(file))
+                    var tiff = f.Tiff;
+                    for (var x = tiff.StartX - tiff.StartX % _tileSize; x < tiff.EndX; x += _tileSize)
+                    for (var y = tiff.StartY - tiff.StartY % _tileSize; y < tiff.EndY; y += _tileSize)
                     {
-                        if (tiff.Width % _tileSize != 0 || tiff.Height % _tileSize != 0) throw new Exception($"Invalid file size: {tiff.Width} x {tiff.Height}");
-                        for (var x = tiff.StartX; x < tiff.EndX; x += _tileSize)
-                        for (var y = tiff.StartY; y < tiff.EndY; y += _tileSize)
+                        try
                         {
-                            Debug.WriteLine(file + ";" + tiff.Width + ";" + tiff.Height + ";" + tiff.Width % _tileSize + ";" + tiff.Height % _tileSize + ";" + tiff.StartX + ";" + tiff.StartY + ";" + tiff.StartX % _tileSize + ";" + tiff.StartY % _tileSize + ";" + x + ";" + y + ";" + x % _tileSize + ";" + y % _tileSize);
                             var fn = System.IO.Path.Combine(_destination, $"{x},{y}_{_tileSize}x{_tileSize}.bin");
-                            using (var tile = tiff.GetSubset(x, y, _tileSize))
+                            if (System.IO.File.Exists(fn))
+                            {
+                                _cip.Increment("Skipped existing tiles");
+                                continue;
+                            }
+                            using (var tile = GetSubset(x, y, _tileSize))
                                 QuickGeoTiff.WriteQuickTiff(tile, fn);
+                            _cip.Increment("Generated tiles");
+                        }
+                        catch (OutsideOfAreaException ex)
+                        {
+                            _cip.Increment("Tiles outside of area");
                         }
                     }
 
@@ -47,5 +67,37 @@ namespace LambdaModel.Terrain
                 }
             }
         }
+
+        protected override string GetFilename(string key)
+        {
+            _cip.Set("Last loaded", System.IO.Path.GetFileName(key));
+            return key;
+        }
+
+        public override string GetTileKey(double x, double y)
+        {
+            return GetTileKey(QuickMath.Round(x), QuickMath.Round(y));
+        }
+
+        public override string GetTileKey(int x, int y)
+        {
+            foreach (var f in _files)
+            {
+                if (f.Tiff.Contains(x, y))
+                    return f.Path;
+            }
+
+            throw new OutsideOfAreaException();
+        }
+
+        public void Dispose()
+        {
+            foreach(var f in _files)
+                f.Tiff.Dispose();
+        }
+    }
+
+    public class OutsideOfAreaException : Exception
+    {
     }
 }
