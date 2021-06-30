@@ -1,18 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
+﻿using System.IO;
 using ConsoleUtilities.ConsoleInfoPanel;
-using LambdaModel.General;
-using LambdaModel.Terrain.Tiff;
-using LambdaModel.Utilities;
-using no.sintef.SpeedModule.Geometry.SimpleStructures;
 
-namespace LambdaModel.Terrain
+namespace LambdaModel.Terrain.Cache
 {
     public class LocalTileCache : TileCacheBase<(int x, int y)>
     {

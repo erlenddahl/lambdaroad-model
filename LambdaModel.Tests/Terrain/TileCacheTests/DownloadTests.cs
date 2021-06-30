@@ -1,4 +1,5 @@
 ﻿using LambdaModel.Terrain;
+using LambdaModel.Terrain.Cache;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace LambdaModel.Tests.Terrain.TileCacheTests

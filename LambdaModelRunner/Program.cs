@@ -5,6 +5,7 @@ using BitMiracle.LibTiff.Classic;
 using ConsoleUtilities.ConsoleInfoPanel;
 using LambdaModel.Calculations;
 using LambdaModel.Terrain;
+using LambdaModel.Terrain.Cache;
 using LambdaModel.Terrain.Tiff;
 using no.sintef.SpeedModule.Geometry.SimpleStructures;
 

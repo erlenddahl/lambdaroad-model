@@ -2,6 +2,7 @@
 using LambdaModel.General;
 using LambdaModel.PathLoss;
 using LambdaModel.Terrain;
+using LambdaModel.Terrain.Cache;
 using no.sintef.SpeedModule.Geometry.SimpleStructures;
 
 namespace LambdaModel.Calculations

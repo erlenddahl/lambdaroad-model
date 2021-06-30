@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using ConsoleUtilities.ConsoleInfoPanel;
+using LambdaModel.Terrain.Cache;
 using LambdaModel.Terrain.Tiff;
 using LambdaModel.Utilities;
 

@@ -1,17 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 using ConsoleUtilities.ConsoleInfoPanel;
 using LambdaModel.General;
 using LambdaModel.Terrain.Tiff;
 using LambdaModel.Utilities;
 using no.sintef.SpeedModule.Geometry.SimpleStructures;
 
-namespace LambdaModel.Terrain
+namespace LambdaModel.Terrain.Cache
 {
     public abstract class TileCacheBase<T> : ITiffReader
     {

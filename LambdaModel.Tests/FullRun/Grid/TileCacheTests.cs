@@ -4,6 +4,7 @@ using LambdaModel.Calculations;
 using LambdaModel.General;
 using LambdaModel.PathLoss;
 using LambdaModel.Terrain;
+using LambdaModel.Terrain.Cache;
 using LambdaModel.Terrain.Tiff;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using no.sintef.SpeedModule.Geometry.SimpleStructures;

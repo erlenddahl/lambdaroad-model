@@ -6,6 +6,7 @@ using LambdaModel.Calculations;
 using LambdaModel.General;
 using LambdaModel.PathLoss;
 using LambdaModel.Terrain;
+using LambdaModel.Terrain.Cache;
 using LambdaModel.Terrain.Tiff;
 using LambdaModel.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

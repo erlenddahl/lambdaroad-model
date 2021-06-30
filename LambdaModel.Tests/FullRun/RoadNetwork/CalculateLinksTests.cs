@@ -5,6 +5,7 @@ using System.Threading;
 using LambdaModel.Calculations;
 using LambdaModel.General;
 using LambdaModel.Terrain;
+using LambdaModel.Terrain.Cache;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using no.sintef.SpeedModule.Geometry.SimpleStructures;
 
