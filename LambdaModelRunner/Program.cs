@@ -38,12 +38,15 @@ namespace LambdaModelRunner
             {
                 Tiff.SetErrorHandler(new LambdaTiffErrorHandler(cip));
 
+                //new TileGenerator(@"G:\Jobb\Lambda\12-14", @"G:\Jobb\Lambda\Tiles_512\", 512, cip).Generate();
+                //new TileGenerator(@"G:\Jobb\Lambda\12-14", @"G:\Jobb\Lambda\Tiles_256\", 256, cip).Generate();
+
                 var center = new Point3D(271327, 7040324);
                 var radius = 50_000;
                 var tileSize = 512;
                 var txHeightAboveTerrain = 100;
 
-                var tiles = new TileCache(@"..\..\..\..\Data\Testing\CacheTest", tileSize, cip);
+                var tiles = new LocalTileCache(@"G:\Jobb\Lambda\Tiles_" + tileSize, tileSize, cip, 5000, 100);
 
                 var road = new RoadNetworkCalculator(tiles, @"..\..\..\..\Data\RoadNetwork\2021-05-28_smaller.shp", radius, center, txHeightAboveTerrain, cip);
                 road.RemoveLinksTooFarAway(200);
