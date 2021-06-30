@@ -17,7 +17,7 @@ namespace LambdaModel.Terrain
         private readonly ConsoleInformationPanel _cip;
         private readonly (string Path, GeoTiff Tiff)[] _files;
 
-        public TileGenerator(string source, string destination, int tileSize, ConsoleInformationPanel cip) : base(source, tileSize, cip, 6, 1)
+        public TileGenerator(string source, string destination, int tileSize, ConsoleInformationPanel cip) : base(source, tileSize, cip, 50, 10)
         {
             _source = source;
             _destination = destination;
@@ -32,7 +32,7 @@ namespace LambdaModel.Terrain
                 .Select(p => (Path: p, Tiff: new GeoTiff(p, true)))
                 .ToArray();
 
-            CreateTiff = fn => new LazyGeoTiff(fn, false, 100, 10);
+            CreateTiff = fn => new LazyGeoTiff(fn, false, 100000, 1000);
         }
 
         public void Generate()
