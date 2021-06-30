@@ -63,6 +63,7 @@ namespace LambdaModel.Utilities
             var removeIds = new HashSet<K>();
             foreach (var key in lastRecentlyUsed)
             {
+                if (key == null) continue;
                 if (!_cache.TryGetValue(key, out var v)) continue;
 
                 removeIds.Add(key);
