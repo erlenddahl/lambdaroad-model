@@ -142,7 +142,7 @@ namespace LambdaModel.Calculations
                     {
                         var vectorLength = Tiles.FillVector(_vector, Center.X, Center.Y, c.X, c.Y, Tiles.TileSize, false);
                         for (var i = 0; i < vectorLength; i++)
-                            tiles.Add(Tiles.GetTileCoordinates(_vector[i].X, _vector[i].Y));
+                            tiles.Add(Tiles.GetTileKey(_vector[i].X, _vector[i].Y));
                     }
 
                     pb?.Increment();

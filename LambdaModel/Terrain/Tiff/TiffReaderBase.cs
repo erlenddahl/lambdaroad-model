@@ -28,7 +28,7 @@ namespace LambdaModel.Terrain.Tiff
         /// </summary>
         public int EndY;
 
-        protected void SetEnds()
+        public void SetEnds()
         {
             EndX = StartX + Width;
             EndY = StartY + Height;
