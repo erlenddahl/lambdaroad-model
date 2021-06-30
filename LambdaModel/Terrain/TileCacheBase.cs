@@ -13,11 +13,11 @@ using no.sintef.SpeedModule.Geometry.SimpleStructures;
 
 namespace LambdaModel.Terrain
 {
-    public abstract class TileCacheBase : ITiffReader
+    public abstract class TileCacheBase<T> : ITiffReader
     {
         protected readonly string _cacheLocation;
         public int TileSize { get; }
-        protected readonly LruCache<(int x, int y), TiffReaderBase> _tiffCache = new LruCache<(int x, int y), TiffReaderBase>(1000, 5);
+        protected readonly LruCache<T, TiffReaderBase> _tiffCache;
         protected readonly ConsoleInformationPanel _cip;
 
         public Func<string, TiffReaderBase> CreateTiff = fn => new QuickGeoTiff(fn);
@@ -41,7 +41,7 @@ namespace LambdaModel.Terrain
             _tiffCache.OnRemoved = tiff => tiff.Dispose();
         }
 
-        protected abstract string GetFilename(int x, int y);
+        protected abstract string GetFilename(T key);
 
         public float GetAltitude(Point3D p)
         {
@@ -50,30 +50,28 @@ namespace LambdaModel.Terrain
 
         public float GetAltitude(double x, double y)
         {
-            return GetTiff(x, y).Result.GetAltitude(x, y);
+            return GetTiff(x, y).GetAltitude(x, y);
         }
 
-        private Task<TiffReaderBase> GetTiff(double x, double y)
+        private TiffReaderBase GetTiff(double x, double y)
         {
-            var (ix, iy) = GetTileCoordinates(x, y);
-            return GetTiffByInternalCoordinates(ix, iy);
+            return GetTiffByInternalCoordinates(GetTileKey(x, y));
         }
 
-        private Task<TiffReaderBase> GetTiff(int x, int y)
+        private TiffReaderBase GetTiff(int x, int y)
         {
-            var (ix, iy) = (x - x % TileSize, y - y % TileSize);
-            return GetTiffByInternalCoordinates(ix, iy);
+            return GetTiffByInternalCoordinates(GetTileKey(x, y));
         }
 
-        protected async Task<TiffReaderBase> GetTiffByInternalCoordinates(int ix, int iy)
+        protected TiffReaderBase GetTiffByInternalCoordinates(T key)
         {
-            if (_tiffCache.TryGetValue((ix, iy), out var tiff))
+            if (_tiffCache.TryGetValue(key, out var tiff))
                 return tiff;
 
-            var fn = GetFilename(ix, iy);
+            var fn = GetFilename(key);
             tiff = CreateTiff(fn);
 
-            _tiffCache.Add((ix, iy), tiff);
+            _tiffCache.Add(key, tiff);
 
             _cip?.Set("Tiles retrieved from memcache", _tiffCache.RetrievedFromCache);
             _cip?.Set("Tiles removed from memcache", _tiffCache.RemovedFromCache);
@@ -83,13 +81,9 @@ namespace LambdaModel.Terrain
             return tiff;
         }
 
-        public (int ix, int iy) GetTileCoordinates(double x, double y)
-        {
-            var (ix, iy) = (QuickMath.Round(x), QuickMath.Round(y));
-            ix -= ix % TileSize;
-            iy -= iy % TileSize;
-            return (ix, iy);
-        }
+        public abstract T GetTileKey(double x, double y);
+
+        public abstract T GetTileKey(int x, int y);
 
         public Point4D[] GetAltitudeVector(Point3D a, Point3D b, int incMeter = 1)
         {
@@ -105,7 +99,7 @@ namespace LambdaModel.Terrain
             foreach(var p in v)
             {
                 if (tiff?.Contains(p.X, p.Y) != true)
-                    tiff = GetTiff(p.X, p.Y).Result;
+                    tiff = GetTiff(p.X, p.Y);
 
                 p.Z = tiff.GetAltitude(p.X, p.Y);
             }
@@ -121,7 +115,7 @@ namespace LambdaModel.Terrain
                 if (!double.IsNaN(vector[i].Z)) continue;
 
                 if (tiff?.Contains(vector[i].X, vector[i].Y) != true)
-                    tiff = GetTiff(vector[i].X, vector[i].Y).Result;
+                    tiff = GetTiff(vector[i].X, vector[i].Y);
                 
                 vector[i].Z = tiff.GetAltitude(vector[i]);
             }
@@ -179,7 +173,7 @@ namespace LambdaModel.Terrain
                 if (withHeights)
                 {
                     if (tiff?.Contains(vm.RoundedX, vm.RoundedY) != true)
-                        tiff = GetTiff(vm.RoundedX, vm.RoundedY).Result;
+                        tiff = GetTiff(vm.RoundedX, vm.RoundedY);
 
                     vm.Z = tiff.GetAltitudeNoCheck(vm.RoundedX, vm.RoundedY);
                 }
@@ -202,6 +196,30 @@ namespace LambdaModel.Terrain
             System.IO.Directory.Delete(_cacheLocation, true);
             System.IO.Directory.CreateDirectory(_cacheLocation);
             _tiffCache.Clear();
+        }
+
+        public GeoTiff GetSubset(int bottomLeftX, int bottomLeftY, int size)
+        {
+            var res = new GeoTiff
+            {
+                HeightMap = new float[size, size],
+                StartX = bottomLeftX,
+                StartY = bottomLeftY,
+                Width = size,
+                Height = size
+            };
+            res.SetEnds(); 
+            TiffReaderBase tiff = null;
+            for (var y = bottomLeftY; y < bottomLeftY + size; y++)
+            for (var x = bottomLeftX; x < bottomLeftX + size; x++)
+            {
+                if (tiff?.Contains(x, y) != true)
+                    tiff = GetTiff(x, y);
+
+                res.HeightMap[size - y + bottomLeftY - 1, x - bottomLeftX] = tiff.GetAltitudeNoCheck(x, y);
+            }
+
+            return res;
         }
     }
 }

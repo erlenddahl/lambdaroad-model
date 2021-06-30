@@ -13,7 +13,7 @@ using no.sintef.SpeedModule.Geometry.SimpleStructures;
 
 namespace LambdaModel.Terrain
 {
-    public class OnlineTileCache : TileCacheBase
+    public class OnlineTileCache : TileCacheBase<(int x, int y)>
     {
         private WebClient _wc = new WebClient();
         private int _maxTries = 10;
@@ -25,7 +25,7 @@ namespace LambdaModel.Terrain
 
         public async Task<bool> Preload(int ix, int iy)
         {
-            var fn = GetFilename(ix, iy);
+            var fn = GetFilename((ix, iy));
             if (!HasCached(fn))
             {
                 await DownloadTileForCoordinate(ix, iy, fn);
@@ -108,12 +108,27 @@ namespace LambdaModel.Terrain
             }
         }
 
-        protected override string GetFilename(int ix, int iy)
+        protected override string GetFilename((int, int) key)
         {
-            var fn = System.IO.Path.Combine(_cacheLocation, $"{ix},{iy}_{TileSize}x{TileSize}.tiff");
+            var fn = System.IO.Path.Combine(_cacheLocation, $"{key.Item1},{key.Item2}_{TileSize}x{TileSize}.tiff");
             if (!HasCached(fn))
-                DownloadTileForCoordinate(ix, iy, fn).Wait();
+                DownloadTileForCoordinate(key.Item1, key.Item2, fn).Wait();
             return fn;
+        }
+
+        public override (int x, int y) GetTileKey(double x, double y)
+        {
+            var (ix, iy) = (QuickMath.Round(x), QuickMath.Round(y));
+            ix -= ix % TileSize;
+            iy -= iy % TileSize;
+            return (ix, iy);
+        }
+
+        public override (int x, int y) GetTileKey(int x, int y)
+        {
+            var ix = x - x % TileSize;
+            var iy = y - y % TileSize;
+            return (ix, iy);
         }
 
         private bool HasCached(string fn)
