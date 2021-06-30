@@ -38,29 +38,33 @@ namespace LambdaModel.Terrain
 
         public void Generate()
         {
-            using (var pb = _cip.SetProgress("Generating tiles", max: _files.Length))
+            using (var pb = _cip.SetProgress("Generating tiles (" + _tileSize + ")", max: _files.Length))
             {
-                foreach (var f in _files)
+                for (var i = 0; i < _files.Length; i++)
                 {
-                    var tiff = f.Tiff;
+                    var tiff = _files[i].Tiff;
                     for (var x = tiff.StartX - tiff.StartX % _tileSize; x < tiff.EndX; x += _tileSize)
-                    for (var y = tiff.StartY - tiff.StartY % _tileSize; y < tiff.EndY; y += _tileSize)
                     {
-                        try
+                        for (var y = tiff.StartY - tiff.StartY % _tileSize; y < tiff.EndY; y += _tileSize)
                         {
-                            var fn = System.IO.Path.Combine(_destination, $"{x},{y}_{_tileSize}x{_tileSize}.bin");
-                            if (System.IO.File.Exists(fn))
+                            try
                             {
-                                _cip.Increment("Skipped existing tiles");
-                                continue;
+                                var fn = System.IO.Path.Combine(_destination, $"{x},{y}_{_tileSize}x{_tileSize}.bin");
+                                if (System.IO.File.Exists(fn))
+                                {
+                                    _cip.Increment("Skipped existing tiles");
+                                }
+                                else
+                                {
+                                    using (var tile = GetSubset(x, y, _tileSize))
+                                        QuickGeoTiff.WriteQuickTiff(tile, fn);
+                                    _cip.Increment("Generated tiles");
+                                }
                             }
-                            using (var tile = GetSubset(x, y, _tileSize))
-                                QuickGeoTiff.WriteQuickTiff(tile, fn);
-                            _cip.Increment("Generated tiles");
-                        }
-                        catch (OutsideOfAreaException ex)
-                        {
-                            _cip.Increment("Tiles outside of area");
+                            catch (OutsideOfAreaException ex)
+                            {
+                                _cip.Increment("Tiles outside of area");
+                            }
                         }
                     }
 
