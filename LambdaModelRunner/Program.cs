@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using BitMiracle.LibTiff.Classic;
 using ConsoleUtilities.ConsoleInfoPanel;
@@ -7,6 +8,7 @@ using LambdaModel.Calculations;
 using LambdaModel.Terrain;
 using LambdaModel.Terrain.Cache;
 using LambdaModel.Terrain.Tiff;
+using LambdaModel.Utilities;
 using no.sintef.SpeedModule.Geometry.SimpleStructures;
 
 namespace LambdaModelRunner
@@ -18,6 +20,7 @@ namespace LambdaModelRunner
             /*
              * TODOS:
              * Order road links by angle in order to use spiral sequence
+             *    - Will reduce cache removals
              * Then by distance from center?
              * Eliminate further by looking at fresnel obstructions and eliminating once we know path loss gets too big
              */
@@ -47,7 +50,7 @@ namespace LambdaModelRunner
                 var tileSize = 512;
                 var txHeightAboveTerrain = 100;
 
-                var tiles = new LocalTileCache(@"G:\Jobb\Lambda\Tiles_" + tileSize, tileSize, cip, 5000, 100);
+                var tiles = new LocalTileCache(@"I:\Jobb\Lambda\Tiles_" + tileSize, tileSize, cip, 300, 50);
 
                 var road = new RoadNetworkCalculator(tiles, @"..\..\..\..\Data\RoadNetwork\2021-05-28_smaller.shp", radius, center, txHeightAboveTerrain, cip);
                 road.RemoveLinksTooFarAway(200);
@@ -63,8 +66,6 @@ namespace LambdaModelRunner
                 road.SaveResults(@"..\..\..\..\Data\RoadNetwork\test-results-huge-2.shp");
                 cip.Set("Saving time", $"{DateTime.Now.Subtract(start).TotalSeconds:n2} seconds.");
             }
-
-            Console.ReadLine();
         }
     }
 
