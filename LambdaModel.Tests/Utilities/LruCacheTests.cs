@@ -214,7 +214,7 @@ namespace LambdaModel.Tests.Utilities
 
             cache.Add(10, 0);
 
-            Assert.AreEqual(false, cache.TryGetValue(13, out v));
+            Assert.AreEqual(false, cache.TryGetValue(5, out v));
         }
 
         [TestMethod]
@@ -246,7 +246,7 @@ namespace LambdaModel.Tests.Utilities
             cache.Add(10, 0);
 
             Assert.AreEqual(false, cache.TryGetValue(13, out v));
-            Assert.AreEqual(false, cache.TryGetValue(12, out v));
+            Assert.AreEqual(false, cache.TryGetValue(5, out v));
         }
     }
 }

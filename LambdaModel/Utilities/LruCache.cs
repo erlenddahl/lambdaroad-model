@@ -7,12 +7,11 @@ namespace LambdaModel.Utilities
 {
     public class LruCache<K,T>
     {
-        private readonly Dictionary<K, T> _cache = new Dictionary<K, T>();
-        private readonly K[] _retrievedKeys;
-        private int _retrievedKeyIndex = 0;
+        protected readonly Dictionary<K, CacheItem<T>> _cache = new Dictionary<K, CacheItem<T>>();
 
         public int RetrievedFromCache { get; private set; }
         public int RemovedFromCache { get; private set; }
+        public int CacheRemovals { get; private set; }
         public int AddedToCache { get; private set; }
         public int CurrentlyInCache => _cache.Count;
         public int MaxItems { get; }
@@ -20,75 +19,91 @@ namespace LambdaModel.Utilities
 
         public Action<T> OnRemoved = null;
 
+        private int _ageCounter = 0;
+
         public LruCache(int maxItems, int removeItemsWhenFull)
         {
             MaxItems = maxItems;
             RemoveItemsWhenFull = removeItemsWhenFull;
-
-            _retrievedKeys = new K[maxItems * 5];
         }
 
         public virtual bool TryGetValue(K key, out T value)
         {
-            var result = _cache.TryGetValue(key, out value);
+            var result = _cache.TryGetValue(key, out var cacheItem);
             if (result)
             {
                 RetrievedFromCache++;
-                MarkRetrieved(key);
+                cacheItem.AddedAt = _ageCounter++;
+                value = cacheItem.Item;
             }
+            else
+            {
+                value = default;
+            }
+
+            if (_ageCounter == int.MaxValue) ResetAge();
 
             return result;
         }
 
-        private void MarkRetrieved(K key)
+        private void ResetAge()
         {
-            _retrievedKeys[_retrievedKeyIndex++] = key;
-            if (_retrievedKeyIndex >= _retrievedKeys.Length)
-                _retrievedKeyIndex = 0;
+            _ageCounter = 0;
+            foreach (var item in _cache.Values.OrderBy(p => p.AddedAt))
+                item.AddedAt = _ageCounter++;
+        }
+
+        public int GetCreationAge(K key)
+        {
+            return _cache[key].AddedAt;
         }
 
         public void Add(K key, T value)
         {
             if (_cache.Count == MaxItems)
                 RemoveLeastRecentlyUsed(RemoveItemsWhenFull);
-            
-            _cache.Add(key, value);
-            MarkRetrieved(key);
+
+            _cache.Add(key, new CacheItem<T>(value)
+            {
+                AddedAt = _ageCounter++
+            });
             AddedToCache++;
+
+            if (_ageCounter == int.MaxValue)
+                ResetAge();
         }
 
         private void RemoveLeastRecentlyUsed(int remove)
         {
-            var lastRecentlyUsed = _retrievedKeys.GroupBy(p => p).OrderBy(p => p.Count()).Select(p => p.Key);
-            var removeIds = new HashSet<K>();
-            foreach (var key in lastRecentlyUsed)
+            var lastRecentlyUsed = _cache.OrderBy(p => p.Value.AddedAt).Take(remove).ToArray();
+            foreach (var item in lastRecentlyUsed)
             {
-                if (key == null) continue;
-                if (!_cache.TryGetValue(key, out var v)) continue;
-
-                removeIds.Add(key);
-                OnRemoved?.Invoke(v);
-                _cache.Remove(key);
+                OnRemoved?.Invoke(item.Value.Item);
+                _cache.Remove(item.Key);
                 RemovedFromCache++;
-
-                if (removeIds.Count >= remove) break;
             }
 
-            for (var i = 0; i < _retrievedKeys.Length; i++)
-            {
-                if (removeIds.Contains(_retrievedKeys[i]))
-                    _retrievedKeys[i] = default;
-            }
+            CacheRemovals++;
         }
 
         public void Clear()
         {
             _cache.Clear();
-            for (var i = 0; i < _retrievedKeys.Length; i++)
-                _retrievedKeys[i] = default;
             AddedToCache = 0;
             RemovedFromCache = 0;
             RetrievedFromCache = 0;
+            CacheRemovals = 0;
+        }
+    }
+
+    public class CacheItem<T>
+    {
+        public T Item;
+        public int AddedAt;
+
+        public CacheItem(T value)
+        {
+            Item = value;
         }
     }
 }

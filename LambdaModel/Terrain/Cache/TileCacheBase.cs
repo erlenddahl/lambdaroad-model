@@ -27,12 +27,14 @@ namespace LambdaModel.Terrain.Cache
 
             cip?.Set("Tile size", TileSize);
             cip?.Set("Tile cache", System.IO.Path.GetFileName(_cacheLocation));
-            _cip?.Set("Memcache options", _tiffCache.MaxItems + " / " + _tiffCache.RemoveItemsWhenFull);
+            _cip?.Set("Memcache options", TiffCache.MaxItems + " / " + TiffCache.RemoveItemsWhenFull);
 
             if (!System.IO.Directory.Exists(_cacheLocation))
                 System.IO.Directory.CreateDirectory(_cacheLocation);
 
-            _tiffCache.OnRemoved = tiff => tiff.Dispose();
+            TiffCache.OnRemoved = tiff => tiff.Dispose();
+        }
+
         public void SetCache(LruCache<T, TiffReaderBase> cache)
         {
             TiffCache = cache;
@@ -62,18 +64,17 @@ namespace LambdaModel.Terrain.Cache
 
         protected TiffReaderBase GetTiffByInternalCoordinates(T key)
         {
-            if (_tiffCache.TryGetValue(key, out var tiff))
+            if (TiffCache.TryGetValue(key, out var tiff))
                 return tiff;
 
             var fn = GetFilename(key);
             tiff = CreateTiff(fn);
 
-            _tiffCache.Add(key, tiff);
+            TiffCache.Add(key, tiff);
 
-            _cip?.Set("Tiles retrieved from memcache", _tiffCache.RetrievedFromCache);
-            _cip?.Set("Tiles removed from memcache", _tiffCache.RemovedFromCache);
-            _cip?.Set("Tiles added to memcache", _tiffCache.AddedToCache);
-            _cip?.Set("Tiles in memcache", _tiffCache.CurrentlyInCache);
+            _cip?.Set("Tiles retrieved from memcache", TiffCache.RetrievedFromCache);
+            _cip?.Set("Memcache added/current", TiffCache.AddedToCache + " / " + TiffCache.CurrentlyInCache);
+            _cip?.Set("Memcache rem/rem.ops", TiffCache.RemovedFromCache + " / " + TiffCache.CacheRemovals);
 
             return tiff;
         }
