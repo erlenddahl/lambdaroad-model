@@ -11,19 +11,19 @@ namespace LambdaModel.Terrain.Cache
     {
         protected readonly string _cacheLocation;
         public int TileSize { get; }
-        protected readonly LruCache<T, TiffReaderBase> _tiffCache;
+        protected LruCache<T, TiffReaderBase> TiffCache { get; set; }
         protected readonly ConsoleInformationPanel _cip;
 
         public Func<string, TiffReaderBase> CreateTiff = fn => new QuickGeoTiff(fn);
 
-        public int TilesRetrievedFromCache => _tiffCache.RetrievedFromCache;
+        public int TilesRetrievedFromCache => TiffCache.RetrievedFromCache;
 
         public TileCacheBase(string cacheLocation, int tileSize = 512, ConsoleInformationPanel cip = null, int maxCacheItems = 1000, int removeCacheItemsWhenFull = 5)
         {
             _cip = cip;
             _cacheLocation = cacheLocation;
             TileSize = tileSize;
-            _tiffCache = new LruCache<T, TiffReaderBase>(maxCacheItems, removeCacheItemsWhenFull);
+            TiffCache = new LruCache<T, TiffReaderBase>(maxCacheItems, removeCacheItemsWhenFull);
 
             cip?.Set("Tile size", TileSize);
             cip?.Set("Tile cache", System.IO.Path.GetFileName(_cacheLocation));
@@ -33,6 +33,9 @@ namespace LambdaModel.Terrain.Cache
                 System.IO.Directory.CreateDirectory(_cacheLocation);
 
             _tiffCache.OnRemoved = tiff => tiff.Dispose();
+        public void SetCache(LruCache<T, TiffReaderBase> cache)
+        {
+            TiffCache = cache;
         }
 
         protected abstract string GetFilename(T key);
@@ -211,7 +214,7 @@ namespace LambdaModel.Terrain.Cache
             throw new Exception("Do you really want to do this?");
             System.IO.Directory.Delete(_cacheLocation, true);
             System.IO.Directory.CreateDirectory(_cacheLocation);
-            _tiffCache.Clear();
+            TiffCache.Clear();
         }
 
         public GeoTiff GetSubset(int bottomLeftX, int bottomLeftY, int size)

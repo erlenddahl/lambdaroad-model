@@ -28,7 +28,7 @@ namespace LambdaModel.Utilities
             _retrievedKeys = new K[maxItems * 5];
         }
 
-        public bool TryGetValue(K key, out T value)
+        public virtual bool TryGetValue(K key, out T value)
         {
             var result = _cache.TryGetValue(key, out value);
             if (result)
