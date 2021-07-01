@@ -37,7 +37,9 @@ namespace LambdaModel.Calculations
             Radius = radius;
             Center = center;
             TxHeightAboveTerrain = txHeightAboveTerrain;
-            RoadLinks = ShapeLink.ReadLinks(roadShapeLocation, Center, radius).ToArray();//.OrderBy(p => Center.DistanceTo2D(p.Cx, p.Cy)).ToArray();
+            RoadLinks = ShapeLink.ReadLinks(roadShapeLocation, Center, radius)
+                .OrderBy(p => Center.AngleFromHorizon(new Point3D(p.Cx, p.Cy)))
+                .ToArray();
 
             cip?.Set("Relevant road links", RoadLinks.Length);
 

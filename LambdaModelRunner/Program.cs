@@ -19,9 +19,6 @@ namespace LambdaModelRunner
         {
             /*
              * TODOS:
-             * Order road links by angle in order to use spiral sequence
-             *    - Will reduce cache removals
-             * Then by distance from center?
              * Eliminate further by looking at fresnel obstructions and eliminating once we know path loss gets too big
              */
 
@@ -50,7 +47,7 @@ namespace LambdaModelRunner
                 var tileSize = 512;
                 var txHeightAboveTerrain = 100;
 
-                var tiles = new LocalTileCache(@"I:\Jobb\Lambda\Tiles_" + tileSize, tileSize, cip, 300, 50);
+                var tiles = new LocalTileCache(@"I:\Jobb\Lambda\Tiles_" + tileSize, tileSize, cip, 300, 100);
 
                 var road = new RoadNetworkCalculator(tiles, @"..\..\..\..\Data\RoadNetwork\2021-05-28_smaller.shp", radius, center, txHeightAboveTerrain, cip);
                 road.RemoveLinksTooFarAway(200);
