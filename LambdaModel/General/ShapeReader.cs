@@ -15,14 +15,16 @@ namespace LambdaModel.General
     public class ShapeLink
     {
         public int ID { get; }
+        public string Name { get; set; }
         public int Cx { get; }
         public int Cy { get; }
         public int Length { get; }
         public Point4D[] Geometry { get; }
 
-        private ShapeLink(int id, IEnumerable<Point4D> geometry, int cx, int cy, int length)
+        private ShapeLink(int id, string name, IEnumerable<Point4D> geometry, int cx, int cy, int length)
         {
             ID = id;
+            Name = name;
             Cx = cx;
             Cy = cy;
             Length = length;
@@ -35,6 +37,7 @@ namespace LambdaModel.General
                 Geometry[i] = new Point4D(pi.X, pi.Y, pi.Z);
             }
         }
+
 
         /// <summary>
         /// Reads all links that are within the given radius from the center point.
@@ -96,7 +99,7 @@ namespace LambdaModel.General
                     }
 
                     if (anyInside && length > 1)
-                        yield return new ShapeLink(ix, geometry, cx, cy, length);
+                        yield return new ShapeLink(ix, name, geometry, cx, cy, length);
                 }
             }
         }
