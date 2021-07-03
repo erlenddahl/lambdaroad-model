@@ -117,6 +117,7 @@ namespace LambdaModel.Calculations
 
             var table = shp.DataTable;
             table.Columns.Add("Loss", typeof(double));
+            table.Columns.Add("RoadLinkId", typeof(string));
             table.AcceptChanges();
 
             using (var pb = _cip?.SetProgress("Saving results", max: RoadLinks.Length))
@@ -127,6 +128,7 @@ namespace LambdaModel.Calculations
                         if (double.IsNaN(c.M)) continue;
                         var feature = shp.AddFeature(new Point(new Coordinate(c.X, c.Y, c.Z)));
                         feature.DataRow["Loss"] = c.M;
+                        feature.DataRow["RoadLinkId"] = link.Name;
                     }
 
                     pb?.Increment();
