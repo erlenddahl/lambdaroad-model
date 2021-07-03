@@ -133,7 +133,9 @@ namespace LambdaModel.Calculations
 
                     pb?.Increment();
                 }
-            shp.SaveAs(outputLocation, true);
+
+            using (var _ = _cip?.SetUnknownProgress("Writing shape"))
+                shp.SaveAs(outputLocation, true);
         }
     }
 }
