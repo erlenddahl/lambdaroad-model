@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using ConsoleUtilities.ConsoleInfoPanel;
@@ -29,7 +30,7 @@ namespace LambdaModel.Terrain
                 System.IO.Directory.CreateDirectory(_destination);
 
             _files = System.IO.Directory
-                .GetFiles(_source, "*.tif")
+                .GetFiles(_source, "*.tif", SearchOption.AllDirectories)
                 .Select(p => (Path: p, Tiff: new GeoTiff(p, true)))
                 .ToArray();
 
