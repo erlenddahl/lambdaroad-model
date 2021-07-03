@@ -46,11 +46,14 @@ namespace LambdaModelRunner
                 var radius = 50_000;
                 var tileSize = 512;
                 var txHeightAboveTerrain = 100;
+                var stationTotalTransmittionLevel = 62;
+                var minAllowableValue = -150;
+                var maxLoss = stationTotalTransmittionLevel - minAllowableValue;
 
                 var tiles = new LocalTileCache(@"I:\Jobb\Lambda\Tiles_" + tileSize, tileSize, cip, 300, 100);
 
                 var road = new RoadNetworkCalculator(tiles, @"..\..\..\..\Data\RoadNetwork\2021-05-28_smaller.shp", radius, center, txHeightAboveTerrain, cip);
-                road.RemoveLinksTooFarAway(200);
+                road.RemoveLinksTooFarAway(maxLoss);
 
                 var start = DateTime.Now;
                 var calculations = road.Calculate();
@@ -58,6 +61,8 @@ namespace LambdaModelRunner
                 cip.Set("Calculation time", $"{secs:n2} seconds");
                 cip.Set("Calculations", calculations);
                 cip.Set("Calculations per second", $"{(calculations / secs):n2} c/s");
+
+                road.RemoveLinkWithTooMuchPathLoss(maxLoss);
 
                 start = DateTime.Now;
                 road.SaveResults(@"..\..\..\..\Data\RoadNetwork\test-results-huge-2.shp");

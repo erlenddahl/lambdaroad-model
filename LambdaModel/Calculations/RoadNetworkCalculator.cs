@@ -60,20 +60,42 @@ namespace LambdaModel.Calculations
         /// <returns></returns>
         public void RemoveLinksTooFarAway(int maxPathLoss)
         {
-            using (var pb = _cip?.SetProgress("Checking road link min possible path loss", max: RoadLinks.Length))
+            RemoveLinksBy("Checking road link min possible path loss", "Road links removed (min loss)", p =>
+            {
+                var minDistToCenter = Center.DistanceTo2D(p.Cx, p.Cy) - p.Length;
+                var minPossiblePathLoss = _calc.CalculateMinPossibleLoss(minDistToCenter, TxHeightAboveTerrain);
+                return minPossiblePathLoss > maxPathLoss;
+            });
+        }
+
+        private void RemoveLinksBy(string desc, string removalDesc, Func<ShapeLink, bool> filter)
+        {
+            using (var pb = _cip?.SetProgress(desc, max: RoadLinks.Length))
             {
                 var linkIdsToRemove = new HashSet<int>(RoadLinks.Where(p =>
                 {
-                    var minDistToCenter = Center.DistanceTo2D(p.Cx, p.Cy) - p.Length;
-                    var minPossiblePathLoss = _calc.CalculateMinPossibleLoss(minDistToCenter, TxHeightAboveTerrain);
+                    var res = filter(p);
                     pb?.Increment();
-                    return minPossiblePathLoss > maxPathLoss;
+                    return res;
                 }).Select(p => p.ID));
 
                 RoadLinks = RoadLinks.Where(p => !linkIdsToRemove.Contains(p.ID)).ToArray();
 
-                _cip.Set("Road links removed", linkIdsToRemove.Count);
+                _cip.Set(removalDesc, linkIdsToRemove.Count);
             }
+        }
+
+        /// <summary>
+        /// Check all links and removes those that has too much path loss due to distance alone.
+        /// </summary>
+        /// <returns></returns>
+        public void RemoveLinkWithTooMuchPathLoss(int maxPathLoss)
+        {
+            RemoveLinksBy("Checking road link calculated path loss", "Road links removed (actual loss)", p =>
+            {
+                var minPathLoss = p.Geometry.Min(c => c.M);
+                return minPathLoss > maxPathLoss;
+            });
         }
 
         public int Calculate()
