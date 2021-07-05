@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using DotSpatial.Data;
 using DotSpatial.Topology;
+using LambdaModel.Stations;
 using no.sintef.SpeedModule.Geometry;
 using no.sintef.SpeedModule.Geometry.SimpleStructures;
 
@@ -43,15 +44,18 @@ namespace LambdaModel.General
         /// Reads all links that are within the given radius from the center point.
         /// </summary>
         /// <param name="geometryPath"></param>
-        /// <param name="center"></param>
-        /// <param name="radius"></param>
+        /// <param name="stations"></param>
         /// <returns></returns>
-        public static IEnumerable<ShapeLink> ReadLinks(string geometryPath, Point3D center, double radius)
+        public static void ReadLinks(string geometryPath, RoadLinkBaseStation[] stations)
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-            var cc = new Coordinate(center.X, center.Y);
             if (!File.Exists(geometryPath + ".cache"))
                 GenerateShapeCache(geometryPath);
+
+            foreach (var bs in stations)
+            {
+                bs.Links.Clear();
+            }
 
             using (var reader = new BinaryReader(File.OpenRead(geometryPath + ".cache")))
             {
@@ -66,9 +70,6 @@ namespace LambdaModel.General
                     var cy = reader.ReadInt32();
                     var length = reader.ReadInt32();
 
-                    var dx = cx - cc.X;
-                    var dy = cy - cc.Y;
-
                     var name = reader.ReadString();
 
                     var pointCount = reader.ReadInt32();
@@ -76,30 +77,48 @@ namespace LambdaModel.General
                     var pointBytes = reader.ReadBytes(pointCount * 24);
                     position += 4 + 4 * 3 + 4 + name.Length + 4 + pointBytes.Length;
 
-                    if (Math.Sqrt(dx * dx + dy * dy) - length > radius)
-                        continue;
+                    if (pointCount < 2) continue;
 
-                    var geometry = new Point4D[pointCount];
-                    var pix = 0;
-                    var anyInside = false;
-                    for (var i = 0; i < pointBytes.Length; i += 24)
+                    ShapeLink link = null;
+                    foreach (var bs in stations)
                     {
-                        var x = BitConverter.ToDouble(pointBytes, i);
-                        var y = BitConverter.ToDouble(pointBytes, i + 8);
-                        var z = BitConverter.ToDouble(pointBytes, i + 16);
-                        geometry[pix++] = new Point4D(x, y, z);
+                        var dist = bs.Center.DistanceTo2D(cx, cy);
 
-                        if (!anyInside)
+                        // If this link is guaranteed to be outside of the station's radius, skip it immediately.
+                        if (dist - length > bs.MaxRadius)
+                            continue;
+
+                        // Otherwise, parse the link geometry (which is stored outside of the link so that we only
+                        // have to do it once, and so that each base stations gets the same link object reference.
+                        if (link == null)
                         {
-                            dx = x - cc.X;
-                            dy = y - cc.Y;
-                            if (Math.Sqrt(dx * dx + dy * dy) <= radius)
-                                anyInside = true;
-                        }
-                    }
+                            var geometry = new Point4D[pointCount];
+                            var pix = 0;
 
-                    if (anyInside && length > 1)
-                        yield return new ShapeLink(ix, name, geometry, cx, cy, length);
+                            for (var i = 0; i < pointBytes.Length; i += 24)
+                            {
+                                var x = BitConverter.ToDouble(pointBytes, i);
+                                var y = BitConverter.ToDouble(pointBytes, i + 8);
+                                var z = BitConverter.ToDouble(pointBytes, i + 16);
+                                geometry[pix++] = new Point4D(x, y, z);
+                            }
+
+                            link = new ShapeLink(ix, name, geometry, cx, cy, length);
+                        }
+
+                        // Check if any points on the link is actually inside of the radius.
+                        foreach (var g in link.Geometry)
+                        {
+                            dist = g.DistanceTo2D(bs.Center);
+                            if (dist <= bs.MaxRadius)
+                            {
+                                // If so, add the link, and break this loop.
+                                bs.Links.Add(link);
+                                break;
+                            }
+                        }
+
+                    }
                 }
             }
         }
