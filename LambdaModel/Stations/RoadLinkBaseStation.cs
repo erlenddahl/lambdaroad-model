@@ -70,6 +70,7 @@ namespace LambdaModel.Stations
 
         public int Calculate(ITiffReader tiles)
         {
+            SortLinks();
             var calculations = 0;
 
             Center.Z = tiles.GetAltitude(Center);
@@ -91,7 +92,9 @@ namespace LambdaModel.Stations
                         var vectorLength = tiles.FillVector(_vector, Center.X, Center.Y, c.X, c.Y, withHeights: true);
 
                         // Calculate the loss for this point, and store it in the results matrix
-                        c.M = _calc.CalculateLoss(_vector, HeightAboveTerrain, 2, vectorLength - 1);
+                        var value = _calc.CalculateLoss(_vector, HeightAboveTerrain, 2, vectorLength - 1);
+                        if (value < c.M)
+                            c.M = value;
 
                         linkCalcs++;
                     }

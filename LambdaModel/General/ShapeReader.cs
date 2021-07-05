@@ -35,7 +35,7 @@ namespace LambdaModel.General
             for (var i = 0; i < line.Length; i++)
             {
                 var pi = line.QueryPointInfo(i);
-                Geometry[i] = new Point4D(pi.X, pi.Y, pi.Z);
+                Geometry[i] = new Point4D(pi.X, pi.Y, pi.Z, double.MaxValue);
             }
         }
 
