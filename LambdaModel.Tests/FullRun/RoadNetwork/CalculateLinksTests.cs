@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading;
 using LambdaModel.Calculations;
 using LambdaModel.General;
+using LambdaModel.Stations;
 using LambdaModel.Terrain;
 using LambdaModel.Terrain.Cache;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -17,17 +18,17 @@ namespace LambdaModel.Tests.FullRun.RoadNetwork
         public void TinyTest(int tileSize)
         {
             var tiles = new OnlineTileCache(@"..\..\..\..\Data\Testing\CacheTest", tileSize);
-            var road = new RoadNetworkCalculator(tiles, @"..\..\..\..\Data\RoadNetwork\2021-05-28_smaller.shp", 500, new Point3D(271327, 7040324), 100);
+            var bs = new RoadLinkBaseStation(271327, 7040324, 100, 500);
 
             var start = DateTime.Now;
-            var calculations = road.Calculate();
+            var calculations = bs.Calculate(tiles);
             var secs = DateTime.Now.Subtract(start).TotalSeconds;
             Console.WriteLine($"Calculation time: {secs:n2} seconds.");
             Console.WriteLine($"Calculations: {calculations:n0}, {(calculations / secs):n2} c/s");
 
-            start = DateTime.Now;
-            road.SaveResults(@"..\..\..\..\Data\RoadNetwork\test-results-tiny.shp");
-            Console.WriteLine($"Saving time: {DateTime.Now.Subtract(start).TotalSeconds:n2} seconds.");
+            //start = DateTime.Now;
+            //bs.SaveResults(@"..\..\..\..\Data\RoadNetwork\test-results-tiny.shp");
+            //Console.WriteLine($"Saving time: {DateTime.Now.Subtract(start).TotalSeconds:n2} seconds.");
         }
 
         [TestMethod]

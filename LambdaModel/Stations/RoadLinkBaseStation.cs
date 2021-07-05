@@ -1,7 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using ConsoleUtilities.ConsoleInfoPanel;
+using DotSpatial.Data;
+using DotSpatial.Topology;
 using LambdaModel.General;
+using LambdaModel.Terrain;
+using no.sintef.SpeedModule.Geometry.SimpleStructures;
 
 namespace LambdaModel.Stations
 {
@@ -9,8 +15,94 @@ namespace LambdaModel.Stations
     {
         public List<ShapeLink> Links { get; set; } = new List<ShapeLink>();
 
-        public RoadLinkBaseStation(double x, double y, int heightAboveTerrain) : base(x, y, heightAboveTerrain)
+        public RoadLinkBaseStation(double x, double y, int heightAboveTerrain, int maxRadius, ConsoleInformationPanel cip = null) : base(x, y, heightAboveTerrain, maxRadius, cip)
         {
+        }
+
+        public void SortLinks()
+        {
+            Links = Links.OrderBy(p => Center.AngleFromHorizon(new Point3D(p.Cx, p.Cy))).ToList();
+        }
+
+        private void RemoveLinksBy(string desc, string removalDesc, Func<ShapeLink, bool> filter)
+        {
+            using (var pb = _cip?.SetProgress(desc, max: Links.Count))
+            {
+                var removed = Links.RemoveAll(p =>
+                {
+                    var res = filter(p);
+                    pb?.Increment();
+                    return res;
+                });
+
+                _cip?.Set(removalDesc, removed);
+            }
+        }
+
+        /// <summary>
+        /// Check all links and removes those that has too much path loss due to distance alone.
+        /// </summary>
+        /// <returns></returns>
+        public void RemoveLinksTooFarAway(double maxPathLoss)
+        {
+            RemoveLinksBy("Checking road link min possible path loss", "Road links removed (min loss)", p =>
+            {
+                var minDistToCenter = Center.DistanceTo2D(p.Cx, p.Cy) - p.Length;
+                var minPossiblePathLoss = _calc.CalculateMinPossibleLoss(minDistToCenter, HeightAboveTerrain);
+                return minPossiblePathLoss > maxPathLoss;
+            });
+        }
+
+        /// <summary>
+        /// Check all links and removes those that has too much path loss due to distance alone.
+        /// </summary>
+        /// <returns></returns>
+        public void RemoveLinksWithTooMuchPathLoss(double maxPathLoss)
+        {
+            RemoveLinksBy("Checking road link calculated path loss", "Road links removed (actual loss)", p =>
+            {
+                var minPathLoss = p.Geometry.Min(c => c.M);
+                return minPathLoss > maxPathLoss;
+            });
+        }
+
+
+
+        public int Calculate(ITiffReader tiles)
+        {
+            var calculations = 0;
+
+            Center.Z = tiles.GetAltitude(Center);
+
+            using (var pb = _cip?.SetProgress("Calculating path loss", max: Links.Count))
+            {
+                foreach (var link in Links)
+                {
+                    var linkCalcs = 0;
+                    foreach (var c in link.Geometry)
+                    {
+                        if (Center.DistanceTo2D(c) > MaxRadius)
+                        {
+                            _cip?.Increment("Points outside of radius");
+                            continue;
+                        }
+
+                        // Get the X,Y,Z vector from the center to these coordinates.
+                        var vectorLength = tiles.FillVector(_vector, Center.X, Center.Y, c.X, c.Y, withHeights: true);
+
+                        // Calculate the loss for this point, and store it in the results matrix
+                        c.M = _calc.CalculateLoss(_vector, HeightAboveTerrain, 2, vectorLength - 1);
+
+                        linkCalcs++;
+                    }
+
+                    pb?.Increment();
+                    calculations += linkCalcs;
+                    _cip?.Increment("Points calculated", linkCalcs);
+                }
+            }
+
+            return calculations;
         }
     }
 }

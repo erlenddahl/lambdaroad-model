@@ -1,10 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using BitMiracle.LibTiff.Classic;
 using ConsoleUtilities.ConsoleInfoPanel;
+using DotSpatial.Data;
+using DotSpatial.Topology;
 using LambdaModel.Calculations;
+using LambdaModel.General;
+using LambdaModel.Stations;
 using LambdaModel.Terrain;
 using LambdaModel.Terrain.Cache;
 using LambdaModel.Terrain.Tiff;
@@ -39,35 +45,79 @@ namespace LambdaModelRunner
             {
                 Tiff.SetErrorHandler(new LambdaTiffErrorHandler(cip));
 
-                //new TileGenerator(@"G:\Jobb\Lambda\12-14", @"G:\Jobb\Lambda\Tiles_512\", 512, cip).Generate();
-                //new TileGenerator(@"G:\Jobb\Lambda\12-14", @"G:\Jobb\Lambda\Tiles_256\", 256, cip).Generate();
+                var stations = new[]
+                {
+                    new RoadLinkBaseStation(263062, 7041212, 100, 50_000, cip),
+                    new RoadLinkBaseStation(271327, 7040324, 50, 50_000, cip)
+                };
 
-                var center = new Point3D(271327, 7040324);
-                var radius = 50_000;
+                //new TileGenerator(@"I:\Jobb\Lambda\Unpacked", @"I:\Jobb\Lambda\Tiles_512", 512, cip).Generate();
+                //new TileGenerator(@"I:\Jobb\Lambda\Unpacked\1213-13", @"I:\Jobb\Lambda\Tiles_512", 256, cip).Generate();
+
+                //TODO: Solve repeating progress bars and info (both here and inside bs.Calculate)
+
                 var tileSize = 512;
-                var txHeightAboveTerrain = 100;
-                var stationTotalTransmittionLevel = 62;
                 var minAllowableValue = -150;
-                var maxLoss = stationTotalTransmittionLevel - minAllowableValue;
+
+                var roadShapeLocation = @"..\..\..\..\Data\RoadNetwork\2021-05-28_smaller.shp";
+                cip?.Set("Road network source", System.IO.Path.GetFileName(roadShapeLocation));
+                ShapeLink.ReadLinks(roadShapeLocation, stations);
 
                 var tiles = new LocalTileCache(@"I:\Jobb\Lambda\Tiles_" + tileSize, tileSize, cip, 300, 100);
 
-                var road = new RoadNetworkCalculator(tiles, @"..\..\..\..\Data\RoadNetwork\2021-05-28_smaller.shp", radius, center, txHeightAboveTerrain, cip);
-                road.RemoveLinksTooFarAway(maxLoss);
-
                 var start = DateTime.Now;
-                var calculations = road.Calculate();
-                var secs = DateTime.Now.Subtract(start).TotalSeconds;
-                cip.Set("Calculation time", $"{secs:n2} seconds");
-                cip.Set("Calculations", calculations);
-                cip.Set("Calculations per second", $"{(calculations / secs):n2} c/s");
+                foreach (var bs in stations)
+                {
+                    cip?.Set("Calculation radius", bs.MaxRadius);
+                    cip?.Set("Relevant road links", bs.Links.Count);
 
-                road.RemoveLinkWithTooMuchPathLoss(maxLoss);
+                    var maxLoss = bs.TotalTransmissionLevel - minAllowableValue;
+
+                    bs.RemoveLinksTooFarAway(maxLoss);
+
+                    var calculations = bs.Calculate(tiles);
+                    var secs = DateTime.Now.Subtract(start).TotalSeconds;
+                    
+                    cip?.Set("Calculation time", $"{secs:n2} seconds");
+                    cip?.Set("Calculations", calculations);
+                    cip?.Set("Calculations per second", $"{(calculations / secs):n2} c/s");
+
+                    bs.RemoveLinksWithTooMuchPathLoss(maxLoss);
+                }
 
                 start = DateTime.Now;
-                road.SaveResults(@"..\..\..\..\Data\RoadNetwork\test-results-huge-2.shp");
+                SaveResults(@"..\..\..\..\Data\RoadNetwork\test-results-huge.shp", stations.SelectMany(p => p.Links).ToArray(), cip);
                 cip.Set("Saving time", $"{DateTime.Now.Subtract(start).TotalSeconds:n2} seconds.");
             }
+        }
+
+
+
+        public static void SaveResults(string outputLocation, IList<ShapeLink> links, ConsoleInformationPanel cip = null)
+        {
+            var shp = new FeatureSet(FeatureType.Point);
+
+            var table = shp.DataTable;
+            table.Columns.Add("Loss", typeof(double));
+            table.Columns.Add("RoadLinkId", typeof(string));
+            table.AcceptChanges();
+
+            using (var pb = cip?.SetProgress("Saving results", max: links.Count))
+                foreach (var link in links)
+                {
+                    foreach (var c in link.Geometry)
+                    {
+                        if (double.IsNaN(c.M)) continue;
+                        var feature = shp.AddFeature(new Point(new Coordinate(c.X, c.Y, c.Z)));
+                        feature.DataRow["Loss"] = c.M;
+                        feature.DataRow["RoadLinkId"] = link.Name;
+                    }
+
+                    pb?.Increment();
+                }
+
+            using (var _ = cip?.SetUnknownProgress("Writing shape"))
+                shp.SaveAs(outputLocation, true);
         }
     }
 

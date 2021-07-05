@@ -46,7 +46,7 @@ namespace LambdaModel.General
         /// <param name="geometryPath"></param>
         /// <param name="stations"></param>
         /// <returns></returns>
-        public static void ReadLinks(string geometryPath, RoadLinkBaseStation[] stations)
+        public static void ReadLinks(string geometryPath, IList<RoadLinkBaseStation> stations)
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             if (!File.Exists(geometryPath + ".cache"))
