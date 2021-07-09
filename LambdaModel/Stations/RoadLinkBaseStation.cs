@@ -35,7 +35,7 @@ namespace LambdaModel.Stations
                     return res;
                 });
 
-                _cip?.Set(removalDesc, removed);
+                _cip?.Increment(removalDesc, removed);
             }
         }
 
@@ -75,34 +75,30 @@ namespace LambdaModel.Stations
 
             Center.Z = tiles.GetAltitude(Center);
 
-            using (var pb = _cip?.SetProgress("Calculating path loss", max: Links.Count))
+            foreach (var link in _cip.Run("Calculating path loss", Links))
             {
-                foreach (var link in Links)
+                var linkCalcs = 0;
+                foreach (var c in link.Geometry)
                 {
-                    var linkCalcs = 0;
-                    foreach (var c in link.Geometry)
+                    if (Center.DistanceTo2D(c) > MaxRadius)
                     {
-                        if (Center.DistanceTo2D(c) > MaxRadius)
-                        {
-                            _cip?.Increment("Points outside of radius");
-                            continue;
-                        }
-
-                        // Get the X,Y,Z vector from the center to these coordinates.
-                        var vectorLength = tiles.FillVector(_vector, Center.X, Center.Y, c.X, c.Y, withHeights: true);
-
-                        // Calculate the loss for this point, and store it in the results matrix
-                        var value = _calc.CalculateLoss(_vector, HeightAboveTerrain, 2, vectorLength - 1);
-                        if (value < c.M)
-                            c.M = value;
-
-                        linkCalcs++;
+                        _cip?.Increment("Points outside of radius");
+                        continue;
                     }
 
-                    pb?.Increment();
-                    calculations += linkCalcs;
-                    _cip?.Increment("Points calculated", linkCalcs);
+                    // Get the X,Y,Z vector from the center to these coordinates.
+                    var vectorLength = tiles.FillVector(_vector, Center.X, Center.Y, c.X, c.Y, withHeights: true);
+
+                    // Calculate the loss for this point, and store it in the results matrix
+                    var value = _calc.CalculateLoss(_vector, HeightAboveTerrain, 2, vectorLength - 1);
+                    if (value < c.M)
+                        c.M = value;
+
+                    linkCalcs++;
                 }
+
+                calculations += linkCalcs;
+                _cip?.Increment("Points calculated", linkCalcs);
             }
 
             return calculations;

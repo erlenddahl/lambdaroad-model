@@ -54,10 +54,9 @@ namespace LambdaModelRunner
                 //new TileGenerator(@"I:\Jobb\Lambda\Unpacked", @"I:\Jobb\Lambda\Tiles_512", 512, cip).Generate();
                 //new TileGenerator(@"I:\Jobb\Lambda\Unpacked\1213-13", @"I:\Jobb\Lambda\Tiles_512", 256, cip).Generate();
 
-                //TODO: Solve repeating progress bars and info (both here and inside bs.Calculate)
-
                 var tileSize = 512;
                 var minAllowableValue = -150;
+                var calculations = 0;
 
                 var roadShapeLocation = @"..\..\..\..\Data\RoadNetwork\2021-05-28_smaller.shp";
                 cip?.Set("Road network source", System.IO.Path.GetFileName(roadShapeLocation));
@@ -66,7 +65,7 @@ namespace LambdaModelRunner
                 var tiles = new LocalTileCache(@"I:\Jobb\Lambda\Tiles_" + tileSize, tileSize, cip, 300, 100);
 
                 var start = DateTime.Now;
-                foreach (var bs in stations)
+                foreach (var bs in cip.Run("Processing base stations", stations))
                 {
                     cip?.Set("Calculation radius", bs.MaxRadius);
                     cip?.Set("Relevant road links", bs.Links.Count);
@@ -75,11 +74,10 @@ namespace LambdaModelRunner
 
                     bs.RemoveLinksTooFarAway(maxLoss);
 
-                    var calculations = bs.Calculate(tiles);
-                    var secs = DateTime.Now.Subtract(start).TotalSeconds;
+                    calculations += bs.Calculate(tiles);
                     
-                    cip?.Set("Calculation time", $"{secs:n2} seconds");
-                    cip?.Set("Calculations", calculations);
+                    var secs = DateTime.Now.Subtract(start).TotalSeconds;
+                    cip?.Increment("Calculation time", secs);
                     cip?.Set("Calculations per second", $"{(calculations / secs):n2} c/s");
 
                     bs.RemoveLinksWithTooMuchPathLoss(maxLoss);
