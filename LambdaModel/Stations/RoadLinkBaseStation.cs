@@ -26,7 +26,7 @@ namespace LambdaModel.Stations
 
         private void RemoveLinksBy(string desc, string removalDesc, Func<ShapeLink, bool> filter)
         {
-            using (var pb = _cip?.SetProgress(desc, max: Links.Count))
+            using (var pb = Cip?.SetProgress(desc, max: Links.Count))
             {
                 var removed = Links.RemoveAll(p =>
                 {
@@ -35,7 +35,7 @@ namespace LambdaModel.Stations
                     return res;
                 });
 
-                _cip?.Increment(removalDesc, removed);
+                Cip?.Increment(removalDesc, removed);
             }
         }
 
@@ -75,14 +75,14 @@ namespace LambdaModel.Stations
 
             Center.Z = tiles.GetAltitude(Center);
 
-            foreach (var link in _cip.Run("Calculating path loss", Links))
+            foreach (var link in Cip.Run("Calculating path loss", Links))
             {
                 var linkCalcs = 0;
                 foreach (var c in link.Geometry)
                 {
                     if (Center.DistanceTo2D(c) > MaxRadius)
                     {
-                        _cip?.Increment("Points outside of radius");
+                        Cip?.Increment("Points outside of radius");
                         continue;
                     }
 
@@ -98,7 +98,7 @@ namespace LambdaModel.Stations
                 }
 
                 calculations += linkCalcs;
-                _cip?.Increment("Points calculated", linkCalcs);
+                Cip?.Increment("Points calculated", linkCalcs);
             }
 
             return calculations;

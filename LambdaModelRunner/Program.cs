@@ -9,6 +9,7 @@ using ConsoleUtilities.ConsoleInfoPanel;
 using DotSpatial.Data;
 using DotSpatial.Topology;
 using LambdaModel.Calculations;
+using LambdaModel.Config;
 using LambdaModel.General;
 using LambdaModel.Stations;
 using LambdaModel.Terrain;
@@ -41,36 +42,50 @@ namespace LambdaModelRunner
                 Debug.WriteLine(ex.Message);
             }
 
+            var config = new RoadNetworkConfig()
+            {
+                CalculationMethod = CalculationMethod.RoadNetwork,
+                TileSize = 512,
+                BaseStations = new[]
+                {
+                    new RoadLinkBaseStation(263062, 7041212, 100, 50_000),
+                    new RoadLinkBaseStation(271327, 7040324, 50, 50_000)
+                },
+                MinimumAllowableSignalValue = -150,
+                RoadShapeLocation = @"..\..\..\..\Data\RoadNetwork\2021-05-28_smaller.shp",
+                OutputLocation = @"..\..\..\..\Data\RoadNetwork\test-results-huge.shp",
+                Terrain = new TerrainConfig()
+                {
+                    Type = TerrainType.LocalCache,
+                    Location = @"I:\Jobb\Lambda\Tiles_512",
+                    MaxCacheItems = 300,
+                    RemoveCacheItemsWhenFull = 100
+                }
+            };
+
             using (var cip = new ConsoleInformationPanel("Running road network signal loss calculations"))
             {
                 Tiff.SetErrorHandler(new LambdaTiffErrorHandler(cip));
 
-                var stations = new[]
-                {
-                    new RoadLinkBaseStation(263062, 7041212, 100, 50_000, cip),
-                    new RoadLinkBaseStation(271327, 7040324, 50, 50_000, cip)
-                };
+                foreach (var bs in config.BaseStations)
+                    bs.Cip = cip;
 
                 //new TileGenerator(@"I:\Jobb\Lambda\Unpacked", @"I:\Jobb\Lambda\Tiles_512", 512, cip).Generate();
-                //new TileGenerator(@"I:\Jobb\Lambda\Unpacked\1213-13", @"I:\Jobb\Lambda\Tiles_512", 256, cip).Generate();
 
-                var tileSize = 512;
-                var minAllowableValue = -150;
                 var calculations = 0;
 
-                var roadShapeLocation = @"..\..\..\..\Data\RoadNetwork\2021-05-28_smaller.shp";
-                cip?.Set("Road network source", System.IO.Path.GetFileName(roadShapeLocation));
-                ShapeLink.ReadLinks(roadShapeLocation, stations);
+                cip?.Set("Road network source", System.IO.Path.GetFileName(config.RoadShapeLocation));
+                ShapeLink.ReadLinks(config.RoadShapeLocation, config.BaseStations);
 
-                var tiles = new LocalTileCache(@"I:\Jobb\Lambda\Tiles_" + tileSize, tileSize, cip, 300, 100);
+                var tiles = config.Terrain.CreateCache(cip);
 
                 var start = DateTime.Now;
-                foreach (var bs in cip.Run("Processing base stations", stations))
+                foreach (var bs in cip.Run("Processing base stations", config.BaseStations))
                 {
                     cip?.Set("Calculation radius", bs.MaxRadius);
                     cip?.Set("Relevant road links", bs.Links.Count);
 
-                    var maxLoss = bs.TotalTransmissionLevel - minAllowableValue;
+                    var maxLoss = bs.TotalTransmissionLevel - config.MinimumAllowableSignalValue;
 
                     bs.RemoveLinksTooFarAway(maxLoss);
 
@@ -84,7 +99,7 @@ namespace LambdaModelRunner
                 }
 
                 start = DateTime.Now;
-                SaveResults(@"..\..\..\..\Data\RoadNetwork\test-results-huge.shp", stations.SelectMany(p => p.Links).ToArray(), cip);
+                SaveResults(config.OutputLocation, config.BaseStations.SelectMany(p => p.Links).ToArray(), cip);
                 cip.Set("Saving time", $"{DateTime.Now.Subtract(start).TotalSeconds:n2} seconds.");
             }
         }

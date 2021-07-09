@@ -8,7 +8,8 @@ namespace LambdaModel.Stations
 {
     public class BaseStation
     {
-        protected readonly ConsoleInformationPanel _cip;
+        public ConsoleInformationPanel Cip { get; set; }
+
         protected readonly PathLossCalculator _calc;
         protected readonly Point4D[] _vector;
         public Point3D Center { get; set; }
@@ -17,14 +18,19 @@ namespace LambdaModel.Stations
 
         public double TotalTransmissionLevel { get; set; } = 46 + 18 - 2;
 
+        public BaseStation()
+        {
+
+        }
+
         public BaseStation(double x, double y, int heightAboveTerrain, int maxRadius, ConsoleInformationPanel cip = null)
         {
-            _cip = cip;
+            Cip = cip;
             HeightAboveTerrain = heightAboveTerrain;
             Center = new Point3D(x, y);
             MaxRadius = maxRadius;
 
-            _cip = cip;
+            Cip = cip;
 
             // Initialize a PointUtm array that is to be (re)used as the vector of points from
             // the center to each of the points that should be calculated.
@@ -34,6 +40,5 @@ namespace LambdaModel.Stations
 
             _calc = new PathLossCalculator();
         }
-
     }
 }
