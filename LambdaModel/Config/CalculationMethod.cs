@@ -4,6 +4,7 @@
     {
         Invalid,
         RoadNetwork,
-        Grid
+        Grid,
+        GenerateTiles
     }
 }

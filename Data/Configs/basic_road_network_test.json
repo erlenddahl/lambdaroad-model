@@ -1,0 +1,28 @@
+{
+    "CalculationMethod": "RoadNetwork",
+    "TileSize": 512,
+    "BaseStations": [
+        {
+            "x": 263062, 
+            "y": 7041212, 
+            "heightAboveTerrain": 100, 
+            "maxRadius": 50000
+        },
+        {
+            "x": 271327, 
+            "y": 7040324, 
+            "heightAboveTerrain": 50, 
+            "maxRadius": 50000
+        }
+    ],
+    "MinimumAllowableSignalValue": -150,
+    "RoadShapeLocation": "..\\RoadNetwork\\2021-05-28_smaller.shp",
+    "OutputLocation": "..\\RoadNetwork\\test-results-huge.shp",
+    "Terrain": 
+    {
+        "Type": "LocalCache",
+        "Location": "I:\\Jobb\\Lambda\\Tiles_512",
+        "MaxCacheItems": 300,
+        "RemoveCacheItemsWhenFull": 100
+    }
+}
