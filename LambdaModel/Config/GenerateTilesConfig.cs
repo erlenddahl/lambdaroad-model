@@ -7,7 +7,7 @@ namespace LambdaModel.Config
     {
         public string RawDataLocation { get; set; }
 
-        protected override GeneralConfig Validate(string configLocation = null)
+        public override GeneralConfig Validate(string configLocation = null)
         {
             RawDataLocation = GetFullPath(configLocation, RawDataLocation);
             return base.Validate(configLocation);

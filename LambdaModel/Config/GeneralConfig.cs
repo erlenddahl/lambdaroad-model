@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using ConsoleUtilities.ConsoleInfoPanel;
 using LambdaModel.Stations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -20,6 +21,9 @@ namespace LambdaModel.Config
         public string OutputLocation { get; set; }
         public TerrainConfig Terrain { get; set; }
 
+        public ConsoleInformationPanel Cip { get; set; }
+        public ConsoleInformationPanelSnapshot FinalSnapshot { get; set; }
+
         public static GeneralConfig ParseConfigFile(string file)
         {
             if (!File.Exists(file))
@@ -30,7 +34,7 @@ namespace LambdaModel.Config
 
         public abstract void Run();
 
-        protected virtual GeneralConfig Validate(string configLocation = null)
+        public virtual GeneralConfig Validate(string configLocation = null)
         {
             if (string.IsNullOrWhiteSpace(OutputLocation)) throw new ConfigException("Invalid output location: '" + OutputLocation + "'");
 

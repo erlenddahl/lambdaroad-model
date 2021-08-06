@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.8" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LambdaModel\LambdaModel.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="ConsoleUtilities">
+      <HintPath>..\Lib\ConsoleUtilities.dll</HintPath>
+    </Reference>
+    <Reference Include="Extensions">
+      <HintPath>..\Lib\Extensions.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

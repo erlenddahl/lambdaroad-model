@@ -7,7 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LambdaModel", "LambdaModel\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LambdaModel.Tests", "LambdaModel.Tests\LambdaModel.Tests.csproj", "{44BAC077-EE43-42F1-A3C8-3BF3AE8E1815}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LambdaModelRunner", "LambdaModelRunner\LambdaModelRunner.csproj", "{ED4C830E-E924-413D-A9F6-832E9513D6E9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LambdaModelRunner", "LambdaModelRunner\LambdaModelRunner.csproj", "{ED4C830E-E924-413D-A9F6-832E9513D6E9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LambdaRestApi", "LambdaRestApi\LambdaRestApi.csproj", "{86BA4DE7-B847-41EA-8E73-7D06FE8AD27B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{ED4C830E-E924-413D-A9F6-832E9513D6E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ED4C830E-E924-413D-A9F6-832E9513D6E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ED4C830E-E924-413D-A9F6-832E9513D6E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{86BA4DE7-B847-41EA-8E73-7D06FE8AD27B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{86BA4DE7-B847-41EA-8E73-7D06FE8AD27B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{86BA4DE7-B847-41EA-8E73-7D06FE8AD27B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{86BA4DE7-B847-41EA-8E73-7D06FE8AD27B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

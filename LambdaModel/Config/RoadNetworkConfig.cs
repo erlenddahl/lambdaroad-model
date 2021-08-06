@@ -16,27 +16,28 @@ namespace LambdaModel.Config
         public string RoadShapeLocation { get; set; }
         public new RoadLinkBaseStation[] BaseStations { get; set; }
 
+
         public override void Run()
         {
-            using (var cip = new ConsoleInformationPanel("Running road network signal loss calculations"))
+            using (Cip = new ConsoleInformationPanel("Running road network signal loss calculations"))
             {
-                Tiff.SetErrorHandler(new LambdaTiffErrorHandler(cip));
+                Tiff.SetErrorHandler(new LambdaTiffErrorHandler(Cip));
 
                 foreach (var bs in BaseStations)
-                    bs.Cip = cip;
+                    bs.Cip = Cip;
 
                 var calculations = 0;
 
-                cip?.Set("Road network source", System.IO.Path.GetFileName(RoadShapeLocation));
+                Cip?.Set("Road network source", System.IO.Path.GetFileName(RoadShapeLocation));
                 ShapeLink.ReadLinks(RoadShapeLocation, BaseStations);
 
-                var tiles = Terrain.CreateCache(cip);
+                var tiles = Terrain.CreateCache(Cip);
 
                 var start = DateTime.Now;
-                foreach (var bs in cip.Run("Processing base stations", BaseStations))
+                foreach (var bs in Cip.Run("Processing base stations", BaseStations))
                 {
-                    cip?.Set("Calculation radius", bs.MaxRadius);
-                    cip?.Set("Relevant road links", bs.Links.Count);
+                    Cip?.Set("Calculation radius", bs.MaxRadius);
+                    Cip?.Set("Relevant road links", bs.Links.Count);
 
                     var maxLoss = bs.TotalTransmissionLevel - MinimumAllowableSignalValue;
 
@@ -45,19 +46,21 @@ namespace LambdaModel.Config
                     calculations += bs.Calculate(tiles);
 
                     var secs = DateTime.Now.Subtract(start).TotalSeconds;
-                    cip?.Increment("Calculation time", secs);
-                    cip?.Set("Calculations per second", $"{(calculations / secs):n2} c/s");
+                    Cip?.Increment("Calculation time", secs);
+                    Cip?.Set("Calculations per second", $"{(calculations / secs):n2} c/s");
 
                     bs.RemoveLinksWithTooMuchPathLoss(maxLoss);
                 }
 
                 start = DateTime.Now;
-                SaveResults(OutputLocation, BaseStations.SelectMany(p => p.Links).ToArray(), cip);
-                cip.Set("Saving time", $"{DateTime.Now.Subtract(start).TotalSeconds:n2} seconds.");
+                SaveResults(OutputLocation, BaseStations.SelectMany(p => p.Links).ToArray(), Cip);
+                Cip.Set("Saving time", $"{DateTime.Now.Subtract(start).TotalSeconds:n2} seconds.");
+
+                FinalSnapshot = Cip.GetSnapshot();
             }
         }
 
-        protected override GeneralConfig Validate(string configLocation = null)
+        public override GeneralConfig Validate(string configLocation = null)
         {
             if (BaseStations?.Any() != true) throw new ConfigException("No BaseStations defined.");
             if (Terrain == null) throw new ConfigException("Missing Terrain config.");
