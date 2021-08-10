@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using BitMiracle.LibTiff.Classic;
 using ConsoleUtilities.ConsoleInfoPanel;
@@ -8,6 +9,7 @@ using DotSpatial.Topology;
 using LambdaModel.General;
 using LambdaModel.Stations;
 using LambdaModel.Utilities;
+using Newtonsoft.Json.Linq;
 
 namespace LambdaModel.Config
 {
@@ -28,7 +30,7 @@ namespace LambdaModel.Config
 
                 var calculations = 0;
 
-                Cip?.Set("Road network source", System.IO.Path.GetFileName(RoadShapeLocation));
+                Cip?.Set("Road network source", Path.GetFileName(RoadShapeLocation));
                 ShapeLink.ReadLinks(RoadShapeLocation, BaseStations);
 
                 var tiles = Terrain.CreateCache(Cip);
@@ -53,7 +55,18 @@ namespace LambdaModel.Config
                 }
 
                 start = DateTime.Now;
-                SaveResults(OutputLocation, BaseStations.SelectMany(p => p.Links).ToArray(), Cip);
+
+                if (OutputLocation.ToLower().EndsWith(".shp"))
+                {
+                    SaveShape(OutputLocation, BaseStations.SelectMany(p => p.Links).ToArray(), Cip);
+                }
+                else
+                {
+                    if (!Directory.Exists(OutputLocation))
+                        Directory.CreateDirectory(OutputLocation);
+                    SaveApiResults(OutputLocation, BaseStations.SelectMany(p => p.Links).ToArray(), Cip);
+                }
+
                 Cip.Set("Saving time", $"{DateTime.Now.Subtract(start).TotalSeconds:n2} seconds.");
 
                 FinalSnapshot = Cip.GetSnapshot();
@@ -65,10 +78,42 @@ namespace LambdaModel.Config
             if (BaseStations?.Any() != true) throw new ConfigException("No BaseStations defined.");
             if (Terrain == null) throw new ConfigException("Missing Terrain config.");
             RoadShapeLocation = GetFullPath(configLocation, RoadShapeLocation);
-            return base.Validate();
+            return base.Validate(configLocation);
         }
 
-        public static void SaveResults(string outputLocation, IList<ShapeLink> links, ConsoleInformationPanel cip = null)
+        public static void SaveApiResults(string outputDirectory, IList<ShapeLink> links, ConsoleInformationPanel cip = null)
+        {
+            var metaFile = Path.Combine(outputDirectory, "meta.json");
+            File.WriteAllText(metaFile, JArray.FromObject(links.Select(p => new RoadLinkResultMetadata(p))).ToString());
+
+            using (var pb = cip?.SetProgress("Saving results", max: links.Count))
+                foreach (var link in links)
+                {
+                    var linkFile = Path.Combine(outputDirectory, link.ID.ToString() + ".lnkres");
+                    using (var writer = new BinaryWriter(File.Create(linkFile)))
+                    {
+                        writer.Write(link.ID);
+                        writer.Write(link.Cx);
+                        writer.Write(link.Cy);
+                        writer.Write(link.Length);
+                        writer.Write(link.Name);
+                        writer.Write(link.Geometry.Length);
+
+                        foreach (var c in link.Geometry)
+                        {
+                            if (double.IsNaN(c.M)) continue;
+                            writer.Write(c.X);
+                            writer.Write(c.Y);
+                            writer.Write(c.Z);
+                            writer.Write(c.M);
+                        }
+                    }
+
+                    pb?.Increment();
+                }
+        }
+
+        public static void SaveShape(string pathFile, IList<ShapeLink> links, ConsoleInformationPanel cip = null)
         {
             var shp = new FeatureSet(FeatureType.Point);
 
@@ -92,7 +137,43 @@ namespace LambdaModel.Config
                 }
 
             using (var _ = cip?.SetUnknownProgress("Writing shape"))
-                shp.SaveAs(outputLocation, true);
+                shp.SaveAs(pathFile, true);
+        }
+    }
+
+    public class RoadLinkResultMetadata
+    {
+        public int ID { get; set; }
+        public int Cx { get; set; }
+        public int Cy { get; set; }
+        public int Length { get; set; }
+        public double Min { get; set; } = double.MaxValue;
+        public double Max { get; set; } = double.MinValue;
+        public double Average { get; set; }
+
+        public RoadLinkResultMetadata()
+        {
+
+        }
+
+        public RoadLinkResultMetadata(ShapeLink link)
+        {
+            ID = link.ID;
+            Cx = link.Cx;
+            Cy = link.Cy;
+            Length = link.Length;
+
+            var sum = 0d;
+            var count = 0;
+            foreach (var v in link.Geometry.Where(p => !double.IsNaN(p.M)).Select(p => p.M))
+            {
+                sum += v;
+                count++;
+                if (v < Min) Min = v;
+                if (v > Max) Max = v;
+            }
+
+            Average = sum / count;
         }
     }
 }
