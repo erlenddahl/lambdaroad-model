@@ -4,6 +4,8 @@ using System.Linq;
 using LambdaModel.Config;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace LambdaRestApi.Controllers
 {
@@ -13,13 +15,15 @@ namespace LambdaRestApi.Controllers
     {
         private readonly ILogger<RoadNetworkController> _logger;
         
-        private static Queue<JobData> _jobQueue = new Queue<JobData>();
-        private static Dictionary<string, JobData> _finishedJobs = new Dictionary<string, JobData>();
-        private static JobData _currentJob = null;
+        private static readonly Queue<JobData> JobQueue = new();
+        private static readonly Dictionary<string, JobData> FinishedJobs = new();
+        private static JobData _currentJob;
+        private readonly string _resultsDirectory;
 
         public RoadNetworkController(ILogger<RoadNetworkController> logger)
         {
             _logger = logger;
+            _resultsDirectory = @"C:\Code\LambdaModel\Data\ApiOutput";
         }
 
         [HttpPost]
@@ -28,7 +32,6 @@ namespace LambdaRestApi.Controllers
             config.CalculationMethod = CalculationMethod.RoadNetwork;
             config.TileSize = 512;
             config.RoadShapeLocation = @"C:\Code\LambdaModel\Data\RoadNetwork\2021-05-28_smaller.shp";
-            config.OutputLocation = @"C:\Code\LambdaModel\Data\RoadNetwork\test-results-huge.shp";
 
             config.Terrain = new TerrainConfig()
             {
@@ -38,10 +41,9 @@ namespace LambdaRestApi.Controllers
                 RemoveCacheItemsWhenFull = 100
             };
 
-            config.Validate();
+            var job = new JobData(config, _resultsDirectory);
 
-            var job = new JobData(config);
-            _jobQueue.Enqueue(job);
+            JobQueue.Enqueue(job);
             ProcessQueue();
             
             return JobStatus(job.Id);
@@ -51,13 +53,13 @@ namespace LambdaRestApi.Controllers
         {
             if (_currentJob?.Config.FinalSnapshot != null)
             {
-                _finishedJobs.Add(_currentJob.Id, _currentJob);
+                FinishedJobs.Add(_currentJob.Id, _currentJob);
                 _currentJob = null;
             }
             if (_currentJob != null) return;
-            if (!_jobQueue.Any()) return;
+            if (!JobQueue.Any()) return;
 
-            _currentJob = _jobQueue.Dequeue();
+            _currentJob = JobQueue.Dequeue();
             _currentJob.Run(ProcessQueue);
         }
 
@@ -66,11 +68,11 @@ namespace LambdaRestApi.Controllers
         {
             if (_currentJob?.Id == key) return new JobStatusData(_currentJob, Controllers.JobStatus.Processing);
 
-            if (_finishedJobs.TryGetValue(key, out var job))
+            if (FinishedJobs.TryGetValue(key, out var job))
                 return new JobStatusData(job, Controllers.JobStatus.Finished);
 
             var ix = 0;
-            foreach (var q in _jobQueue)
+            foreach (var q in JobQueue)
             {
                 if (q.Id == key)
                 {
@@ -81,5 +83,26 @@ namespace LambdaRestApi.Controllers
 
             return null;
         }
+
+        [HttpGet("results")]
+        public object Results(string key)
+        {
+            var dir = System.IO.Path.Combine(_resultsDirectory, key);
+            if (!System.IO.Directory.Exists(dir)) throw new NoSuchResultsException();
+
+            var metaFile = System.IO.Path.Combine(dir, "meta.json");
+            if (!System.IO.File.Exists(metaFile)) throw new ResultsMissingMetadataException();
+            var meta = JsonConvert.DeserializeObject<RoadLinkResultMetadata[]>(System.IO.File.ReadAllText(metaFile));
+
+            return meta;
+        }
+    }
+
+    public class ResultsMissingMetadataException : Exception
+    {
+    }
+
+    public class NoSuchResultsException : Exception
+    {
     }
 }

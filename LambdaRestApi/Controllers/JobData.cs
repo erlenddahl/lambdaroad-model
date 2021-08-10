@@ -20,13 +20,16 @@ namespace LambdaRestApi.Controllers
         public Task RunTask { get; set; }
         public Exception RunException { get; set; }
 
-        public JobData(RoadNetworkConfig config)
+        public JobData(RoadNetworkConfig config, string resultsDirectory)
         {
             Config = config;
             Enqueued = DateTime.Now;
             CreatedBy = -1;
             Started = DateTime.MinValue;
             Finished = DateTime.MinValue;
+
+            Config.OutputLocation = System.IO.Path.Combine(resultsDirectory, Id);
+            config.Validate();
         }
 
         public void Run(Action callback)
