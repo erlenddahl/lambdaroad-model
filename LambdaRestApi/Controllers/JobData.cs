@@ -63,6 +63,8 @@ namespace LambdaRestApi.Controllers
                 json[nameof(Started)] = Started;
             if (Started > DateTime.MinValue)
                 json[nameof(Finished)] = Finished;
+            if (RunException != null)
+                json[nameof(RunException)] = RunException.Message;
 
             var snap = Config.FinalSnapshot ?? Config.Cip?.GetSnapshot();
             if (snap != null)

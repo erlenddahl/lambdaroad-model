@@ -4,6 +4,7 @@
     {
         InQueue,
         Processing,
-        Finished
+        Finished,
+        Failed
     }
 }

@@ -12,12 +12,13 @@ namespace LambdaRestApi.Controllers
         {
             Status = status;
             Data = data.ToJson();
+
+            if (data.RunException != null)
+                Status = JobStatus.Failed;
         }
 
-        public JobStatusData(JobData data, JobStatus status, int queueIndex)
+        public JobStatusData(JobData data, JobStatus status, int queueIndex) : this(data, status)
         {
-            Status = status;
-            Data = data.ToJson();
             QueueIndex = queueIndex;
         }
     }
