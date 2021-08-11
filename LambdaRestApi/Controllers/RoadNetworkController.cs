@@ -51,7 +51,7 @@ namespace LambdaRestApi.Controllers
 
         private void ProcessQueue()
         {
-            if (_currentJob?.Config.FinalSnapshot != null)
+            if (_currentJob != null && _currentJob.Finished > DateTime.MinValue)
             {
                 FinishedJobs.Add(_currentJob.Id, _currentJob);
                 _currentJob = null;
