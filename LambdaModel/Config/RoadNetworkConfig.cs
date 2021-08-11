@@ -30,6 +30,8 @@ namespace LambdaModel.Config
 
                 var calculations = 0;
 
+                Cip.Set("Minimum signal", MinimumAllowableSignalValue);
+
                 Cip?.Set("Road network source", Path.GetFileName(RoadShapeLocation));
                 ShapeLink.ReadLinks(RoadShapeLocation, BaseStations);
 
