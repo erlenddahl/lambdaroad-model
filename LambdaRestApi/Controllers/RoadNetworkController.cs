@@ -27,7 +27,7 @@ namespace LambdaRestApi.Controllers
         }
 
         [HttpPost]
-        public JobStatusData Start(RoadNetworkConfig config)
+        public object Start(RoadNetworkConfig config)
         {
             config.CalculationMethod = CalculationMethod.RoadNetwork;
             config.TileSize = 512;
@@ -64,7 +64,7 @@ namespace LambdaRestApi.Controllers
         }
 
         [HttpGet]
-        public JobStatusData JobStatus(string key)
+        public object JobStatus(string key)
         {
             if (_currentJob?.Id == key) return new JobStatusData(_currentJob, Controllers.JobStatus.Processing);
 
@@ -81,7 +81,7 @@ namespace LambdaRestApi.Controllers
                 ix++;
             }
 
-            return null;
+            return new JObject();
         }
 
         [HttpGet("results")]
