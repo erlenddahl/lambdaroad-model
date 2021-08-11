@@ -32,7 +32,7 @@ namespace LambdaModel.General
 
             var line = new CachedLineTools(geometry.ToArray());
             Geometry = new Point4D[(int) line.Length + 1];
-            for (var i = 0; i < line.Length; i++)
+            for (var i = 0; i < Geometry.Length; i++)
             {
                 var pi = line.QueryPointInfo(i);
                 Geometry[i] = new Point4D(pi.X, pi.Y, pi.Z, double.MaxValue);
