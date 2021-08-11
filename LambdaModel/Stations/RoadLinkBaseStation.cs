@@ -45,7 +45,7 @@ namespace LambdaModel.Stations
         /// <returns></returns>
         public void RemoveLinksTooFarAway(double maxPathLoss)
         {
-            RemoveLinksBy("Checking road link min possible path loss", "Road links removed (min loss)", p =>
+            RemoveLinksBy("Checking road link min possible path loss", "Road links removed (max loss)", p =>
             {
                 var minDistToCenter = Center.DistanceTo2D(p.Cx, p.Cy) - p.Length;
                 var minPossiblePathLoss = _calc.CalculateMinPossibleLoss(minDistToCenter, HeightAboveTerrain);
