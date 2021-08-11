@@ -14,7 +14,7 @@ namespace LambdaModel.Stations
         protected readonly Point4D[] _vector;
         public Point3D Center { get; set; }
         public int HeightAboveTerrain { get; set; }
-        public int MaxRadius { get; }
+        public int MaxRadius { get; set; } = 50_000;
 
         public double TotalTransmissionLevel { get; set; } = 46 + 18 - 2;
 
