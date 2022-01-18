@@ -3,21 +3,27 @@
     "TileSize": 512,
     "BaseStations": [
         {
-            "x": 263062, 
-            "y": 7041212, 
+            "x": 268672, 
+            "y": 7040224, 
             "heightAboveTerrain": 100, 
-            "maxRadius": 50000
+            "maxRadius": 10000
         },
         {
             "x": 271327, 
             "y": 7040324, 
             "heightAboveTerrain": 50, 
-            "maxRadius": 50000
+            "maxRadius": 10000
+        },
+        {
+            "x": 271209, 
+            "y": 7041460, 
+            "heightAboveTerrain": 50,
+            "maxRadius": 10000
         }
     ],
     "MinimumAllowableSignalValue": -150,
     "RoadShapeLocation": "..\\RoadNetwork\\2021-05-28_smaller.shp",
-    "OutputLocation": "..\\RoadNetwork\\test-results-huge.shp",
+    "OutputLocation": "..\\RoadNetwork\\test-results-huge_itsg5.shp",
     "Terrain": 
     {
         "Type": "LocalCache",

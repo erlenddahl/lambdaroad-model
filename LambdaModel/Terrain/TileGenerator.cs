@@ -19,17 +19,18 @@ namespace LambdaModel.Terrain
         private readonly ConsoleInformationPanel _cip;
         private readonly (string Path, GeoTiff Tiff)[] _files;
 
-        public TileGenerator(string source, string destination, int tileSize, ConsoleInformationPanel cip) : base(source, tileSize, cip, 50, 10)
+        public TileGenerator(string source, string destination, int tileSize, ConsoleInformationPanel cip) : base(source, tileSize, cip, 10, 3)
         {
+            BitMiracle.LibTiff.Classic.Tiff.SetErrorHandler(new LambdaTiffErrorHandler(cip));
             _source = source;
             _destination = destination;
             _tileSize = tileSize;
             _cip = cip;
 
-            if (!System.IO.Directory.Exists(_destination))
-                System.IO.Directory.CreateDirectory(_destination);
+            if (!Directory.Exists(_destination))
+                Directory.CreateDirectory(_destination);
 
-            _files = System.IO.Directory
+            _files = Directory
                 .GetFiles(_source, "*.tif", SearchOption.AllDirectories)
                 .Select(p => (Path: p, Tiff: new GeoTiff(p, true)))
                 .ToArray();
@@ -39,44 +40,39 @@ namespace LambdaModel.Terrain
 
         public void Generate()
         {
-            using (var pb = _cip.SetProgress("Generating tiles (" + _tileSize + ")", max: _files.Length))
+            foreach (var file in _cip.Run("Generating tiles (" + _tileSize + ")", _files))
             {
-                for (var i = 0; i < _files.Length; i++)
+                var tiff = file.Tiff;
+                for (var x = tiff.StartX - tiff.StartX % _tileSize; x < tiff.EndX; x += _tileSize)
                 {
-                    var tiff = _files[i].Tiff;
-                    for (var x = tiff.StartX - tiff.StartX % _tileSize; x < tiff.EndX; x += _tileSize)
+                    for (var y = tiff.StartY - tiff.StartY % _tileSize; y < tiff.EndY; y += _tileSize)
                     {
-                        for (var y = tiff.StartY - tiff.StartY % _tileSize; y < tiff.EndY; y += _tileSize)
+                        try
                         {
-                            try
+                            var fn = Path.Combine(_destination, $"{x},{y}_{_tileSize}x{_tileSize}.bin");
+                            if (File.Exists(fn))
                             {
-                                var fn = System.IO.Path.Combine(_destination, $"{x},{y}_{_tileSize}x{_tileSize}.bin");
-                                if (System.IO.File.Exists(fn))
-                                {
-                                    _cip.Increment("Skipped existing tiles");
-                                }
-                                else
-                                {
-                                    using (var tile = GetSubset(x, y, _tileSize))
-                                        QuickGeoTiff.WriteQuickTiff(tile, fn);
-                                    _cip.Increment("Generated tiles");
-                                }
+                                _cip.Increment("Skipped existing tiles");
                             }
-                            catch (OutsideOfAreaException ex)
+                            else
                             {
-                                _cip.Increment("Tiles outside of area");
+                                using (var tile = GetSubset(x, y, _tileSize))
+                                    QuickGeoTiff.WriteQuickTiff(tile, fn);
+                                _cip.Increment("Generated tiles");
                             }
                         }
+                        catch (OutsideOfAreaException ex)
+                        {
+                            _cip.Increment("Tiles outside of area");
+                        }
                     }
-
-                    pb.Increment();
                 }
             }
         }
 
         protected override string GetFilename(string key)
         {
-            _cip.Set("Last loaded", System.IO.Path.GetFileName(key));
+            _cip.Set("Last loaded", Path.GetFileName(key));
             return key;
         }
 
