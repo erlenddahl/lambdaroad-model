@@ -39,7 +39,7 @@ namespace LambdaModel.Terrain.Cache
         private async Task DownloadTileForCoordinate(int x, int y, string filePath)
         {
             var bbox = $"{x},{y},{x + TileSize},{y + TileSize}";
-            var url = $"https://wms.geonorge.no/skwms1/wms.hoyde-dom1?bbox={bbox}&format=image/tiff&service=WMS&version=1.1.1&request=GetMap&srs=EPSG:25833&transparent=true&width={TileSize}&height={TileSize}&layers=dom1_33:None";
+            var url = $"https://wms.geonorge.no/skwms1/wms.hoyde-dom?bbox={bbox}&format=image/tiff&service=WMS&version=1.1.1&request=GetMap&srs=EPSG:25833&transparent=true&width={TileSize}&height={TileSize}&layers=dom1_33:None";
 
             Exception lastException = null;
             for (var i = 0; i < _maxTries; i++)
