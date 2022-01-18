@@ -10,7 +10,7 @@ namespace LambdaModel.Calculations
     public class GridCalculator
     {
         private readonly Point4D[] _vector;
-        private readonly PathLossCalculator _calc;
+        private readonly MobileNetworkPathLossCalculator _calc;
 
         public OnlineTileCache Tiles { get; }
         public int Radius { get; }
@@ -32,7 +32,7 @@ namespace LambdaModel.Calculations
                 _vector[i] = new Point4D(0, 0);
 
             Results = new double[radius * 2 + 1, radius * 2 + 1];
-            _calc = new PathLossCalculator();
+            _calc = new MobileNetworkPathLossCalculator();
         }
 
         /// <summary>

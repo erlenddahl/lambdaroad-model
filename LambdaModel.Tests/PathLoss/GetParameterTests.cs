@@ -7,7 +7,7 @@ using no.sintef.SpeedModule.Geometry.SimpleStructures;
 namespace LambdaModel.Tests.PathLoss
 {
     [TestClass]
-    public class GetParameterTests : PathLossCalculator
+    public class GetParameterTests : MobileNetworkPathLossCalculator
     {
 
         [TestMethod]

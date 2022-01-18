@@ -6,7 +6,10 @@ using no.sintef.SpeedModule.Geometry.SimpleStructures;
 
 namespace LambdaModel.PathLoss
 {
-    public class PathLossCalculator
+    /// <summary>
+    /// Calculates the path loss of received mobile signal strength.
+    /// </summary>
+    public class MobileNetworkPathLossCalculator : IPathLossCalculator
     {
         public int DistanceScale { get; set; } = 1;
 

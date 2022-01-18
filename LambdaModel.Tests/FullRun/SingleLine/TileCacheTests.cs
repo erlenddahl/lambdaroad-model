@@ -32,7 +32,7 @@ namespace LambdaModel.Tests.FullRun.SingleLine
             center.Z = tiles.GetAltitude(center);
 
             var vector = tiles.GetAltitudeVector(center, center.Move(5000, 0)).ToArray();
-            var calc = new PathLossCalculator();
+            var calc = new MobileNetworkPathLossCalculator();
             var start = DateTime.Now;
             for (var i = 2; i < vector.Length; i++)
             {

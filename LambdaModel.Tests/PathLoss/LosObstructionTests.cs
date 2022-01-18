@@ -8,7 +8,7 @@ using no.sintef.SpeedModule.Geometry.SimpleStructures;
 namespace LambdaModel.Tests.PathLoss
 {
     [TestClass]
-    public class LosObstructionTests : PathLossCalculator
+    public class LosObstructionTests : MobileNetworkPathLossCalculator
     {
 
         [TestMethod]

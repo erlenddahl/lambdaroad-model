@@ -29,7 +29,7 @@ namespace LambdaModel.Tests.PathLoss
             center.Z = tiles.GetAltitude(center);
 
             var vector = tiles.GetAltitudeVector(center, center.Move(50000, 0)).ToArray();
-            var calc = new PathLossCalculator();
+            var calc = new MobileNetworkPathLossCalculator();
             var start = DateTime.Now;
             var minDiff = double.MaxValue;
             for (var txHeightAboveTerrain = 0; txHeightAboveTerrain < 500; txHeightAboveTerrain += 15)

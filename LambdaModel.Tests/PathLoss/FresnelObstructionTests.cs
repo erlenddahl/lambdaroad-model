@@ -7,7 +7,7 @@ using no.sintef.SpeedModule.Geometry.SimpleStructures;
 namespace LambdaModel.Tests.PathLoss
 {
     [TestClass]
-    public class FresnelObstructionTests : PathLossCalculator
+    public class FresnelObstructionTests : MobileNetworkPathLossCalculator
     {
         [TestMethod]
         public void FindFresnelObstructionNearest()
