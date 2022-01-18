@@ -18,7 +18,6 @@ namespace LambdaModel.Config
         public string RoadShapeLocation { get; set; }
         public new RoadLinkBaseStation[] BaseStations { get; set; }
 
-
         public override void Run()
         {
             using (Cip = new ConsoleInformationPanel("Running road network signal loss calculations"))
@@ -50,7 +49,7 @@ namespace LambdaModel.Config
                     calculations += bs.Calculate(tiles);
 
                     var secs = DateTime.Now.Subtract(start).TotalSeconds;
-                    Cip?.Increment("Calculation time", secs);
+                    Cip?.Set("Calculation time", secs);
                     Cip?.Set("Calculations per second", $"{(calculations / secs):n2} c/s");
 
                     bs.RemoveLinksWithTooMuchPathLoss(maxLoss);
