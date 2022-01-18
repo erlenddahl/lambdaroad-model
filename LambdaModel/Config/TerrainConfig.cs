@@ -19,6 +19,7 @@ namespace LambdaModel.Config
                 var cache = new OnlineTileCache(Location, Config.TileSize, cip, MaxCacheItems, RemoveCacheItemsWhenFull);
                 if (!string.IsNullOrWhiteSpace(WmsUrl))
                     cache.WmsUrl = WmsUrl;
+                return cache;
             }
             return new LocalTileCache(Location, Config.TileSize, cip, MaxCacheItems, RemoveCacheItemsWhenFull);
         }
