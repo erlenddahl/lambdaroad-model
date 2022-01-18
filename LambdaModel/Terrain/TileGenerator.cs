@@ -98,8 +98,4 @@ namespace LambdaModel.Terrain
                 f.Tiff.Dispose();
         }
     }
-
-    public class OutsideOfAreaException : Exception
-    {
-    }
 }

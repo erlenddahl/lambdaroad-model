@@ -95,15 +95,4 @@ namespace LambdaModel.Utilities
             CacheRemovals = 0;
         }
     }
-
-    public class CacheItem<T>
-    {
-        public T Item;
-        public int AddedAt;
-
-        public CacheItem(T value)
-        {
-            Item = value;
-        }
-    }
 }
