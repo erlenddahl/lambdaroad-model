@@ -79,6 +79,8 @@ namespace LambdaModel.Config
         {
             if (BaseStations?.Any() != true) throw new ConfigException("No BaseStations defined.");
             if (Terrain == null) throw new ConfigException("Missing Terrain config.");
+            foreach (var bs in BaseStations)
+                bs.Validate();
             RoadShapeLocation = GetFullPath(configLocation, RoadShapeLocation);
             return base.Validate(configLocation);
         }
