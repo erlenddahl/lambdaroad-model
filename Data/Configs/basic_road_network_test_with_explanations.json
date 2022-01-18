@@ -1,0 +1,40 @@
+{
+    "CalculationMethod": "RoadNetwork",      // Fortel modellen at det skal bereknast langs vegnettet. Kan også berekne for eit heilt område, men det tar mykje lengre tid.
+    "TileSize": 512,                         // Størrelse på høgdedata-tiles som blir benytta. 512 er ein fin verdi mellom små filer som kan opnast superraskt, og store filer som dekker eit stort område og ikkje må opnast så ofte.
+    "BaseStations": [                        // Ei liste (array) av alle relevante basestasjonar
+        {
+            "name": "Mob1",                  // Eit namn, ikkje i bruk akkurat no, men tanken er ein enkel måte å skilje dei frå kvarandre for brukaren
+            "x": 268672,                     // X-koordinat i UTM 33N (EPSG 25833). Viss du må slå opp koordinatar kan du bruke QGis, eller feks her: https://epsg.io/map#srs=25833
+            "y": 7040224,                    // Y-koordinat i UTM 33N
+            "heightAboveTerrain": 100,       // Kor høgt over terrenget antenna står (meter)
+            "maxRadius": 50000,              // Teoretisk maks-radius antenna kan sende, brukt for å begrense antal veglenker som må bereknast før dei kan brukast/forkastast
+            "antennaType": "MobileNetwork"   // Type antenne; kan vere MobileNetwork for 800Mhz mobilsignal, eller ItsG5 for ITS G5.
+        },
+        {
+            "name": "Its2151",               
+            "x": 271327, 
+            "y": 7040324, 
+            "heightAboveTerrain": 50, 
+            "maxRadius": 10000,
+            "antennaType": "ItsG5"
+        },
+        {
+            "name": "3",
+            "x": 271209, 
+            "y": 7041460, 
+            "heightAboveTerrain": 50,
+            "maxRadius": 10000,
+            "antennaType": "ItsG5"
+        }
+    ],
+    "MinimumAllowableSignalValue": -150,                                // Minste tillatte signal (verdiar under dette blir ikkje tatt med i resultatfila, og lenker som basert på avstand er for langt unna til å kunne oppnå høgare signal blir ignorert)
+    "RoadShapeLocation": "..\\RoadNetwork\\2021-05-28_smaller.shp",     // Shape-fil som inneheld vegnettverket
+    "OutputLocation": "..\\RoadNetwork\\test-results-huge_itsg5.shp",   // Shape-fil der resultata vert skrive. OBS: Viss du har denne lagt til som eit lag i QGis, så må du lukke QGis mens du køyrer berekninga, ellers kan det ikkje skrivast til fila.
+    "Terrain":                                                          // Innstillingar for terreng/høgdedata
+    {
+        "Type": "OnlineCache",                                          // Brukar OnlineCache for å spare diskplass. Det betyr at høgdedata blir lasta ned ved behov, som igjen betyr at første berekning på nytt område vil ta ein del lengre tid en etterfølgande berekningar.
+        "Location": "I:\\Jobb\\Lambda\\Tiles_512_Online",               // Sti til kvar høgdedata kan lagrast. Anbefaler rask harddisk (SSD) med nok plass.
+        "MaxCacheItems": 300,                                           // Innstilling for minnehandtering. Dette er kor mange tiles me kan ha i minne samtidig. For høgt tall krasjar programmet når det går tomt for minne, for lågt tal fører til at filer må lesast om og om igjen, og prosessen tar lengre tid.
+        "RemoveCacheItemsWhenFull": 100                                 // Innstilling for minnehandtering. Dette er kor mange tiles som blir fjerna når minne-cachen er full. For høgt tal fører til at unødvendig mange tiles må lesast inn på nytt, for lågt tal fører til at cachen må renskast for ofte.
+    }
+}
