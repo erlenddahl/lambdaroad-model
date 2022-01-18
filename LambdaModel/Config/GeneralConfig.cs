@@ -39,6 +39,7 @@ namespace LambdaModel.Config
             if (string.IsNullOrWhiteSpace(OutputLocation)) throw new ConfigException("Invalid output location: '" + OutputLocation + "'");
 
             OutputLocation = GetFullPath(configLocation, OutputLocation);
+
             Terrain.Config = this;
 
             return this;
