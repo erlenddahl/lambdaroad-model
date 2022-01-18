@@ -13,6 +13,7 @@ namespace LambdaModel.Stations
 
         protected readonly IPathLossCalculator _calc;
         protected readonly Point4D[] _vector;
+        public string Name { get; set; }
         public Point3D Center { get; set; }
         public int HeightAboveTerrain { get; set; }
         public int MaxRadius { get; set; } = 50_000;
