@@ -33,6 +33,7 @@
     "Terrain":                                                          // Innstillingar for terreng/høgdedata
     {
         "Type": "OnlineCache",                                          // Brukar OnlineCache for å spare diskplass. Det betyr at høgdedata blir lasta ned ved behov, som igjen betyr at første berekning på nytt område vil ta ein del lengre tid en etterfølgande berekningar.
+        "WmsUrl": "https://wms.geonorge.no/skwms1/wms.hoyde-dom?bbox={0}&format=image/tiff&service=WMS&version=1.1.1&request=GetMap&srs=EPSG:25833&transparent=true&width={1}&height={2}&layers=dom1_33:None", // Dynamisk url til høgdedata-WMS (tjeneste for nedlasting av TIFF-filer med høgdedata for område angitt i lenka)
         "Location": "I:\\Jobb\\Lambda\\Tiles_512_Online",               // Sti til kvar høgdedata kan lagrast. Anbefaler rask harddisk (SSD) med nok plass.
         "MaxCacheItems": 300,                                           // Innstilling for minnehandtering. Dette er kor mange tiles me kan ha i minne samtidig. For høgt tall krasjar programmet når det går tomt for minne, for lågt tal fører til at filer må lesast om og om igjen, og prosessen tar lengre tid.
         "RemoveCacheItemsWhenFull": 100                                 // Innstilling for minnehandtering. Dette er kor mange tiles som blir fjerna når minne-cachen er full. For høgt tal fører til at unødvendig mange tiles må lesast inn på nytt, for lågt tal fører til at cachen må renskast for ofte.

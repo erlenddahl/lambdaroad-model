@@ -12,8 +12,9 @@ namespace LambdaModel.Terrain.Cache
         private WebClient _wc = new WebClient();
         private int _maxTries = 10;
         public int TilesDownloaded { get; private set; }
+        public string WmsUrl { get; set; } = "https://wms.geonorge.no/skwms1/wms.hoyde-dom?bbox={0}&format=image/tiff&service=WMS&version=1.1.1&request=GetMap&srs=EPSG:25833&transparent=true&width={1}&height={2}&layers=dom1_33:None";
 
-        public OnlineTileCache(string cacheLocation, int tileSize = 512, ConsoleInformationPanel cip = null) : base(cacheLocation, tileSize, cip)
+        public OnlineTileCache(string cacheLocation, int tileSize = 512, ConsoleInformationPanel cip = null, int maxCacheItems = 1000, int removeCacheItemsWhenFull = 5) : base(cacheLocation, tileSize, cip, maxCacheItems, removeCacheItemsWhenFull)
         {
         }
 
@@ -39,7 +40,7 @@ namespace LambdaModel.Terrain.Cache
         private async Task DownloadTileForCoordinate(int x, int y, string filePath)
         {
             var bbox = $"{x},{y},{x + TileSize},{y + TileSize}";
-            var url = $"https://wms.geonorge.no/skwms1/wms.hoyde-dom?bbox={bbox}&format=image/tiff&service=WMS&version=1.1.1&request=GetMap&srs=EPSG:25833&transparent=true&width={TileSize}&height={TileSize}&layers=dom1_33:None";
+            var url = string.Format(WmsUrl, bbox, TileSize, TileSize);
 
             Exception lastException = null;
             for (var i = 0; i < _maxTries; i++)

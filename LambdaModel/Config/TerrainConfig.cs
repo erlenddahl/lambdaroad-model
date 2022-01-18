@@ -9,12 +9,17 @@ namespace LambdaModel.Config
         public string Location { get; set; }
         public int MaxCacheItems { get; set; }
         public int RemoveCacheItemsWhenFull { get; set; }
+        public string WmsUrl { get; set; }
         public GeneralConfig Config { get; set; }
 
         public TileCacheBase<(int x, int y)> CreateCache(ConsoleInformationPanel cip)
         {
             if (Type == TerrainType.OnlineCache)
-                return new OnlineTileCache(Location, Config.TileSize, cip);
+            {
+                var cache = new OnlineTileCache(Location, Config.TileSize, cip, MaxCacheItems, RemoveCacheItemsWhenFull);
+                if (!string.IsNullOrWhiteSpace(WmsUrl))
+                    cache.WmsUrl = WmsUrl;
+            }
             return new LocalTileCache(Location, Config.TileSize, cip, MaxCacheItems, RemoveCacheItemsWhenFull);
         }
     }
