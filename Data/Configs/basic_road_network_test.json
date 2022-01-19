@@ -1,5 +1,6 @@
 {
     "CalculationMethod": "RoadNetwork",
+    "CalculationThreads": null,
     "TileSize": 512,
     "BaseStations": [
         {

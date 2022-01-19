@@ -29,30 +29,42 @@ namespace LambdaModel.Config
 
                 var calculations = 0;
 
+                if (CalculationThreads.HasValue)
+                    Cip.Set("Calculation threads", CalculationThreads.Value);
                 Cip.Set("Minimum signal", MinimumAllowableSignalValue);
 
                 Cip?.Set("Road network source", Path.GetFileName(RoadShapeLocation));
                 ShapeLink.ReadLinks(RoadShapeLocation, BaseStations);
 
-                var tiles = Terrain.CreateCache(Cip);
-
                 var start = DateTime.Now;
-                foreach (var bs in Cip.Run("Processing base stations", BaseStations))
+                using (var pb = Cip.SetProgress("Processing base stations", max: BaseStations.Length))
                 {
-                    Cip?.Set("Calculation radius", bs.MaxRadius);
-                    Cip?.Set("Relevant road links", bs.Links.Count);
+                    var query = BaseStations.AsParallel();
+                    
+                    if (CalculationThreads.HasValue)
+                        query = query.WithDegreeOfParallelism(CalculationThreads.Value);
 
-                    var maxLoss = bs.TotalTransmissionLevel - MinimumAllowableSignalValue;
+                    query.ForAll(bs =>
+                    {
+                        var tiles = Terrain.CreateCache(Cip);
 
-                    bs.RemoveLinksTooFarAway(maxLoss);
+                        Cip?.Set("Calculation radius", bs.MaxRadius);
+                        Cip?.Set("Relevant road links", bs.Links.Count);
 
-                    calculations += bs.Calculate(tiles);
+                        var maxLoss = bs.TotalTransmissionLevel - MinimumAllowableSignalValue;
 
-                    var secs = DateTime.Now.Subtract(start).TotalSeconds;
-                    Cip?.Set("Calculation time", secs);
-                    Cip?.Set("Calculations per second", $"{(calculations / secs):n2} c/s");
+                        bs.RemoveLinksTooFarAway(maxLoss);
 
-                    bs.RemoveLinksWithTooMuchPathLoss(maxLoss);
+                        calculations += bs.Calculate(tiles);
+
+                        var secs = DateTime.Now.Subtract(start).TotalSeconds;
+                        Cip?.Set("Calculation time", secs);
+                        Cip?.Set("Calculations per second", $"{(calculations / secs):n2} c/s");
+
+                        bs.RemoveLinksWithTooMuchPathLoss(maxLoss);
+
+                        pb.Increment();
+                    });
                 }
 
                 start = DateTime.Now;

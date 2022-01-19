@@ -1,5 +1,6 @@
 {
     "CalculationMethod": "RoadNetwork",      // Fortel modellen at det skal bereknast langs vegnettet. Kan også berekne for eit heilt område, men det tar mykje lengre tid.
+    "CalculationThreads": null,              // Kor mange trådar som kan køyre berekningar. Viss "null", så blir det automatisk bestemt ut frå antal kjernar i prosessoren. N trådar betyr N gongar så mykje minnebruk, så sett den til lågt tal ved minneproblem. Det vil aldri bli brukt fleire trådar enn det er basestasjonar (éin tråd prosesserer éin basestasjon om gangen).
     "TileSize": 512,                         // Størrelse på høgdedata-tiles som blir benytta. 512 er ein fin verdi mellom små filer som kan opnast superraskt, og store filer som dekker eit stort område og ikkje må opnast så ofte.
     "BaseStations": [                        // Ei liste (array) av alle relevante basestasjonar
         {

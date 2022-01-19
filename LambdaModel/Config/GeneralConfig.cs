@@ -21,6 +21,8 @@ namespace LambdaModel.Config
         public string OutputLocation { get; set; }
         public TerrainConfig Terrain { get; set; }
 
+        public int? CalculationThreads { get; set; }
+
         public ConsoleInformationPanel Cip { get; set; }
         public ConsoleInformationPanelSnapshot FinalSnapshot { get; set; }
 
