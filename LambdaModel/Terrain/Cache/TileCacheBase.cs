@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Threading;
 using ConsoleUtilities.ConsoleInfoPanel;
 using LambdaModel.General;
 using LambdaModel.Terrain.Tiff;
@@ -16,6 +18,10 @@ namespace LambdaModel.Terrain.Cache
 
         public Func<string, TiffReaderBase> CreateTiff = fn => new QuickGeoTiff(fn);
 
+        private static int _cacheCounter = -1;
+        private int _cacheIx;
+        private int _lastRetrieved;
+
         public int TilesRetrievedFromCache => TiffCache.RetrievedFromCache;
 
         public TileCacheBase(string cacheLocation, int tileSize = 512, ConsoleInformationPanel cip = null, int maxCacheItems = 1000, int removeCacheItemsWhenFull = 5)
@@ -27,7 +33,8 @@ namespace LambdaModel.Terrain.Cache
 
             cip?.Set("Tile size", TileSize);
             cip?.Set("Tile cache", System.IO.Path.GetFileName(_cacheLocation));
-            _cip?.Set("Memcache options", TiffCache.MaxItems + " / " + TiffCache.RemoveItemsWhenFull);
+            cip?.Set("Memcache options", TiffCache.MaxItems + " / " + TiffCache.RemoveItemsWhenFull);
+            _cacheIx = Interlocked.Increment(ref _cacheCounter);
 
             if (!System.IO.Directory.Exists(_cacheLocation))
                 System.IO.Directory.CreateDirectory(_cacheLocation);
@@ -72,9 +79,12 @@ namespace LambdaModel.Terrain.Cache
 
             TiffCache.Add(key, tiff);
 
-            _cip?.Set("Tiles retrieved from memcache", TiffCache.RetrievedFromCache);
-            _cip?.Set("Memcache added/current", TiffCache.AddedToCache + " / " + TiffCache.CurrentlyInCache);
-            _cip?.Set("Memcache rem/rem.ops", TiffCache.RemovedFromCache + " / " + TiffCache.CacheRemovals);
+            var retrieved = TiffCache.RetrievedFromCache - _lastRetrieved;
+            _lastRetrieved = TiffCache.RetrievedFromCache;
+            _cip?.Increment("Tiles retrieved from memcache", retrieved);
+
+            _cip?.Set("Memcache added/current [" + _cacheIx + "]", TiffCache.AddedToCache + " / " + TiffCache.CurrentlyInCache);
+            _cip?.Set("Memcache rem/rem.ops [" + _cacheIx + "]", TiffCache.RemovedFromCache + " / " + TiffCache.CacheRemovals);
 
             return tiff;
         }
