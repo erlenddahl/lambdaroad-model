@@ -7,13 +7,17 @@ using DotSpatial.Data;
 using DotSpatial.Topology;
 using LambdaModel.General;
 using LambdaModel.Terrain;
+using Newtonsoft.Json;
 using no.sintef.SpeedModule.Geometry.SimpleStructures;
 
 namespace LambdaModel.Stations
 {
     public class RoadLinkBaseStation : BaseStation
     {
+        [JsonIgnore]
         public List<ShapeLink> Links { get; set; } = new List<ShapeLink>();
+
+        public int BaseStationIndex { get; set; }
 
         public RoadLinkBaseStation(double x, double y, int heightAboveTerrain, int maxRadius, ConsoleInformationPanel cip = null) : base(x, y, heightAboveTerrain, maxRadius, cip)
         {
@@ -57,21 +61,22 @@ namespace LambdaModel.Stations
         /// Check all links and removes those that has too much path loss due to distance alone.
         /// </summary>
         /// <returns></returns>
-        public void RemoveLinksWithTooMuchPathLoss(double maxPathLoss)
+        public void RemoveLinksWithTooLowRssi(double minRssi)
         {
             RemoveLinksBy("Checking road link calculated path loss", "Road links removed (actual loss)", p =>
             {
-                var minPathLoss = p.Geometry.Min(c => c.M);
-                return minPathLoss > maxPathLoss;
+                var minPathLoss = p.Geometry.Max(c => c.M?.MaxRssi ?? double.MinValue);
+                return minPathLoss < minRssi;
             });
         }
         
-        public int Calculate(ITiffReader tiles)
+        public int Calculate(ITiffReader tiles, int numBaseStations = 1, int baseStationIx = 0)
         {
             SortLinks();
             var calculations = 0;
 
             Center.Z = tiles.GetAltitude(Center);
+            var transmitPower = TotalTransmissionLevel;
 
             foreach (var link in Cip.Run("Calculating path loss [" + Name + "]", Links))
             {
@@ -84,13 +89,17 @@ namespace LambdaModel.Stations
                         continue;
                     }
 
+                    if (c.M == null) c.M = new CalculationDetails() {BaseStationRssi = new double[numBaseStations]};
+
                     // Get the X,Y,Z vector from the center to these coordinates.
                     var vectorLength = tiles.FillVector(_vector, Center.X, Center.Y, c.X, c.Y, withHeights: true);
 
                     // Calculate the loss for this point, and store it in the results matrix
-                    var value = _calc.CalculateLoss(_vector, HeightAboveTerrain, 2, vectorLength - 1);
-                    if (value < c.M)
-                        c.M = value;
+                    var loss = _calc.CalculateLoss(_vector, HeightAboveTerrain, 2, vectorLength - 1);
+                    var value = transmitPower - loss;
+                    c.M.BaseStationRssi[baseStationIx] = value;
+                    if (value > c.M.MaxRssi)
+                        c.M.MaxRssi = value;
 
                     linkCalcs++;
                 }

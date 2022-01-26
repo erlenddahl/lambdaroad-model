@@ -27,12 +27,12 @@ namespace LambdaModel.Config
 
             var sum = 0d;
             var count = 0;
-            foreach (var v in link.Geometry.Where(p => !double.IsNaN(p.M)).Select(p => p.M))
+            foreach (var v in link.Geometry.Where(p => p.M!=null).Select(p => p.M))
             {
-                sum += v;
+                sum += v.MaxRssi;
                 count++;
-                if (v < Min) Min = v;
-                if (v > Max) Max = v;
+                if (v.MaxRssi < Min) Min = v.MaxRssi;
+                if (v.MaxRssi > Max) Max = v.MaxRssi;
             }
 
             Average = sum / count;

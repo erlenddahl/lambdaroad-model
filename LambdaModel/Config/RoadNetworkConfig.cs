@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using BitMiracle.LibTiff.Classic;
 using ConsoleUtilities.ConsoleInfoPanel;
 using DotSpatial.Data;
 using DotSpatial.Topology;
+using Extensions.StringExtensions;
 using LambdaModel.General;
 using LambdaModel.Stations;
 using LambdaModel.Utilities;
@@ -24,8 +26,12 @@ namespace LambdaModel.Config
             {
                 Tiff.SetErrorHandler(new LambdaTiffErrorHandler(Cip));
 
+                var bix = 0;
                 foreach (var bs in BaseStations)
+                {
                     bs.Cip = Cip;
+                    bs.BaseStationIndex = bix++;
+                }
 
                 var calculations = 0;
 
@@ -50,18 +56,16 @@ namespace LambdaModel.Config
 
                         Cip?.Set("Calculation radius", bs.MaxRadius);
                         Cip?.Set("Relevant road links", bs.Links.Count);
+                        
+                        bs.RemoveLinksTooFarAway(bs.TotalTransmissionLevel - MinimumAllowableSignalValue);
 
-                        var maxLoss = bs.TotalTransmissionLevel - MinimumAllowableSignalValue;
-
-                        bs.RemoveLinksTooFarAway(maxLoss);
-
-                        calculations += bs.Calculate(tiles);
+                        calculations += bs.Calculate(tiles, BaseStations.Length, bs.BaseStationIndex);
 
                         var secs = DateTime.Now.Subtract(start).TotalSeconds;
                         Cip?.Set("Calculation time", secs);
                         Cip?.Set("Calculations per second", $"{(calculations / secs):n2} c/s");
 
-                        bs.RemoveLinksWithTooMuchPathLoss(maxLoss);
+                        bs.RemoveLinksWithTooLowRssi(MinimumAllowableSignalValue);
 
                         pb.Increment();
                     });
@@ -95,15 +99,20 @@ namespace LambdaModel.Config
             return base.Validate(configLocation);
         }
 
-        public static void SaveApiResults(string outputDirectory, IList<ShapeLink> links, ConsoleInformationPanel cip = null)
+        public static void SaveApiResults(string outputDirectory, RoadLinkBaseStation[] baseStations, ConsoleInformationPanel cip = null)
         {
             var metaFile = Path.Combine(outputDirectory, "meta.json");
-            File.WriteAllText(metaFile, JArray.FromObject(links.Select(p => new RoadLinkResultMetadata(p))).ToString());
+            var links = baseStations.SelectMany(p => p.Links).Distinct().ToArray();
+            File.WriteAllText(metaFile, JObject.FromObject(new
+            {
+                baseStations,
+                links = JArray.FromObject(links.Select(p => new RoadLinkResultMetadata(p)))
+            }).ToString());
 
-            using (var pb = cip?.SetProgress("Saving results", max: links.Count))
+            using (var pb = cip?.SetProgress("Saving results", max: links.Length))
                 foreach (var link in links)
                 {
-                    var linkFile = Path.Combine(outputDirectory, link.ID.ToString() + ".lnkres");
+                    var linkFile = Path.Combine(outputDirectory, link.ID + ".lnkres");
                     using (var writer = new BinaryWriter(File.Create(linkFile)))
                     {
                         writer.Write(link.ID);
@@ -115,7 +124,7 @@ namespace LambdaModel.Config
 
                         foreach (var c in link.Geometry)
                         {
-                            if (double.IsNaN(c.M)) continue;
+                            if (c.M == null) continue;
                             writer.Write(c.X);
                             writer.Write(c.Y);
                             writer.Write(c.Z);
@@ -127,13 +136,17 @@ namespace LambdaModel.Config
                 }
         }
 
-        public static void SaveShape(string pathFile, IList<ShapeLink> links, ConsoleInformationPanel cip = null)
+        public static void SaveShape(string pathFile, IList<RoadLinkBaseStation> baseStations, IList<ShapeLink> links, ConsoleInformationPanel cip = null)
         {
             var shp = new FeatureSet(FeatureType.Point);
 
             var table = shp.DataTable;
-            table.Columns.Add("Loss", typeof(double));
             table.Columns.Add("RoadLinkId", typeof(string));
+            table.Columns.Add("Max RSSI", typeof(double));
+
+            foreach (var bs in baseStations)
+                table.Columns.Add("RSSI_" + bs.Name, typeof(double));
+
             table.AcceptChanges();
 
             using (var pb = cip?.SetProgress("Saving results", max: links.Count))
@@ -141,10 +154,13 @@ namespace LambdaModel.Config
                 {
                     foreach (var c in link.Geometry)
                     {
-                        if (double.IsNaN(c.M)) continue;
+                        if (c.M == null) continue;
                         var feature = shp.AddFeature(new Point(new Coordinate(c.X, c.Y, c.Z)));
-                        feature.DataRow["Loss"] = c.M;
+                        feature.DataRow["Max RSSI"] = c.M.MaxRssi;
                         feature.DataRow["RoadLinkId"] = link.Name;
+
+                        foreach (var bs in baseStations)
+                            feature.DataRow["RSSI_" + bs.Name] = c.M.BaseStationRssi[bs.BaseStationIndex];
                     }
 
                     pb?.Increment();
