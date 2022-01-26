@@ -28,7 +28,7 @@ namespace LambdaRestApi.Controllers
             Started = DateTime.MinValue;
             Finished = DateTime.MinValue;
 
-            Config.OutputLocation = System.IO.Path.Combine(resultsDirectory, Id);
+            Config.OutputDirectory = System.IO.Path.Combine(resultsDirectory, Id);
             config.Validate();
         }
 

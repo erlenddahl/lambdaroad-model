@@ -18,7 +18,15 @@ namespace LambdaModel.Config
         public double MinimumAllowableSignalValue { get; set; } = -150;
 
         public BaseStation[] BaseStations { get; set; }
-        public string OutputLocation { get; set; }
+        public string OutputDirectory { get; set; }
+        public string ShapeFileName { get; set; } = "results.shp";
+        public string CsvFileName { get; set; } = "results.csv";
+        public string CsvSeparator { get; set; } = ";";
+        public string LogFileName { get; set; } = "log.json";
+        public bool WriteShape { get; set; } = true;
+        public bool WriteCsv { get; set; } = true;
+        public bool WriteLog { get; set; } = true;
+        public bool WriteApiResults { get; set; } = true;
         public TerrainConfig Terrain { get; set; }
 
         public int? CalculationThreads { get; set; }
@@ -38,9 +46,14 @@ namespace LambdaModel.Config
 
         public virtual GeneralConfig Validate(string configLocation = null)
         {
-            if (string.IsNullOrWhiteSpace(OutputLocation)) throw new ConfigException("Invalid output location: '" + OutputLocation + "'");
+            if (string.IsNullOrWhiteSpace(OutputDirectory)) throw new ConfigException("Invalid output directory: '" + OutputDirectory + "'");
 
-            OutputLocation = GetFullPath(configLocation, OutputLocation);
+            OutputDirectory = GetFullPath(configLocation, OutputDirectory);
+            if (File.Exists(OutputDirectory)) throw new ConfigException("OutputDirectory is a file -- must be a directory.");
+            if (!Directory.Exists(OutputDirectory))
+                Directory.CreateDirectory(OutputDirectory);
+            if (WriteShape && ShapeFileName.Contains("\\")) throw new ConfigException("ShapeFileName must be a file name only, not a path.");
+            if (WriteLog && LogFileName.Contains("\\")) throw new ConfigException("LogFileName must be a file name only, not a path.");
 
             Terrain.Config = this;
 

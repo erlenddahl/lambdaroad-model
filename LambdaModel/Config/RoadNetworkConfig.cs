@@ -69,20 +69,19 @@ namespace LambdaModel.Config
 
                 start = DateTime.Now;
 
-                if (OutputLocation.ToLower().EndsWith(".shp"))
-                {
-                    SaveShape(OutputLocation, BaseStations.SelectMany(p => p.Links).ToArray(), Cip);
-                }
-                else
-                {
-                    if (!Directory.Exists(OutputLocation))
-                        Directory.CreateDirectory(OutputLocation);
-                    SaveApiResults(OutputLocation, BaseStations.SelectMany(p => p.Links).ToArray(), Cip);
-                }
+                if (WriteShape)
+                    SaveShape(Path.Combine(OutputDirectory, ShapeFileName), BaseStations, BaseStations.SelectMany(p => p.Links).Distinct().ToArray(), Cip);
+                if (WriteApiResults)
+                    SaveApiResults(OutputDirectory, BaseStations, Cip);
+                if (WriteCsv)
+                    SaveCsv(Path.Combine(OutputDirectory, CsvFileName), CsvSeparator, BaseStations, BaseStations.SelectMany(p => p.Links).Distinct().ToArray(), Cip);
 
                 Cip.Set("Saving time", $"{DateTime.Now.Subtract(start).TotalSeconds:n2} seconds.");
 
                 FinalSnapshot = Cip.GetSnapshot();
+
+                if (WriteLog)
+                    File.WriteAllText(Path.Combine(OutputDirectory, LogFileName), JObject.FromObject(FinalSnapshot).ToString());
             }
         }
 

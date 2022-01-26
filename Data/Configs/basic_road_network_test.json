@@ -30,7 +30,11 @@
     ],
     "MinimumAllowableSignalValue": -150,
     "RoadShapeLocation": "..\\RoadNetwork\\2021-05-28_smaller.shp",
-    "OutputLocation": "..\\RoadNetwork\\test-results-huge_itsg5.shp",
+    "OutputDirectory": "..\\RoadNetwork",
+    "ShapeFileName": "test-results-huge_itsg5.shp",
+    "WriteCsv": true,
+    "WriteShape": true,
+    "WriteApiResults": false,
     "Terrain": 
     {
         "Type": "OnlineCache",

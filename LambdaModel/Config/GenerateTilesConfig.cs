@@ -16,7 +16,7 @@ namespace LambdaModel.Config
         public override void Run()
         {
             using (var cip = new ConsoleInformationPanel("Generating terrain tiles"))
-                new TileGenerator(RawDataLocation, OutputLocation, TileSize, cip).Generate();
+                new TileGenerator(RawDataLocation, OutputDirectory, TileSize, cip).Generate();
         }
     }
 }

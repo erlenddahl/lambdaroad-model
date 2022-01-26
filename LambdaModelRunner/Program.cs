@@ -44,12 +44,12 @@ namespace LambdaModelRunner
             var tconfig = new GenerateTilesConfig()
             {
                 RawDataLocation = @"I:\Jobb\Lambda\Unpacked",
-                OutputLocation = @"I:\Jobb\Lambda\Tiles_512",
+                OutputDirectory = @"I:\Jobb\Lambda\Tiles_512",
                 TileSize = 512
             };
+            //tconfig.Run();
 
             var config = GeneralConfig.ParseConfigFile(@"..\..\..\..\Data\Configs\basic_road_network_test.json");
-
             config.Run();
         }
     }
