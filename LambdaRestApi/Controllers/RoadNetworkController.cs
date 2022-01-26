@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using LambdaModel.Config;
+using LambdaRestApi.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -96,13 +97,5 @@ namespace LambdaRestApi.Controllers
 
             return meta;
         }
-    }
-
-    public class ResultsMissingMetadataException : Exception
-    {
-    }
-
-    public class NoSuchResultsException : Exception
-    {
     }
 }
