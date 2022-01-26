@@ -169,5 +169,31 @@ namespace LambdaModel.Config
             using (var _ = cip?.SetUnknownProgress("Writing shape"))
                 shp.SaveAs(pathFile, true);
         }
+
+        public static void SaveCsv(string pathFile, string separator, IList<RoadLinkBaseStation> baseStations, IList<ShapeLink> links, ConsoleInformationPanel cip = null)
+        {
+            var ci = CultureInfo.InvariantCulture;
+            using (var results = new StreamWriter(File.Create(pathFile)))
+            {
+                results.WriteLine(string.Join(separator, "RoadLinkId", "X", "Y", "Z", "Max RSSI") + separator + string.Join(separator, baseStations.Select(p => p.Name)));
+
+                using (var pb = cip?.SetProgress("Writing CSV", max: links.Count))
+                    foreach (var link in links)
+                    {
+                        foreach (var c in link.Geometry)
+                        {
+                            if (c.M == null) continue;
+                            results.WriteLine(link.Name + separator + 
+                                              c.X.ToString(ci) + separator + 
+                                              c.Y.ToString(ci) + separator +
+                                              c.Z.ToString(ci) + separator +
+                                              c.M.MaxRssi.ToString(ci) + separator + 
+                                              string.Join(separator, c.M.BaseStationRssi.Select(p => p.ToString(ci))));
+                        }
+
+                        pb?.Increment();
+                    }
+            }
+        }
     }
 }
