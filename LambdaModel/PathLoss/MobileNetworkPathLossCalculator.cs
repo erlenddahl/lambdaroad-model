@@ -13,7 +13,7 @@ namespace LambdaModel.PathLoss
     {
         public int DistanceScale { get; set; } = 1;
 
-        public double CalculateLoss(Point4D[] path, double txHeightAboveTerrain, double rxHeightAboveTerrain, int rxIndex = -1)
+        public double CalculateLoss(Point4D<double>[] path, double txHeightAboveTerrain, double rxHeightAboveTerrain, int rxIndex = -1)
         {
             var p = GetParameters(path, rxIndex);
             return 25.1 * Math.Log(p.horizontalDistance) - 1.8e-01 * txHeightAboveTerrain + 1.3e+01 * p.rxa - 1.4e-04 * p.txa - 1.4e-04 * p.rxi - 3.0e-05 * p.txi + 4.9 * p.nobs + 29.3;
@@ -31,7 +31,7 @@ namespace LambdaModel.PathLoss
             return 25.1 * Math.Log(horizontalDistance) - 1.8e-01 * txHeightAboveTerrain - 5;
         }
 
-        protected (double horizontalDistance, double txa, double rxa, double txi, double rxi, int nobs) GetParameters(Point4D[] path, int rxIndex = -1)
+        protected (double horizontalDistance, double txa, double rxa, double txi, double rxi, int nobs) GetParameters(Point4D<double>[] path, int rxIndex = -1)
         {
             if (rxIndex == -1) rxIndex = path.Length - 1;
 
@@ -84,7 +84,7 @@ namespace LambdaModel.PathLoss
             return (horizontalDistance, txa, rxa, txi, rxi, nobs);
         }
 
-        protected (int index, double angle, double distance3d) FindFresnelObstruction(Point4D[] path, bool direction, int rxIndex = -1)
+        protected (int index, double angle, double distance3d) FindFresnelObstruction(Point4D<double>[] path, bool direction, int rxIndex = -1)
         {
             if (rxIndex == -1) rxIndex = path.Length - 1;
 
@@ -160,7 +160,7 @@ namespace LambdaModel.PathLoss
         /// <param name="toIx"></param>
         /// <param name="sightLineHeightChangePerMeter"></param>
         /// <returns></returns>
-        protected int FindLosObstruction(Point4D[] path, int fromIx, int toIx, double sightLineHeightChangePerMeter)
+        protected int FindLosObstruction(Point4D<double>[] path, int fromIx, int toIx, double sightLineHeightChangePerMeter)
         {
             var inc = Math.Sign(toIx - fromIx);
             

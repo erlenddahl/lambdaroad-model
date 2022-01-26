@@ -9,7 +9,7 @@ namespace LambdaModel.Calculations
 {
     public class GridCalculator
     {
-        private readonly Point4D[] _vector;
+        private readonly Point4D<double>[] _vector;
         private readonly MobileNetworkPathLossCalculator _calc;
 
         public OnlineTileCache Tiles { get; }
@@ -27,9 +27,9 @@ namespace LambdaModel.Calculations
 
             // Initialize a PointUtm array that is to be (re)used as the vector of points from
             // the center to each of the points that should be calculated.
-            _vector = new Point4D[(int)Math.Sqrt(radius * radius * 2) + 1];
+            _vector = new Point4D<double>[(int)Math.Sqrt(radius * radius * 2) + 1];
             for (var i = 0; i < _vector.Length; i++)
-                _vector[i] = new Point4D(0, 0);
+                _vector[i] = new Point4D<double>(0, 0);
 
             Results = new double[radius * 2 + 1, radius * 2 + 1];
             _calc = new MobileNetworkPathLossCalculator();

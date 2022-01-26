@@ -60,12 +60,12 @@ namespace LambdaModel.Terrain.Tiff
             return (QuickMath.Round(pX - StartX), QuickMath.Round(pY - StartY));
         }
 
-        public Point4D[] GetAltitudeVector(Point3D a, Point3D b, int incMeter = 1)
+        public Point4D<double>[] GetAltitudeVector(Point3D a, Point3D b, int incMeter = 1)
         {
             return GetAltitudeVector(a.X,a.Y, b.X, b.Y, incMeter);
         }
 
-        public Point4D[] GetAltitudeVector(double aX, double aY, double bX, double bY, int incMeter = 1)
+        public Point4D<double>[] GetAltitudeVector(double aX, double aY, double bX, double bY, int incMeter = 1)
         {
             (aX, aY) = ToLocal(aX, aY);
             (bX, bY) = ToLocal(bX, bY);
@@ -73,7 +73,7 @@ namespace LambdaModel.Terrain.Tiff
             var dx = bX - aX;
             var dy = bY - aY;
 			var l = Math.Sqrt(Math.Pow(dx, 2) + Math.Pow(dy, 2));
-            var v = new Point4D[(int)l + 1];
+            var v = new Point4D<double>[(int)l + 1];
 
             var xInc = dx / l * incMeter;
             var yInc = dy / l * incMeter;
@@ -83,7 +83,7 @@ namespace LambdaModel.Terrain.Tiff
 
             while (m <= l)
             {
-                v[m] = new Point4D(x, y, GetAltitudeInternal(QuickMath.Round(x), QuickMath.Round(y)));
+                v[m] = new Point4D<double>(x, y, GetAltitudeInternal(QuickMath.Round(x), QuickMath.Round(y)));
 
                 m += incMeter;
                 x += xInc;
@@ -123,7 +123,7 @@ namespace LambdaModel.Terrain.Tiff
             return tiff;
         }
 
-        public int FillVector(Point4D[] vector, double aX, double aY, double bX, double bY, int incMeter = 1, bool withHeights = false)
+        public int FillVector(Point4D<double>[] vector, double aX, double aY, double bX, double bY, int incMeter = 1, bool withHeights = false)
         {
             var dx = bX - aX;
             var dy = bY - aY;

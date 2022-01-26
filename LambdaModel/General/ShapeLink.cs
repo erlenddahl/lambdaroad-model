@@ -20,9 +20,9 @@ namespace LambdaModel.General
         public int Cx { get; }
         public int Cy { get; }
         public int Length { get; }
-        public Point4D[] Geometry { get; }
+        public Point4D<CalculationDetails>[] Geometry { get; }
 
-        private ShapeLink(int id, string name, IEnumerable<Point4D> geometry, int cx, int cy, int length)
+        private ShapeLink(int id, string name, IEnumerable<Point4D<CalculationDetails>> geometry, int cx, int cy, int length)
         {
             ID = id;
             Name = name;
@@ -31,11 +31,11 @@ namespace LambdaModel.General
             Length = length;
 
             var line = new CachedLineTools(geometry.ToArray());
-            Geometry = new Point4D[(int) line.Length + 1];
+            Geometry = new Point4D<CalculationDetails>[(int) line.Length + 1];
             for (var i = 0; i < Geometry.Length; i++)
             {
                 var pi = line.QueryPointInfo(i);
-                Geometry[i] = new Point4D(pi.X, pi.Y, pi.Z, double.MaxValue);
+                Geometry[i] = new Point4D<CalculationDetails>(pi.X, pi.Y, pi.Z);
             }
         }
 
@@ -92,7 +92,7 @@ namespace LambdaModel.General
                         // have to do it once, and so that each base stations gets the same link object reference.
                         if (link == null)
                         {
-                            var geometry = new Point4D[pointCount];
+                            var geometry = new Point4D<CalculationDetails>[pointCount];
                             var pix = 0;
 
                             for (var i = 0; i < pointBytes.Length; i += 24)
@@ -100,7 +100,7 @@ namespace LambdaModel.General
                                 var x = BitConverter.ToDouble(pointBytes, i);
                                 var y = BitConverter.ToDouble(pointBytes, i + 8);
                                 var z = BitConverter.ToDouble(pointBytes, i + 16);
-                                geometry[pix++] = new Point4D(x, y, z);
+                                geometry[pix++] = new Point4D<CalculationDetails>(x, y, z);
                             }
 
                             link = new ShapeLink(ix, name, geometry, cx, cy, length);

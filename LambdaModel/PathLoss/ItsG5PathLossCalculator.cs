@@ -10,7 +10,7 @@ namespace LambdaModel.PathLoss
     {
         public int DistanceScale { get; set; } = 1;
 
-        public double CalculateLoss(Point4D[] path, double txHeightAboveTerrain, double rxHeightAboveTerrain, int rxIndex = -1)
+        public double CalculateLoss(Point4D<double>[] path, double txHeightAboveTerrain, double rxHeightAboveTerrain, int rxIndex = -1)
         {
             var trafficCase = 1; //1=no traffic, 2=car, 3=truck
             var p = GetParameters(path, rxIndex);
@@ -23,7 +23,7 @@ namespace LambdaModel.PathLoss
             return 0;
         }
 
-        protected (double horizontalDistance, double dmax, double dmax_tx, double dmax_rx) GetParameters(Point4D[] path, int rxIndex = -1)
+        protected (double horizontalDistance, double dmax, double dmax_tx, double dmax_rx) GetParameters(Point4D<double>[] path, int rxIndex = -1)
         {
             if (rxIndex == -1) rxIndex = path.Length - 1;
 
@@ -43,7 +43,7 @@ namespace LambdaModel.PathLoss
         /// <param name="horizontalDistance"></param>
         /// <param name="rxIndex"></param>
         /// <returns></returns>
-        protected (int index, double dmax) FindLosObstruction(Point4D[] path, double horizontalDistance, int rxIndex)
+        protected (int index, double dmax) FindLosObstruction(Point4D<double>[] path, double horizontalDistance, int rxIndex)
         {
             var sightLineHeightChangePerMeter = (path[0].Z - path[rxIndex].Z) / horizontalDistance;
 

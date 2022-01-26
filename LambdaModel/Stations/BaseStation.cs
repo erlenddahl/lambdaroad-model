@@ -12,7 +12,7 @@ namespace LambdaModel.Stations
         public ConsoleInformationPanel Cip { get; set; }
 
         protected readonly IPathLossCalculator _calc;
-        protected readonly Point4D[] _vector;
+        protected readonly Point4D<double>[] _vector;
         public string Name { get; set; }
         public Point3D Center { get; set; }
         public int HeightAboveTerrain { get; set; }
@@ -37,9 +37,9 @@ namespace LambdaModel.Stations
 
             // Initialize a PointUtm array that is to be (re)used as the vector of points from
             // the center to each of the points that should be calculated.
-            _vector = new Point4D[(int)Math.Sqrt((long)maxRadius * maxRadius * 2L) + 1];
+            _vector = new Point4D<double>[(int)Math.Sqrt((long)maxRadius * maxRadius * 2L) + 1];
             for (var i = 0; i < _vector.Length; i++)
-                _vector[i] = new Point4D(0, 0);
+                _vector[i] = new Point4D<double>(0, 0);
 
             _calc = AntennaType == Stations.AntennaType.ItsG5 ? (IPathLossCalculator)new ItsG5PathLossCalculator() : new MobileNetworkPathLossCalculator();
         }

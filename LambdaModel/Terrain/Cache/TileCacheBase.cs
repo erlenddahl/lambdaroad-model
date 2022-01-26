@@ -96,12 +96,12 @@ namespace LambdaModel.Terrain.Cache
 
         public abstract T GetTileKey(int x, int y);
 
-        public Point4D[] GetAltitudeVector(Point3D a, Point3D b, int incMeter = 1)
+        public Point4D<double>[] GetAltitudeVector(Point3D a, Point3D b, int incMeter = 1)
         {
             return GetAltitudeVector(a.X, a.Y, b.X, b.Y, incMeter);
         }
 
-        public Point4D[] GetAltitudeVector(double aX, double aY, double bX, double bY, int incMeter = 1)
+        public Point4D<double>[] GetAltitudeVector(double aX, double aY, double bX, double bY, int incMeter = 1)
         {
             var v = GetVector(aX, aY, bX, bY, incMeter);
 
@@ -132,12 +132,12 @@ namespace LambdaModel.Terrain.Cache
             }
         }
 
-        public Point4D[] GetVector(double aX, double aY, double bX, double bY, int incMeter = 1)
+        public Point4D<double>[] GetVector(double aX, double aY, double bX, double bY, int incMeter = 1)
         {
             var dx = bX - aX;
             var dy = bY - aY;
             var l = Math.Sqrt(dx * dx + dy * dy);
-            var v = new Point4D[(int)l + 1];
+            var v = new Point4D<double>[(int)l + 1];
 
             var xInc = dx / l * incMeter;
             var yInc = dy / l * incMeter;
@@ -147,7 +147,7 @@ namespace LambdaModel.Terrain.Cache
 
             while (m <= l)
             {
-                v[m] = new Point4D(x, y, double.MinValue);
+                v[m] = new Point4D<double>(x, y, double.MinValue);
 
                 m += incMeter;
                 x += xInc;
@@ -157,7 +157,7 @@ namespace LambdaModel.Terrain.Cache
             return v;
         }
 
-        public int FillVector(Point4D[] vector, double aX, double aY, double bX, double bY, int incMeter = 1, bool withHeights = false)
+        public int FillVector(Point4D<double>[] vector, double aX, double aY, double bX, double bY, int incMeter = 1, bool withHeights = false)
         {
             var dx = bX - aX;
             var dy = bY - aY;
