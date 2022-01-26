@@ -52,7 +52,7 @@ namespace LambdaModel.Stations
             RemoveLinksBy("Checking road link min possible path loss", "Road links removed (max loss)", p =>
             {
                 var minDistToCenter = Center.DistanceTo2D(p.Cx, p.Cy) - p.Length;
-                var minPossiblePathLoss = _calc.CalculateMinPossibleLoss(minDistToCenter, HeightAboveTerrain);
+                var minPossiblePathLoss = Calculator.CalculateMinPossibleLoss(minDistToCenter, HeightAboveTerrain);
                 return minPossiblePathLoss > maxPathLoss;
             });
         }
@@ -95,7 +95,7 @@ namespace LambdaModel.Stations
                     var vectorLength = tiles.FillVector(_vector, Center.X, Center.Y, c.X, c.Y, withHeights: true);
 
                     // Calculate the loss for this point, and store it in the results matrix
-                    var loss = _calc.CalculateLoss(_vector, HeightAboveTerrain, 2, vectorLength - 1);
+                    var loss = Calculator.CalculateLoss(_vector, HeightAboveTerrain, 2, vectorLength - 1);
                     var value = transmitPower - loss;
                     c.M.BaseStationRssi[baseStationIx] = value;
                     if (value > c.M.MaxRssi)

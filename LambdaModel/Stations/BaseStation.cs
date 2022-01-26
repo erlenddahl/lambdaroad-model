@@ -11,7 +11,8 @@ namespace LambdaModel.Stations
     {
         public ConsoleInformationPanel Cip { get; set; }
 
-        protected readonly IPathLossCalculator _calc;
+        public IPathLossCalculator Calculator { get; }
+
         protected readonly Point4D<double>[] _vector;
         public string Name { get; set; }
         public Point3D Center { get; set; }
@@ -41,7 +42,7 @@ namespace LambdaModel.Stations
             for (var i = 0; i < _vector.Length; i++)
                 _vector[i] = new Point4D<double>(0, 0);
 
-            _calc = AntennaType == Stations.AntennaType.ItsG5 ? (IPathLossCalculator)new ItsG5PathLossCalculator() : new MobileNetworkPathLossCalculator();
+            Calculator = AntennaType == Stations.AntennaType.ItsG5 ? (IPathLossCalculator)new ItsG5PathLossCalculator() : new MobileNetworkPathLossCalculator();
         }
 
         public void Validate()
