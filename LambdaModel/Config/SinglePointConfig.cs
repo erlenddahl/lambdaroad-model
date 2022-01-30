@@ -17,7 +17,7 @@ namespace LambdaModel.Config
         public double ReceiverHeightAboveTerrain { get; set; }
         public TerrainConfig Terrain { get; set; }
 
-        public (double rssi, Point4D<double>[] vector, ConsoleInformationPanelSnapshot) Run()
+        public object Run()
         {
             using (var cip = new ConsoleInformationPanel("Running single point signal loss calculations"))
             {
@@ -30,9 +30,9 @@ namespace LambdaModel.Config
                 var loss = BaseStation.Calculator.CalculateLoss(vector, BaseStation.HeightAboveTerrain, ReceiverHeightAboveTerrain);
                 var rssi = BaseStation.TotalTransmissionLevel - loss;
 
-                return (rssi, vector, cip.GetSnapshot());
                 cip.Set("Calculation time", DateTime.Now.Subtract(start).TotalMilliseconds + "ms");
 
+                return new {rssi, vector = vector.Select(p => new {p.X, p.Y, p.Z}), snapshot = cip.GetSnapshot()};
             }
         }
     }
