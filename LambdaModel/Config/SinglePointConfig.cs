@@ -24,11 +24,15 @@ namespace LambdaModel.Config
                 var cache = Terrain.CreateCache(cip);
                 BaseStation.Initialize();
 
+                var start = DateTime.Now;
+
                 var vector = cache.GetAltitudeVector(BaseStation.Center, TargetCoordinates).ToArray();
                 var loss = BaseStation.Calculator.CalculateLoss(vector, BaseStation.HeightAboveTerrain, ReceiverHeightAboveTerrain);
                 var rssi = BaseStation.TotalTransmissionLevel - loss;
 
                 return (rssi, vector, cip.GetSnapshot());
+                cip.Set("Calculation time", DateTime.Now.Subtract(start).TotalMilliseconds + "ms");
+
             }
         }
     }
