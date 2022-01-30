@@ -11,9 +11,9 @@ namespace LambdaModel.Stations
     {
         public ConsoleInformationPanel Cip { get; set; }
 
-        public IPathLossCalculator Calculator { get; }
+        public IPathLossCalculator Calculator { get; private set; }
 
-        protected readonly Point4D<double>[] _vector;
+        protected Point4D<double>[] _vector;
         public string Name { get; set; }
         public Point3D Center { get; set; }
         public int HeightAboveTerrain { get; set; }
@@ -36,9 +36,14 @@ namespace LambdaModel.Stations
 
             Cip = cip;
 
+            Initialize();
+        }
+
+        public void Initialize()
+        {
             // Initialize a PointUtm array that is to be (re)used as the vector of points from
             // the center to each of the points that should be calculated.
-            _vector = new Point4D<double>[(int)Math.Sqrt((long)maxRadius * maxRadius * 2L) + 1];
+            _vector = new Point4D<double>[(int)Math.Sqrt((long)MaxRadius * MaxRadius * 2L) + 1];
             for (var i = 0; i < _vector.Length; i++)
                 _vector[i] = new Point4D<double>(0, 0);
 

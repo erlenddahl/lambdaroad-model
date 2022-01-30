@@ -33,6 +33,9 @@ namespace LambdaRestApi.Controllers
             config.CalculationMethod = CalculationMethod.RoadNetwork;
             config.RoadShapeLocation = @"C:\Code\LambdaModel\Data\RoadNetwork\2021-05-28_smaller.shp";
 
+            foreach(var bs in config.BaseStations)
+                bs.Initialize();
+
             config.Terrain = new TerrainConfig()
             {
                 Type = TerrainType.LocalCache,

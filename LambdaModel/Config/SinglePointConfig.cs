@@ -21,7 +21,8 @@ namespace LambdaModel.Config
         {
             using (var cip = new ConsoleInformationPanel("Running single point signal loss calculations"))
             {
-                var cache = Terrain.CreateCache(null);
+                var cache = Terrain.CreateCache(cip);
+                BaseStation.Initialize();
 
                 var vector = cache.GetAltitudeVector(BaseStation.Center, TargetCoordinates).ToArray();
                 var loss = BaseStation.Calculator.CalculateLoss(vector, BaseStation.HeightAboveTerrain, ReceiverHeightAboveTerrain);

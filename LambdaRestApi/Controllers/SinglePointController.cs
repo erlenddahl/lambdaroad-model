@@ -15,7 +15,8 @@ namespace LambdaRestApi.Controllers
                 Type = TerrainType.LocalCache,
                 Location = @"I:\Jobb\Lambda\Tiles_512",
                 MaxCacheItems = 300,
-                RemoveCacheItemsWhenFull = 100
+                RemoveCacheItemsWhenFull = 100,
+                TileSize = 512
             };
 
             return config.Run();
