@@ -6,6 +6,7 @@ namespace LambdaModel.Config
     public class GenerateTilesConfig : GeneralConfig
     {
         public string RawDataLocation { get; set; }
+        public int TileSize { get; set; } = 512;
 
         public override GeneralConfig Validate(string configLocation = null)
         {

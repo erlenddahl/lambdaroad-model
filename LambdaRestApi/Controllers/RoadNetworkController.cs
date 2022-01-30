@@ -31,7 +31,6 @@ namespace LambdaRestApi.Controllers
         public object Start(RoadNetworkConfig config)
         {
             config.CalculationMethod = CalculationMethod.RoadNetwork;
-            config.TileSize = 512;
             config.RoadShapeLocation = @"C:\Code\LambdaModel\Data\RoadNetwork\2021-05-28_smaller.shp";
 
             config.Terrain = new TerrainConfig()
@@ -39,7 +38,8 @@ namespace LambdaRestApi.Controllers
                 Type = TerrainType.LocalCache,
                 Location = @"I:\Jobb\Lambda\Tiles_512",
                 MaxCacheItems = 300,
-                RemoveCacheItemsWhenFull = 100
+                RemoveCacheItemsWhenFull = 100,
+                TileSize = 512
             };
 
             var job = new JobData(config, _resultsDirectory);

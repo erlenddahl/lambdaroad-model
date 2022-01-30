@@ -14,7 +14,6 @@ namespace LambdaModel.Config
     {
         public CalculationMethod CalculationMethod { get; set; }
 
-        public int TileSize { get; set; } = 512;
         public double MinimumAllowableSignalValue { get; set; } = -150;
 
         public BaseStation[] BaseStations { get; set; }
