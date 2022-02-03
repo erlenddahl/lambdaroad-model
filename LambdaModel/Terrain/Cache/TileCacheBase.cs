@@ -9,7 +9,7 @@ using no.sintef.SpeedModule.Geometry.SimpleStructures;
 
 namespace LambdaModel.Terrain.Cache
 {
-    public abstract class TileCacheBase<T> : ITiffReader
+    public abstract class TileCacheBase<T> : ITiffReader, IDisposable
     {
         protected readonly string _cacheLocation;
         public int TileSize { get; }
@@ -250,6 +250,12 @@ namespace LambdaModel.Terrain.Cache
             }
 
             return res;
+        }
+
+        public void Dispose()
+        {
+            _cip?.Dispose();
+            TiffCache.Clear();
         }
     }
 }

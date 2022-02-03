@@ -20,8 +20,8 @@ namespace LambdaModel.Config
         public object Run()
         {
             using (var cip = new ConsoleInformationPanel("Running single point signal loss calculations"))
+            using (var cache = Terrain.CreateCache(cip))
             {
-                var cache = Terrain.CreateCache(cip);
                 BaseStation.Initialize();
 
                 var start = DateTime.Now;
