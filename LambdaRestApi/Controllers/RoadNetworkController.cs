@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using LambdaModel.Config;
+using LambdaModel.General;
+using LambdaModel.Stations;
 using LambdaRestApi.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -30,27 +32,41 @@ namespace LambdaRestApi.Controllers
         [HttpPost]
         public object Start(RoadNetworkConfig config)
         {
-            config.CalculationMethod = CalculationMethod.RoadNetwork;
-            config.RoadShapeLocation = @"C:\Code\LambdaModel\Data\RoadNetwork\2021-05-28_smaller.shp";
-
-            foreach(var bs in config.BaseStations)
-                bs.Initialize();
-
-            config.Terrain = new TerrainConfig()
+            string jobId;
+            try
             {
-                Type = TerrainType.LocalCache,
-                Location = @"I:\Jobb\Lambda\Tiles_512",
-                MaxCacheItems = 300,
-                RemoveCacheItemsWhenFull = 100,
-                TileSize = 512
-            };
+                config.CalculationMethod = CalculationMethod.RoadNetwork;
+                config.RoadShapeLocation = @"C:\Code\LambdaModel\Data\RoadNetwork\2021-05-28_smaller.shp";
 
-            var job = new JobData(config, _resultsDirectory);
+                foreach (var bs in config.BaseStations)
+                    bs.Initialize();
 
-            JobQueue.Enqueue(job);
+                config.Terrain = new TerrainConfig()
+                {
+                    Type = TerrainType.LocalCache,
+                    Location = @"I:\Jobb\Lambda\Tiles_512",
+                    MaxCacheItems = 300,
+                    RemoveCacheItemsWhenFull = 100,
+                    TileSize = 512
+                };
+
+                var job = new JobData(config, _resultsDirectory);
+
+                JobQueue.Enqueue(job);
+
+                jobId = job.Id;
+            }
+            catch (Exception ex)
+            {
+                return new
+                {
+                    error = ex.Message
+                };
+            }
+
             ProcessQueue();
-            
-            return JobStatus(job.Id);
+
+            return JobStatus(jobId);
         }
 
         [HttpPost("generateConfig")]
@@ -107,22 +123,33 @@ namespace LambdaRestApi.Controllers
         [HttpGet]
         public object JobStatus(string key)
         {
-            if (_currentJob?.Id == key) return new JobStatusData(_currentJob, Controllers.JobStatus.Processing);
-
-            if (FinishedJobs.TryGetValue(key, out var job))
-                return new JobStatusData(job, Controllers.JobStatus.Finished);
-
-            var ix = 0;
-            foreach (var q in JobQueue)
+            try
             {
-                if (q.Id == key)
-                {
-                    return new JobStatusData(q, Controllers.JobStatus.InQueue, ix);
-                }
-                ix++;
-            }
+                if (_currentJob?.Id == key) return new JobStatusData(_currentJob, Controllers.JobStatus.Processing);
 
-            return new JObject();
+                if (FinishedJobs.TryGetValue(key, out var job))
+                    return new JobStatusData(job, Controllers.JobStatus.Finished);
+
+                var ix = 0;
+                foreach (var q in JobQueue)
+                {
+                    if (q.Id == key)
+                    {
+                        return new JobStatusData(q, Controllers.JobStatus.InQueue, ix);
+                    }
+
+                    ix++;
+                }
+
+                return new JObject();
+            }
+            catch (Exception ex)
+            {
+                return new
+                {
+                    error = ex.Message
+                };
+            }
         }
 
         [HttpGet("results")]
