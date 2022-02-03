@@ -92,6 +92,11 @@ namespace LambdaRestApi.Controllers
                 FinishedJobs.Add(_currentJob.Id, _currentJob);
                 _currentJob = null;
             }
+
+            foreach(var job in FinishedJobs)
+                if (!job.Value.HasBeenSaved)
+                    job.Value.Save();
+
             if (_currentJob != null) return;
             if (!JobQueue.Any()) return;
 
@@ -131,6 +136,28 @@ namespace LambdaRestApi.Controllers
             var meta = JsonConvert.DeserializeObject<RoadLinkResultMetadata[]>(System.IO.File.ReadAllText(metaFile));
 
             return meta;
+        }
+
+        [HttpGet("jobs")]
+        public object Jobs(string key)
+        {
+            if (!System.IO.Directory.Exists(_resultsDirectory)) return new string[0];
+            return System.IO.Directory.GetDirectories(_resultsDirectory)
+                .Select(p =>
+                {
+                    var jobData = System.IO.Path.Combine(p, "jobdata.json");
+                    if (!System.IO.File.Exists(jobData)) return null;
+                    try
+                    {
+                        return JobData.FromFile(jobData);
+                    }
+                    catch (Exception ex)
+                    {
+                        return null;
+                    }
+                })
+                .Where(p => p != null)
+                .ToArray();
         }
     }
 }

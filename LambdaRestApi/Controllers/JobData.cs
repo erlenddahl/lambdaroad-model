@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using LambdaModel.Config;
 using Newtonsoft.Json;
@@ -17,8 +18,12 @@ namespace LambdaRestApi.Controllers
         public DateTime Enqueued { get; set; }
         public DateTime Started { get; set; }
         public DateTime Finished { get; set; }
+
+        [JsonIgnore]
         public Task RunTask { get; set; }
         public Exception RunException { get; set; }
+
+        public bool HasBeenSaved { get; set; } = false;
 
         public JobData(RoadNetworkConfig config, string resultsDirectory)
         {
@@ -44,10 +49,35 @@ namespace LambdaRestApi.Controllers
                 catch (Exception ex)
                 {
                     RunException = ex;
+                    Debug.WriteLine(ex.StackTrace);
                 }
                 Finished = DateTime.Now;
+
+                Save();
+
                 callback();
             });
+        }
+
+        public void Save()
+        {
+            if (HasBeenSaved) return;
+
+            try
+            {
+                System.IO.File.WriteAllText(System.IO.Path.Combine(Config.OutputDirectory, "jobdata.json"), ToJson().ToString());
+                var c = JObject.FromObject(Config);
+                
+                c.Remove(nameof(Config.Cip));
+                c.Remove(nameof(Config.FinalSnapshot));
+                
+                System.IO.File.WriteAllText(System.IO.Path.Combine(Config.OutputDirectory, "config.json"), c.ToString());
+                HasBeenSaved = true;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
         }
 
         public JObject ToJson()
@@ -71,6 +101,11 @@ namespace LambdaRestApi.Controllers
                 json.Add("Snapshot", JObject.FromObject(snap));
 
             return json;
+        }
+
+        public static JobData FromFile(string path)
+        {
+            return JsonConvert.DeserializeObject<JobData>(System.IO.File.ReadAllText(path));
         }
     }
 }
