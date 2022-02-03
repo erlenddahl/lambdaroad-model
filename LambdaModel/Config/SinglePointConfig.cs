@@ -27,8 +27,11 @@ namespace LambdaModel.Config
                 var start = DateTime.Now;
 
                 var vector = cache.GetAltitudeVector(BaseStation.Center, TargetCoordinates).ToArray();
-                var loss = BaseStation.Calculator.CalculateLoss(vector, BaseStation.HeightAboveTerrain, ReceiverHeightAboveTerrain);
-                var rssi = BaseStation.TotalTransmissionLevel - loss;
+                var rssi = new double[vector.Length];
+                for (var i = 2; i < vector.Length; i++)
+                {
+                    rssi[i] = BaseStation.TotalTransmissionLevel - BaseStation.Calculator.CalculateLoss(vector, BaseStation.HeightAboveTerrain, ReceiverHeightAboveTerrain, i - 1);
+                }
 
                 cip.Set("Calculation time", DateTime.Now.Subtract(start).TotalMilliseconds + "ms");
 
