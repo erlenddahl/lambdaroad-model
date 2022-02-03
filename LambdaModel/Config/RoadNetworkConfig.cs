@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using BitMiracle.LibTiff.Classic;
 using ConsoleUtilities.ConsoleInfoPanel;
 using DotSpatial.Data;
 using DotSpatial.Topology;
+using DotSpatial.Topology.Operation.Distance;
 using Extensions.StringExtensions;
 using LambdaModel.General;
 using LambdaModel.Stations;
@@ -33,14 +35,15 @@ namespace LambdaModel.Config
                     bs.BaseStationIndex = bix++;
                 }
 
-                var calculations = 0;
-
                 if (CalculationThreads.HasValue)
                     Cip.Set("Calculation threads", CalculationThreads.Value);
                 Cip.Set("Minimum signal", MinimumAllowableSignalValue);
 
                 Cip?.Set("Road network source", Path.GetFileName(RoadShapeLocation));
                 ShapeLink.ReadLinks(RoadShapeLocation, BaseStations);
+
+                var calculations = 0L;
+                var distance = 0L;
 
                 var start = DateTime.Now;
                 using (var pb = Cip.SetProgress("Processing base stations", max: BaseStations.Length))
@@ -59,11 +62,14 @@ namespace LambdaModel.Config
                         
                         bs.RemoveLinksTooFarAway(bs.TotalTransmissionLevel - MinimumAllowableSignalValue);
 
-                        calculations += bs.Calculate(tiles, BaseStations.Length, bs.BaseStationIndex);
+                        var (bsCalcs, bsDist) = bs.Calculate(tiles, BaseStations.Length, bs.BaseStationIndex);
+                        Interlocked.Add(ref calculations, bsCalcs);
+                        Interlocked.Add(ref distance, bsDist);
 
                         var secs = DateTime.Now.Subtract(start).TotalSeconds;
                         Cip?.Set("Calculation time", secs);
                         Cip?.Set("Calculations per second", $"{(calculations / secs):n2} c/s");
+                        Cip?.Set("Terrain lookups per second", $"{(distance / secs):n2} c/s");
 
                         bs.RemoveLinksWithTooLowRssi(MinimumAllowableSignalValue);
 

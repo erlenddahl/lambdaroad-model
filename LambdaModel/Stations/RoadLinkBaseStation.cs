@@ -70,10 +70,11 @@ namespace LambdaModel.Stations
             });
         }
         
-        public int Calculate(ITiffReader tiles, int numBaseStations = 1, int baseStationIx = 0)
+        public (long calculations, long distance) Calculate(ITiffReader tiles, int numBaseStations = 1, int baseStationIx = 0)
         {
             SortLinks();
             var calculations = 0;
+            var distance = 0L;
 
             Center.Z = tiles.GetAltitude(Center);
             var transmitPower = TotalTransmissionLevel;
@@ -81,6 +82,8 @@ namespace LambdaModel.Stations
             foreach (var link in Cip.Run("Calculating path loss [" + Name + "]", Links))
             {
                 var linkCalcs = 0;
+                var linkDist = 0L;
+
                 foreach (var c in link.Geometry)
                 {
                     if (Center.DistanceTo2D(c) > MaxRadius)
@@ -102,13 +105,17 @@ namespace LambdaModel.Stations
                         c.M.MaxRssi = value;
 
                     linkCalcs++;
+                    linkDist += vectorLength;
                 }
 
                 calculations += linkCalcs;
+                distance += linkDist;
+
                 Cip?.Increment("Points calculated", linkCalcs);
+                Cip?.Increment("Terrain lookups", linkDist);
             }
 
-            return calculations;
+            return (calculations, distance);
         }
     }
 }
