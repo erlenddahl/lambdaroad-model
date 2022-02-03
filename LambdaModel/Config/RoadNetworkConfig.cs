@@ -128,7 +128,10 @@ namespace LambdaModel.Config
                             writer.Write(c.X);
                             writer.Write(c.Y);
                             writer.Write(c.Z);
-                            writer.Write(c.M);
+                            writer.Write(c.M.MaxRssi);
+                            writer.Write(c.M.BaseStationRssi.Length);
+                            foreach (var bs in c.M.BaseStationRssi)
+                                writer.Write(bs);
                         }
                     }
 
