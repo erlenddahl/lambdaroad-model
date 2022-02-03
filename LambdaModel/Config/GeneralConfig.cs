@@ -30,7 +30,10 @@ namespace LambdaModel.Config
 
         public int? CalculationThreads { get; set; }
 
+        [JsonIgnore]
         public ConsoleInformationPanel Cip { get; set; }
+
+        [JsonIgnore]
         public ConsoleInformationPanelSnapshot FinalSnapshot { get; set; }
 
         public static GeneralConfig ParseConfigFile(string file)

@@ -1,5 +1,6 @@
 ﻿using ConsoleUtilities.ConsoleInfoPanel;
 using LambdaModel.Terrain.Cache;
+using Newtonsoft.Json;
 
 namespace LambdaModel.Config
 {
@@ -10,6 +11,7 @@ namespace LambdaModel.Config
         public int MaxCacheItems { get; set; }
         public int RemoveCacheItemsWhenFull { get; set; }
         public string WmsUrl { get; set; }
+        [JsonIgnore]
         public GeneralConfig Config { get; set; }
         public int TileSize { get; set; } = 512;
 

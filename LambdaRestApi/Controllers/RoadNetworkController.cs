@@ -53,6 +53,38 @@ namespace LambdaRestApi.Controllers
             return JobStatus(job.Id);
         }
 
+        [HttpPost("generateConfig")]
+        public object GenerateConfig(RoadNetworkConfig config)
+        {
+            try
+            {
+                config.OutputDirectory = "[INSERT ACTUAL PATH HERE]";
+                config.CalculationMethod = CalculationMethod.RoadNetwork;
+                config.RoadShapeLocation = "[INSERT ACTUAL PATH HERE]";
+                config.Terrain = new TerrainConfig()
+                {
+                    Type = TerrainType.OnlineCache,
+                    Location = "[INSERT ACTUAL PATH HERE]",
+                    WmsUrl = "https://wms.geonorge.no/skwms1/wms.hoyde-dom?bbox={0}&format=image/tiff&service=WMS&version=1.1.1&request=GetMap&srs=EPSG:25833&transparent=true&width={1}&height={2}&layers=dom1_33:None",
+                    MaxCacheItems = 300,
+                    RemoveCacheItemsWhenFull = 100,
+                    TileSize = 512
+                };
+
+                var json = JObject.FromObject(config);
+                foreach (JObject bs in json[nameof(config.BaseStations)])
+                    bs.Value<JObject>("Center").Remove("Z");
+                return json;
+            }
+            catch (Exception ex)
+            {
+                return new
+                {
+                    error = ex.Message
+                };
+            }
+        }
+
         private void ProcessQueue()
         {
             if (_currentJob != null && _currentJob.Finished > DateTime.MinValue)

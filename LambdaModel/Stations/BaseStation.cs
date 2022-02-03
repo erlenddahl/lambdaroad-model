@@ -3,14 +3,17 @@ using ConsoleUtilities.ConsoleInfoPanel;
 using Extensions.Utilities;
 using LambdaModel.General;
 using LambdaModel.PathLoss;
+using Newtonsoft.Json;
 using no.sintef.SpeedModule.Geometry.SimpleStructures;
 
 namespace LambdaModel.Stations
 {
     public class BaseStation
     {
+        [JsonIgnore]
         public ConsoleInformationPanel Cip { get; set; }
 
+        [JsonIgnore]
         public IPathLossCalculator Calculator { get; private set; }
 
         protected Point4D<double>[] _vector;
