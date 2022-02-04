@@ -78,11 +78,18 @@ namespace LambdaModel.Config
                 }
 
                 start = DateTime.Now;
-
+                
                 if (WriteShape)
                     SaveShape(Path.Combine(OutputDirectory, ShapeFileName), BaseStations, BaseStations.SelectMany(p => p.Links).Distinct().ToArray(), Cip);
                 if (WriteApiResults)
-                    SaveApiResults(OutputDirectory, BaseStations, Cip);
+                {
+                    var dir = OutputDirectory;
+                    if (!string.IsNullOrWhiteSpace(ApiResultInnerFolder))
+                        dir = Path.Combine(dir, ApiResultInnerFolder);
+                    Directory.CreateDirectory(dir);
+                    SaveApiResults(dir, BaseStations, Cip);
+                }
+
                 if (WriteCsv)
                     SaveCsv(Path.Combine(OutputDirectory, CsvFileName), CsvSeparator, BaseStations, BaseStations.SelectMany(p => p.Links).Distinct().ToArray(), Cip);
 
