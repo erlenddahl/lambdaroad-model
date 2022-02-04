@@ -255,7 +255,6 @@ namespace LambdaModel.Terrain.Cache
 
         public void Dispose()
         {
-            _cip?.Dispose();
             TiffCache.Clear();
         }
     }
