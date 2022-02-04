@@ -16,6 +16,7 @@ namespace LambdaModel.Utilities
         public int CurrentlyInCache => _cache.Count;
         public int MaxItems { get; }
         public int RemoveItemsWhenFull { get; set; }
+        public double SecondsLostToRemovals { get; set; }
 
         public Action<T> OnRemoved = null;
 
@@ -75,6 +76,7 @@ namespace LambdaModel.Utilities
 
         private void RemoveLeastRecentlyUsed(int remove)
         {
+            var start = DateTime.Now;
             var lastRecentlyUsed = _cache.OrderBy(p => p.Value.AddedAt).Take(remove).ToArray();
             foreach (var item in lastRecentlyUsed)
             {
@@ -83,6 +85,7 @@ namespace LambdaModel.Utilities
                 RemovedFromCache++;
             }
 
+            SecondsLostToRemovals += DateTime.Now.Subtract(start).TotalSeconds;
             CacheRemovals++;
         }
 
@@ -93,6 +96,7 @@ namespace LambdaModel.Utilities
             RemovedFromCache = 0;
             RetrievedFromCache = 0;
             CacheRemovals = 0;
+            SecondsLostToRemovals = 0;
         }
     }
 }

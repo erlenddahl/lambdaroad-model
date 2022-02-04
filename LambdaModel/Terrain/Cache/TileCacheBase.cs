@@ -23,6 +23,7 @@ namespace LambdaModel.Terrain.Cache
         private int _lastRetrieved;
 
         public int TilesRetrievedFromCache => TiffCache.RetrievedFromCache;
+        public double SecondsLostToRemovals => TiffCache.SecondsLostToRemovals;
 
         public TileCacheBase(string cacheLocation, int tileSize = 512, ConsoleInformationPanel cip = null, int maxCacheItems = 1000, int removeCacheItemsWhenFull = 5)
         {
