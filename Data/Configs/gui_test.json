@@ -1,0 +1,49 @@
+{
+    "RoadShapeLocation": "..\\RoadNetwork\\2021-05-28_smaller.shp",
+    "BaseStations": [
+        {
+            "BaseStationIndex": 0,
+            "Name": "Stasjon 1",
+            "Center": {
+                "X": 268283.4066450454,
+                "Y": 7040847.668103122
+            },
+            "HeightAboveTerrain": 300,
+            "MaxRadius": 50000,
+            "AntennaType": 0,
+            "TotalTransmissionLevel": 62
+        },
+        {
+            "BaseStationIndex": 0,
+            "Name": "Alfabra",
+            "Center": {
+                "X": 268202.61479943804,
+                "Y": 7039735.629424993
+            },
+            "HeightAboveTerrain": 300,
+            "MaxRadius": 50000,
+            "AntennaType": 0,
+            "TotalTransmissionLevel": 71
+        }
+    ],
+    "CalculationMethod": "RoadNetwork",
+    "MinimumAllowableSignalValue": -125,
+    "OutputDirectory": "..\\RoadNetwork_Results\\cache_{cache_size}_{cache_remove}",
+    "ShapeFileName": "results.shp",
+    "CsvFileName": "results.csv",
+    "CsvSeparator": ";",
+    "LogFileName": "log.json",
+    "WriteShape": true,
+    "WriteCsv": true,
+    "WriteLog": true,
+    "WriteApiResults": true,
+    "Terrain": {
+        "Type": "LocalCache",
+        "Location": "I:\\Jobb\\Lambda\\Tiles_512",
+        "MaxCacheItems": 3000,
+        "RemoveCacheItemsWhenFull": 500,
+        "WmsUrl": "https://wms.geonorge.no/skwms1/wms.hoyde-dom?bbox={0}&format=image/tiff&service=WMS&version=1.1.1&request=GetMap&srs=EPSG:25833&transparent=true&width={1}&height={2}&layers=dom1_33:None",
+        "TileSize": 512
+    },
+    "CalculationThreads": null
+}
