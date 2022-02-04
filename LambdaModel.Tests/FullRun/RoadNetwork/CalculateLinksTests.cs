@@ -21,10 +21,10 @@ namespace LambdaModel.Tests.FullRun.RoadNetwork
             var bs = new RoadLinkBaseStation(271327, 7040324, 100, 500);
 
             var start = DateTime.Now;
-            var calculations = bs.Calculate(tiles);
+            var res = bs.Calculate(tiles);
             var secs = DateTime.Now.Subtract(start).TotalSeconds;
             Console.WriteLine($"Calculation time: {secs:n2} seconds.");
-            Console.WriteLine($"Calculations: {calculations:n0}, {(calculations / secs):n2} c/s");
+            Console.WriteLine($"Calculations: {res.calculations:n0}, {(res.calculations / secs):n2} c/s");
 
             //start = DateTime.Now;
             //bs.SaveResults(@"..\..\..\..\Data\RoadNetwork\test-results-tiny.shp");

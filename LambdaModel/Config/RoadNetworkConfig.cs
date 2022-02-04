@@ -55,21 +55,25 @@ namespace LambdaModel.Config
 
                     query.ForAll(bs =>
                     {
-                        var tiles = Terrain.CreateCache(Cip);
-
                         Cip?.Set("Calculation radius", bs.MaxRadius);
                         Cip?.Set("Relevant road links", bs.Links.Count);
                         
                         bs.RemoveLinksTooFarAway(bs.TotalTransmissionLevel - MinimumAllowableSignalValue);
 
-                        var (bsCalcs, bsDist) = bs.Calculate(tiles, BaseStations.Length, bs.BaseStationIndex);
-                        Interlocked.Add(ref calculations, bsCalcs);
-                        Interlocked.Add(ref distance, bsDist);
+                        using (var tiles = Terrain.CreateCache(Cip))
+                        {
+                            var (bsCalcs, bsDist) = bs.Calculate(tiles, BaseStations.Length, bs.BaseStationIndex);
+
+                            Interlocked.Add(ref calculations, bsCalcs);
+                            Interlocked.Add(ref distance, bsDist);
+
+                            Cip?.Increment("Seconds lost to cache removal", tiles.SecondsLostToRemovals);
+                        }
 
                         var secs = DateTime.Now.Subtract(start).TotalSeconds;
                         Cip?.Set("Calculation time", secs);
-                        Cip?.Set("Calculations per second", $"{(calculations / secs):n2} c/s");
-                        Cip?.Set("Terrain lookups per second", $"{(distance / secs):n2} c/s");
+                        Cip?.Set("Calculations per second", $"{(long)(calculations / secs):n0} c/s");
+                        Cip?.Set("Terrain lookups per second", $"{(long)(distance / secs):n0} tl/s");
 
                         bs.RemoveLinksWithTooLowRssi(MinimumAllowableSignalValue);
 
