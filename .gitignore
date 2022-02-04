@@ -1,12 +1,5 @@
-ReaderJS/Build/*
-!ReaderJS/Build/empty
-!ReaderJS/Build/layout.html
-ReaderJS/package-lock.json
-JetReader/ReaderApp.Release.config
-JetReader/ReaderApp.config
-JetReader.UWP/Package.xml
-
-JetReader.Tests/data/FileLoading/
+Data/RoadNetwork/
+Data/RoadNetwork_Results/
 
 # Created by https://www.gitignore.io/api/visualstudio,csharp
 
