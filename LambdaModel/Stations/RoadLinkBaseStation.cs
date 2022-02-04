@@ -78,6 +78,7 @@ namespace LambdaModel.Stations
 
             Center.Z = tiles.GetAltitude(Center);
             var transmitPower = TotalTransmissionLevel;
+            var process = System.Diagnostics.Process.GetCurrentProcess();
 
             foreach (var link in Cip.Run("Calculating path loss [" + Name + "]", Links))
             {
@@ -113,6 +114,7 @@ namespace LambdaModel.Stations
 
                 Cip?.Increment("Points calculated", linkCalcs);
                 Cip?.Increment("Terrain lookups", linkDist);
+                Cip?.Max("Memory usage", process.WorkingSet64 / 1024d / 1024d);
             }
 
             return (calculations, distance);
