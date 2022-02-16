@@ -25,6 +25,11 @@ namespace LambdaRestApi.Controllers
 
         public bool HasBeenSaved { get; set; } = false;
 
+        public JobData()
+        {
+
+        }
+
         public JobData(RoadNetworkConfig config, string resultsDirectory)
         {
             Config = config;
@@ -65,9 +70,11 @@ namespace LambdaRestApi.Controllers
 
             try
             {
+                System.IO.File.WriteAllText(System.IO.Path.Combine(Config.OutputDirectory, "jobstatusdata.json"), JsonConvert.SerializeObject(new JobStatusData(this, JobStatus.Finished)));
+
                 System.IO.File.WriteAllText(System.IO.Path.Combine(Config.OutputDirectory, "jobdata.json"), ToJson().ToString());
-                var c = JObject.FromObject(Config);
                 
+                var c = JObject.FromObject(Config);
                 c.Remove(nameof(Config.Cip));
                 c.Remove(nameof(Config.FinalSnapshot));
                 
@@ -96,7 +103,7 @@ namespace LambdaRestApi.Controllers
             if (RunException != null)
                 json[nameof(RunException)] = RunException.Message;
 
-            var snap = Config.FinalSnapshot ?? Config.Cip?.GetSnapshot();
+            var snap = Config?.FinalSnapshot ?? Config?.Cip?.GetSnapshot();
             if (snap != null)
                 json.Add("Snapshot", JObject.FromObject(snap));
 

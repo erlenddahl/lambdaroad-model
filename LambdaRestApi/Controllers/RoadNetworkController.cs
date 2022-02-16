@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using LambdaModel.Config;
 using LambdaModel.General;
@@ -110,8 +111,7 @@ namespace LambdaRestApi.Controllers
             }
 
             foreach(var job in FinishedJobs)
-                if (!job.Value.HasBeenSaved)
-                    job.Value.Save();
+                job.Value.Save(); // Will return immediately if it has been saved before
 
             if (_currentJob != null) return;
             if (!JobQueue.Any()) return;
@@ -155,34 +155,49 @@ namespace LambdaRestApi.Controllers
         [HttpGet("results")]
         public object Results(string key)
         {
-            var dir = System.IO.Path.Combine(_resultsDirectory, key);
-            if (!System.IO.Directory.Exists(dir)) throw new NoSuchResultsException();
+            var dir = Path.Combine(_resultsDirectory, key);
+            if (!Directory.Exists(dir)) throw new NoSuchResultsException();
 
-            var metaFile = System.IO.Path.Combine(dir, "meta.json");
+            var metaFile = Path.Combine(dir, "links", "meta.json");
             if (!System.IO.File.Exists(metaFile)) throw new ResultsMissingMetadataException();
-            var meta = JsonConvert.DeserializeObject<RoadLinkResultMetadata[]>(System.IO.File.ReadAllText(metaFile));
-
-            return meta;
+            return JObject.Parse(System.IO.File.ReadAllText(metaFile));
         }
 
         [HttpGet("jobs")]
-        public object Jobs(string key)
+        public object Jobs()
         {
-            if (!System.IO.Directory.Exists(_resultsDirectory)) return new string[0];
-            return System.IO.Directory.GetDirectories(_resultsDirectory)
+            if (!Directory.Exists(_resultsDirectory)) return new string[0];
+            return Directory.GetDirectories(_resultsDirectory)
                 .Select(p =>
                 {
-                    var jobData = System.IO.Path.Combine(p, "jobdata.json");
-                    if (!System.IO.File.Exists(jobData)) return null;
+                    var jobStatusData = Path.Combine(p, "jobstatusdata.json");
+                    if (!System.IO.File.Exists(jobStatusData)) return null;
                     try
                     {
-                        return JobData.FromFile(jobData);
+                        return JobStatusData.FromFile(jobStatusData);
                     }
                     catch (Exception ex)
                     {
-                        return null;
+                        JobData job;
+                        try
+                        {
+                            job = JobData.FromFile(Path.Combine(p, "jobdata.json"));
+                            job.RunException = ex;
+                        }
+                        catch (Exception ex2)
+                        {
+                            job = new JobData()
+                            {
+                                Id = Path.GetFileName(Path.GetDirectoryName(p)),
+                                RunException = ex2
+                            };
+                        }
+
+                        return new JobStatusData(job, Controllers.JobStatus.Failed);
                     }
                 })
+                .Concat(new[] {_currentJob == null ? null : new JobStatusData(_currentJob, Controllers.JobStatus.Processing)})
+                .Concat(JobQueue.Select(p => new JobStatusData(p, Controllers.JobStatus.InQueue)))
                 .Where(p => p != null)
                 .ToArray();
         }

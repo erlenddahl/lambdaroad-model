@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace LambdaRestApi.Controllers
 {
@@ -7,6 +8,11 @@ namespace LambdaRestApi.Controllers
         public JobStatus Status { get; set; }
         public JObject Data { get; set; }
         public int? QueueIndex { get; set; }
+
+        public JobStatusData()
+        {
+
+        }
 
         public JobStatusData(JobData data, JobStatus status)
         {
@@ -20,6 +26,11 @@ namespace LambdaRestApi.Controllers
         public JobStatusData(JobData data, JobStatus status, int queueIndex) : this(data, status)
         {
             QueueIndex = queueIndex;
+        }
+
+        public static JobStatusData FromFile(string path)
+        {
+            return JsonConvert.DeserializeObject<JobStatusData>(System.IO.File.ReadAllText(path));
         }
     }
 }
