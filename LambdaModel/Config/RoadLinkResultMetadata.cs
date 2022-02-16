@@ -1,5 +1,9 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using DotSpatial.Topology;
 using LambdaModel.General;
+using Newtonsoft.Json.Linq;
+using no.sintef.SpeedModule.Geometry.SimpleStructures;
 
 namespace LambdaModel.Config
 {
@@ -12,6 +16,8 @@ namespace LambdaModel.Config
         public double Min { get; set; } = double.MaxValue;
         public double Max { get; set; } = double.MinValue;
         public double Average { get; set; }
+
+        public JArray Points { get; set; }
 
         public RoadLinkResultMetadata()
         {
@@ -36,6 +42,11 @@ namespace LambdaModel.Config
             }
 
             Average = sum / count;
+
+            Points = JArray.FromObject(link.Geometry.Select(p =>
+                new double[] {p.X, p.Y}
+                    .Concat(p.M.BaseStationRssi.Select(c => (double)(int) Math.Round(c)))
+                    .ToArray()));
         }
     }
 }

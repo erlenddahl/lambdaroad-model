@@ -13,6 +13,7 @@ using Extensions.StringExtensions;
 using LambdaModel.General;
 using LambdaModel.Stations;
 using LambdaModel.Utilities;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace LambdaModel.Config
@@ -124,7 +125,7 @@ namespace LambdaModel.Config
             {
                 baseStations,
                 links = JArray.FromObject(links.Select(p => new RoadLinkResultMetadata(p)))
-            }).ToString());
+            }).ToString(Formatting.None));
 
             using (var pb = cip?.SetProgress("Saving results", max: links.Length))
                 foreach (var link in links)
