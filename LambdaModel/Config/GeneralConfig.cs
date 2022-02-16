@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using ConsoleUtilities;
 using ConsoleUtilities.ConsoleInfoPanel;
 using LambdaModel.Stations;
 using Newtonsoft.Json;
@@ -10,7 +11,7 @@ using Newtonsoft.Json.Linq;
 
 namespace LambdaModel.Config
 {
-    public abstract class GeneralConfig
+    public abstract class GeneralConfig : IRunnable
     {
         private string _originalOutputDirectory;
         public CalculationMethod CalculationMethod { get; set; }

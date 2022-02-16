@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using BitMiracle.LibTiff.Classic;
+using ConsoleUtilities;
 using ConsoleUtilities.ConsoleInfoPanel;
 using DotSpatial.Data;
 using DotSpatial.Topology;
@@ -29,17 +30,14 @@ namespace LambdaModelRunner
              * Eliminate further by looking at fresnel obstructions and eliminating once we know path loss gets too big
              */
 
-            try
-            {
-                Console.BufferWidth = Math.Min(Console.LargestWindowWidth, 180);
-                Console.WindowWidth = Math.Min(Console.LargestWindowWidth, 180);
-                Console.BufferHeight = Math.Min(Console.LargestWindowHeight, 40);
-                Console.WindowHeight = Math.Min(Console.LargestWindowHeight, 40);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message);
-            }
+            args = new[] {@"..\..\..\..\Data\Configs\gui_test.json"};
+
+            new ConsoleConfigHelper(args)
+                .AutoResize()
+                .Run("Processing config files - Lambda Model Runner", GeneralConfig.ParseConfigFile)
+                .PrintSummary();
+
+            return;
 
             var tconfig = new GenerateTilesConfig()
             {
@@ -49,8 +47,17 @@ namespace LambdaModelRunner
             };
             //tconfig.Run();
 
-            var config = GeneralConfig.ParseConfigFile(@"..\..\..\..\Data\Configs\basic_road_network_test.json");
-            config.Run();
+            foreach (var cacheSize in new[] {300, 500, 1000, 2000, 3000, 5000, 10000})
+            foreach (var remove in new[] {100, 200, 500, 1000, 2000})
+            {
+                if (remove >= cacheSize) continue;
+
+                var config = GeneralConfig.ParseConfigFile(@"..\..\..\..\Data\Configs\gui_test.json");
+                config.Terrain.MaxCacheItems = cacheSize;
+                config.Terrain.RemoveCacheItemsWhenFull = remove;
+                config.PrepareOutputDirectory();
+                config.Run();
+            }
         }
     }
 }
