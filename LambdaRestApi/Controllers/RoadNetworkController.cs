@@ -20,7 +20,6 @@ namespace LambdaRestApi.Controllers
         private readonly ILogger<RoadNetworkController> _logger;
         
         private static readonly Queue<JobData> JobQueue = new();
-        private static readonly Dictionary<string, JobData> FinishedJobs = new();
         private static JobData _currentJob;
         private readonly string _resultsDirectory;
 
@@ -105,13 +104,7 @@ namespace LambdaRestApi.Controllers
         private void ProcessQueue()
         {
             if (_currentJob != null && _currentJob.Finished > DateTime.MinValue)
-            {
-                FinishedJobs.Add(_currentJob.Id, _currentJob);
                 _currentJob = null;
-            }
-
-            foreach(var job in FinishedJobs)
-                job.Value.Save(); // Will return immediately if it has been saved before
 
             if (_currentJob != null) return;
             if (!JobQueue.Any()) return;
@@ -126,9 +119,6 @@ namespace LambdaRestApi.Controllers
             try
             {
                 if (_currentJob?.Id == key) return new JobStatusData(_currentJob, Controllers.JobStatus.Processing);
-
-                if (FinishedJobs.TryGetValue(key, out var job))
-                    return new JobStatusData(job, Controllers.JobStatus.Finished);
 
                 var ix = 0;
                 foreach (var q in JobQueue)
@@ -199,6 +189,7 @@ namespace LambdaRestApi.Controllers
                 .Concat(new[] {_currentJob == null ? null : new JobStatusData(_currentJob, Controllers.JobStatus.Processing)})
                 .Concat(JobQueue.Select(p => new JobStatusData(p, Controllers.JobStatus.InQueue)))
                 .Where(p => p != null)
+                .OrderBy(p => p.Data[nameof(JobData.Enqueued)])
                 .ToArray();
         }
     }
