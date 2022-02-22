@@ -7,6 +7,7 @@ using LambdaModel.General;
 using LambdaModel.Stations;
 using LambdaRestApi.Exceptions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -22,11 +23,13 @@ namespace LambdaRestApi.Controllers
         private static readonly Queue<JobData> JobQueue = new();
         private static JobData _currentJob;
         private readonly string _resultsDirectory;
+        private readonly IConfiguration _config;
 
-        public RoadNetworkController(ILogger<RoadNetworkController> logger)
+        public RoadNetworkController(ILogger<RoadNetworkController> logger, IConfiguration config)
         {
             _logger = logger;
-            _resultsDirectory = @"C:\Code\LambdaModel\Data\ApiOutput";
+            _config = config;
+            _resultsDirectory = _config.GetValue<string>("ResultsLocation");
         }
 
         [HttpPost]
@@ -36,7 +39,7 @@ namespace LambdaRestApi.Controllers
             try
             {
                 config.CalculationMethod = CalculationMethod.RoadNetwork;
-                config.RoadShapeLocation = @"C:\Code\LambdaModel\Data\RoadNetwork\2021-05-28_smaller.shp";
+                config.RoadShapeLocation = _config.GetValue<string>("RoadShapeLocation");
 
                 foreach (var bs in config.BaseStations)
                     bs.Initialize();
@@ -44,7 +47,7 @@ namespace LambdaRestApi.Controllers
                 config.Terrain = new TerrainConfig()
                 {
                     Type = TerrainType.LocalCache,
-                    Location = @"I:\Jobb\Lambda\Tiles_512",
+                    Location = _config.GetValue<string>("TileCacheLocation"),
                     MaxCacheItems = 300,
                     RemoveCacheItemsWhenFull = 100,
                     TileSize = 512
@@ -81,7 +84,7 @@ namespace LambdaRestApi.Controllers
                 {
                     Type = TerrainType.OnlineCache,
                     Location = "[INSERT ACTUAL PATH HERE]",
-                    WmsUrl = "https://wms.geonorge.no/skwms1/wms.hoyde-dom?bbox={0}&format=image/tiff&service=WMS&version=1.1.1&request=GetMap&srs=EPSG:25833&transparent=true&width={1}&height={2}&layers=dom1_33:None",
+                    WmsUrl = _config.GetValue<string>("TileWmsUrl"),
                     MaxCacheItems = 300,
                     RemoveCacheItemsWhenFull = 100,
                     TileSize = 512
