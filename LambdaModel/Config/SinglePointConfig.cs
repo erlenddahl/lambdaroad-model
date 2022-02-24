@@ -35,7 +35,7 @@ namespace LambdaModel.Config
 
                 cip.Set("Calculation time", DateTime.Now.Subtract(start).TotalMilliseconds + "ms");
 
-                return new {rssi, vector = vector.Select(p => new {p.X, p.Y, p.Z}), snapshot = cip.GetSnapshot()};
+                return new {rssi, vector = vector.Select(p => new {p.X, p.Y, p.Z}), snapshot = cip.GetSnapshot(), config = this};
             }
         }
     }

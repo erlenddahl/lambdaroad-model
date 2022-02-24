@@ -16,6 +16,7 @@ namespace LambdaModel.Stations
         [JsonIgnore]
         public IPathLossCalculator Calculator { get; private set; }
 
+        [JsonIgnore]
         protected Point4D<double>[] _vector;
         public string Name { get; set; }
         public Point3D Center { get; set; }
