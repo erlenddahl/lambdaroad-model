@@ -31,6 +31,9 @@
     <Reference Include="ConsoleUtilities">
       <HintPath>..\Lib\ConsoleUtilities.dll</HintPath>
     </Reference>
+    <Reference Include="Extensions">
+      <HintPath>..\Lib\Extensions.dll</HintPath>
+    </Reference>
     <Reference Include="SpeedModule">
       <HintPath>..\Lib\SpeedModule.dll</HintPath>
     </Reference>
