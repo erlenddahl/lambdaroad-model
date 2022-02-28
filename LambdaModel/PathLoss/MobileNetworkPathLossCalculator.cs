@@ -177,7 +177,7 @@ namespace LambdaModel.PathLoss
             // Go through each point at the height profile from rx to tx (or the other way around),
             // and find the point that has the largest slope from the source to the height profile.
             var (maxSlope, maxIndex) = (double.MinValue, -1);
-            for (var i = fromIx + inc; i != toIx; i += inc)
+            for (var i = fromIx + inc; i != toIx + inc; i += inc)
             {
                 // Optimization note: Checking if this is a top (z >= previousZ && z >= nextZ) seems to be a much
                 // more expensive operation than just performing the calculations below for all points.
@@ -194,7 +194,7 @@ namespace LambdaModel.PathLoss
                 }
             }
 
-            if (maxIndex <= 0) return (-1, 0, 0);
+            if (maxIndex < 0) return (-1, 0, 0);
 
             // Calculate the angle between the source, the target and the max slope point.
             var point = path[maxIndex];
