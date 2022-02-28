@@ -30,8 +30,18 @@ namespace LambdaModel.PathLoss
         /// <returns>The final path loss at rxIndex.</returns>
         public double CalculateLoss(Point4D<double>[] path, double txHeightAboveTerrain, double rxHeightAboveTerrain, int rxIndex = -1)
         {
+            // If rxIndex is -1 (the default value), that is just a shortcut for saying we want to calculate to the end of the terrain profile.
+            if (rxIndex == -1) rxIndex = path.Length - 1;
+
+            // Create modified tx and rx points with their Z values increased as defined in txHeight and rxHeight.
+            // Note: as we create new points and insert them into the local array, the caller's array is not touched.
+            var modifiedPath = new Point4D<double>[path.Length];
+            Array.Copy(path, modifiedPath, path.Length);
+            modifiedPath[0] = modifiedPath[0].Offset(0, 0, txHeightAboveTerrain);
+            modifiedPath[rxIndex] = modifiedPath[rxIndex].Offset(0, 0, rxHeightAboveTerrain);
+
             // Calculate regression parameters/features for the path from 0 to rxIndex.
-            var p = GetParameters(path, rxIndex);
+            var p = GetParameters(modifiedPath, rxIndex);
 
             // This is the actual regression formula, using the parameters from above.
             return 25.1 * Math.Log(p.horizontalDistance) - 1.8e-01 * txHeightAboveTerrain + 1.3e+01 * p.rxa - 1.4e-04 * p.txa - 1.4e-04 * p.rxi - 3.0e-05 * p.txi + 4.9 * p.nobs + 29.3;

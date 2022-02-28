@@ -16,5 +16,14 @@ namespace LambdaModel.General
         {
             M = m;
         }
+
+        public Point4D<T> Offset(int x, int y, double z)
+        {
+            return new Point4D<T>(X + x, Y + y, Z + z, M)
+            {
+                RoundedX = RoundedX + x,
+                RoundedY = RoundedY + y,
+            };
+        }
     }
 }
