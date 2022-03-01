@@ -169,7 +169,7 @@ namespace LambdaModel.PathLoss
 
             // Keep track of the data at the transmitter and receiver.
             var source = path[fromIx];
-            var last = path[toIx];
+            var target = path[toIx];
 
             var distanceBetweenPoints = DistanceScale;
             var distance = 0;
@@ -196,34 +196,42 @@ namespace LambdaModel.PathLoss
 
             if (maxIndex < 0) return (-1, 0, 0);
 
-            // Calculate the angle between the source, the target and the max slope point.
-            var point = path[maxIndex];
-            var (angle, distance3d) = GetAngle(source, last, point);
+            // Calculate the angle between the sight line RX-TX/TX-RX and the sight line source-max.
+            var pointOfMaxObstruction = path[maxIndex];
+            var (angle, distance3d) = GetAngle(source, target, pointOfMaxObstruction);
 
             return (maxIndex, angle, distance3d);
         }
 
         /// <summary>
-        /// Given three points, calculate the angle at the max point between the source and the last points.
+        /// Calculate the angle between the sight line source-target and the sight line source-max.
         /// </summary>
-        /// <param name="source"></param>
-        /// <param name="last"></param>
-        /// <param name="max"></param>
+        /// <param name="source">The point we're calculating from, usually TX or RX, depending on calculation direction.</param>
+        /// <param name="target">The point we're calculating to, usually RX or TX, depending on calculation direction.</param>
+        /// <param name="pointOfMaxObstruction">The point of max (fresnel) obstruction between source and target.</param>
         /// <returns></returns>
-        protected (double angle, double distance3d) GetAngle(Point3D source, Point3D last, Point3D max)
+        protected (double angle, double distance3d) GetAngle(Point3D source, Point3D target, Point3D pointOfMaxObstruction)
         {
-            var d2d = source.DistanceTo2D(max);
-            var dx = source.DistanceTo(max);
+            // Calculate distances (in 2D and 3D) between the source point and the point of max obstruction.
+            var d2d = source.DistanceTo2D(pointOfMaxObstruction);
+            var dx = source.DistanceTo(pointOfMaxObstruction);
 
-            var horizontalDistance = last.DistanceTo2D(source);
-            var sightLineSlope = (last.Z - source.Z) / horizontalDistance;
+            // Calculate the horizontal (2D) distance between source and target (RX/TX or TX/RX)
+            var horizontalDistance = target.DistanceTo2D(source);
+
+            // Calculate the slope of the sight line between source and target
+            var sightLineSlope = (target.Z - source.Z) / horizontalDistance;
+
+            // Calculate the Z value of the sight line at the point of max obstruction
             var sightLineAtMax = source.Z + sightLineSlope * d2d;
 
-            var dz = max.Z - sightLineAtMax;
+            // Calculate the difference between the terrain obstruction and the sight line at this point
+            var dz = pointOfMaxObstruction.Z - sightLineAtMax;
 
+            // Calculate the angle between the sight line RX/TX and the sight line source/max.
             var angle = Math.Atan(dz / dx);
 
-            return (angle, dx);
+            return (angle, d2d);
         }
 
         /// <summary>
