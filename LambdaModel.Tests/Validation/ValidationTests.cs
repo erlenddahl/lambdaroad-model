@@ -39,7 +39,9 @@ namespace LambdaModel.Tests.Validation
                 .ReadFile(@"..\..\..\..\Data\2022-02-28 - validation.csv")
                 .Select(p => new ValidationItem
                 {
-                    Distance = int.Parse(p["distance from antenna"]), TerrainHeight = double.Parse(p["terrain height"]), RxA = double.Parse(p["rx_a"]),
+                    Distance = int.Parse(p["distance from antenna"]), 
+                    TerrainHeight = double.Parse(p["terrain height"]), 
+                    RxA = double.Parse(p["rx_a"]),
                     TxA = double.Parse(p["tx_a"]),
                     RxI = double.Parse(p["rx_i"]),
                     TxI = double.Parse(p["tx_i"]),
