@@ -117,13 +117,10 @@ namespace LambdaModel.PathLoss
             }
 
             // If there is a direct line of sight, all values will be 0. Otherwise, they will get their values from the obstructions found above.
-            if (nobs != 0)
-            {
-                txi = txObstruction.distance3d;
-                rxi = rxObstruction.distance3d;
-                txa = txObstruction.angle;
-                rxa = rxObstruction.angle;
-            }
+            txi = txObstruction.distance3d;
+            rxi = rxObstruction.distance3d;
+            txa = txObstruction.angle;
+            rxa = rxObstruction.angle;
 
             return (horizontalDistance, txa, rxa, txi, rxi, nobs);
         }
