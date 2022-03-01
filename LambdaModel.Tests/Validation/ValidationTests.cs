@@ -62,11 +62,8 @@ namespace LambdaModel.Tests.Validation
             var path = _data.Select((p,i) => new Point4D<double>(0, i, p.TerrainHeight)).ToArray();
             for (var i = 1; i < path.Length; i++)
             {
-                var modifiedPath = new Point4D<double>[path.Length];
-                Array.Copy(path, modifiedPath, path.Length);
-                modifiedPath[0] = modifiedPath[0].Offset(0, 0, txHeightAboveTerrain);
-                modifiedPath[i] = modifiedPath[i].Offset(0, 0, rxHeightAboveTerrain);
-                var features = GetParameters(modifiedPath, i);
+
+                var features = GetParameters(path, txHeightAboveTerrain, rxHeightAboveTerrain, i);
 
                 var loss = CalculateLoss(path, txHeightAboveTerrain, rxHeightAboveTerrain, i);
 

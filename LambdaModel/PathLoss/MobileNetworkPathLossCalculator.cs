@@ -33,15 +33,8 @@ namespace LambdaModel.PathLoss
             // If rxIndex is -1 (the default value), that is just a shortcut for saying we want to calculate to the end of the terrain profile.
             if (rxIndex == -1) rxIndex = path.Length - 1;
 
-            // Create modified tx and rx points with their Z values increased as defined in txHeight and rxHeight.
-            // Note: as we create new points and insert them into the local array, the caller's array is not touched.
-            var modifiedPath = new Point4D<double>[path.Length];
-            Array.Copy(path, modifiedPath, path.Length);
-            modifiedPath[0] = modifiedPath[0].Offset(0, 0, txHeightAboveTerrain);
-            modifiedPath[rxIndex] = modifiedPath[rxIndex].Offset(0, 0, rxHeightAboveTerrain);
-
             // Calculate regression parameters/features for the path from 0 to rxIndex.
-            var p = GetParameters(modifiedPath, rxIndex);
+            var p = GetParameters(path, txHeightAboveTerrain, rxHeightAboveTerrain, rxIndex);
 
             // This is the actual regression formula, using the parameters from above.
             return 25.1 * Math.Log(p.horizontalDistance) - 1.8e-01 * txHeightAboveTerrain + 1.3e+01 * p.rxa - 1.4e-04 * p.txa - 1.4e-04 * p.rxi - 3.0e-05 * p.txi + 4.9 * p.nobs + 29.3;
@@ -72,7 +65,7 @@ namespace LambdaModel.PathLoss
         /// <param name="path"></param>
         /// <param name="rxIndex"></param>
         /// <returns></returns>
-        protected (double horizontalDistance, double txa, double rxa, double txi, double rxi, int nobs) GetParameters(Point4D<double>[] path, int rxIndex = -1)
+        protected (double horizontalDistance, double txa, double rxa, double txi, double rxi, int nobs) GetParameters(Point4D<double>[] path, double txHeightAboveTerrain, double rxHeightAboveTerrain, int rxIndex = -1)
         {
             // If rxIndex is -1 (the default value), that is just a shortcut for saying we want to calculate to the end of the terrain profile.
             if (rxIndex == -1) rxIndex = path.Length - 1;
@@ -93,8 +86,8 @@ namespace LambdaModel.PathLoss
             // Calculates fresnel obstructions between transmitter and receiver. Note that these "obstructions" don't have to be physical
             // obstructions. Even if there is a direct line of sight between transmitter and receiver, this will still keep track of the
             // parts of the terrain nearest to the transmitter (tx) and receiver (rx) that are closest to being an obstruction.
-            var txObstruction = FindFresnelObstruction(path, true, rxIndex);
-            var rxObstruction = FindFresnelObstruction(path, false, rxIndex);
+            var txObstruction = FindFresnelObstruction(path, true, txHeightAboveTerrain, rxHeightAboveTerrain, rxIndex);
+            var rxObstruction = FindFresnelObstruction(path, false, txHeightAboveTerrain, rxHeightAboveTerrain, rxIndex);
             // Optimization note: Tested twice; combining this into a single call that calculates the fresnel obstructions both ways
             // simultaneously is slower than doing it once in each direction. Keep it simple (at least when that is also fastest).
 
@@ -107,7 +100,6 @@ namespace LambdaModel.PathLoss
                 nobs = 1; // A single obstruction
             else
             {
-
                 // Two or more obstructions. Find LOS crossing obstructions between the two already detected obstructions to determine if there is three or more.
 
                 var txo = path[txObstruction.index];
@@ -146,11 +138,12 @@ namespace LambdaModel.PathLoss
         /// <param name="direction"></param>
         /// <param name="rxIndex"></param>
         /// <returns></returns>
-        protected (int index, double angle, double distance3d) FindFresnelObstruction(Point4D<double>[] path, bool direction, int rxIndex = -1)
+        protected (int index, double angle, double distance3d) FindFresnelObstruction(Point4D<double>[] path, bool direction, double txHeightAboveTerrain, double rxHeightAboveTerrain, int rxIndex = -1)
         {
             if (rxIndex == -1) rxIndex = path.Length - 1;
 
             int fromIx, toIx, inc;
+            double sourceHeightAboveTerrain;
 
             // Depending on the direction, we want to start from the transmitter and move towards the receiver,
             // or the other way around.
@@ -159,12 +152,14 @@ namespace LambdaModel.PathLoss
                 fromIx = 0;
                 toIx = rxIndex;
                 inc = 1;
+                sourceHeightAboveTerrain = txHeightAboveTerrain;
             }
             else
             {
                 fromIx = rxIndex;
                 toIx = 0;
                 inc = -1;
+                sourceHeightAboveTerrain = rxHeightAboveTerrain;
             }
 
             // Keep track of the data at the transmitter and receiver.
@@ -184,8 +179,8 @@ namespace LambdaModel.PathLoss
 
                 // Calculate the slope between the start and the current position
                 distance += distanceBetweenPoints;
-                var dzz = path[i].Z - source.Z;
-                var slope = dzz / distance;
+                var dz = path[i].Z - (source.Z + sourceHeightAboveTerrain);
+                var slope = dz / distance;
 
                 // If this slope is larger than the currently largest seen slope, store it.
                 if (slope > maxSlope)
@@ -198,7 +193,7 @@ namespace LambdaModel.PathLoss
 
             // Calculate the angle between the sight line RX-TX/TX-RX and the sight line source-max.
             var pointOfMaxObstruction = path[maxIndex];
-            var (angle, distance3d) = GetAngle(source, target, pointOfMaxObstruction);
+            var (angle, distance3d) = GetAngle(source, sourceHeightAboveTerrain, pointOfMaxObstruction);
 
             return (maxIndex, angle, distance3d);
         }
@@ -209,13 +204,13 @@ namespace LambdaModel.PathLoss
         /// <param name="source">The point we're calculating from, usually TX or RX, depending on calculation direction.</param>
         /// <param name="pointOfMaxObstruction">The point of max (fresnel) obstruction between source and target.</param>
         /// <returns></returns>
-        protected (double angle, double distance3d) GetAngle(Point3D source, Point3D pointOfMaxObstruction)
+        protected (double angle, double distance3d) GetAngle(Point3D source, double sourceHeightAboveTerrain, Point3D pointOfMaxObstruction)
         {
             // Calculate distances (in 2D and 3D) between the source point and the point of max obstruction.
             var dx = source.DistanceTo2D(pointOfMaxObstruction);
             
             // Calculate the difference between the terrain obstruction and the sight line at this point
-            var dz = pointOfMaxObstruction.Z - source.Z;
+            var dz = pointOfMaxObstruction.Z - (source.Z + sourceHeightAboveTerrain);
 
             // Calculate the angle between the sight line RX/TX and the sight line source/max.
             var angle = Math.Atan(dz / dx);
