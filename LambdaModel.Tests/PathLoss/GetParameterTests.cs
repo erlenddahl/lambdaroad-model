@@ -15,7 +15,7 @@ namespace LambdaModel.Tests.PathLoss
         {
             var path = new[]
             {
-                new Point4D<double>(0, 0, 1),
+                new Point4D<double>(0, 0, 0),
                 new Point4D<double>(1, 0, 0),
                 new Point4D<double>(2, 0, 0),
                 new Point4D<double>(3, 0, 0),
@@ -25,10 +25,10 @@ namespace LambdaModel.Tests.PathLoss
                 new Point4D<double>(7, 0, 0),
                 new Point4D<double>(8, 0, 0),
                 new Point4D<double>(9, 0, 0),
-                new Point4D<double>(10, 0, 1),
+                new Point4D<double>(10, 0, 0),
             };
 
-            var p = GetParameters(path);
+            var p = GetParameters(path, 1, 1);
 
             Assert.AreEqual(10, p.horizontalDistance, 0.001);
             Assert.AreEqual(0, p.rxi, 0.001);
@@ -41,7 +41,7 @@ namespace LambdaModel.Tests.PathLoss
         {
             var path = new[]
             {
-                new Point4D<double>(0, 0, 1),
+                new Point4D<double>(0, 0, 0),
                 new Point4D<double>(1, 0, 0),
                 new Point4D<double>(2, 0, 0),
                 new Point4D<double>(3, 0, 5),
@@ -51,10 +51,10 @@ namespace LambdaModel.Tests.PathLoss
                 new Point4D<double>(7, 0, 0),
                 new Point4D<double>(8, 0, 0),
                 new Point4D<double>(9, 0, 0),
-                new Point4D<double>(10, 0, 1),
+                new Point4D<double>(10, 0, 0),
             };
 
-            var p = GetParameters(path);
+            var p = GetParameters(path, 1, 1);
 
             Assert.AreEqual(10, p.horizontalDistance, 0.001);
             Assert.AreEqual(8.1, p.rxi, 0.1);
@@ -67,7 +67,7 @@ namespace LambdaModel.Tests.PathLoss
         {
             var path = new[]
             {
-                new Point4D<double>(0, 0, 1),
+                new Point4D<double>(0, 0, 0),
                 new Point4D<double>(1, 0, 0),
                 new Point4D<double>(2, 0, 0),
                 new Point4D<double>(3, 0, 5),
@@ -77,10 +77,10 @@ namespace LambdaModel.Tests.PathLoss
                 new Point4D<double>(7, 0, 0),
                 new Point4D<double>(8, 0, 0),
                 new Point4D<double>(9, 0, 0),
-                new Point4D<double>(10, 0, 1),
+                new Point4D<double>(10, 0, 0),
             };
 
-            var p = GetParameters(path);
+            var p = GetParameters(path, 1, 1);
 
             Assert.AreEqual(10, p.horizontalDistance, 0.001);
             Assert.AreEqual(5, p.rxi, 0.1);
@@ -93,7 +93,7 @@ namespace LambdaModel.Tests.PathLoss
         {
             var path = new[]
             {
-                new Point4D<double>(0, 0, 1),
+                new Point4D<double>(0, 0, 0),
                 new Point4D<double>(1, 0, 0),
                 new Point4D<double>(2, 0, 0),
                 new Point4D<double>(3, 0, 5),
@@ -103,10 +103,10 @@ namespace LambdaModel.Tests.PathLoss
                 new Point4D<double>(7, 0, 0),
                 new Point4D<double>(8, 0, 0),
                 new Point4D<double>(9, 0, 0),
-                new Point4D<double>(10, 0, 1),
+                new Point4D<double>(10, 0, 0),
             };
 
-            var p = GetParameters(path);
+            var p = GetParameters(path, 1, 1);
 
             Assert.AreEqual(10, p.horizontalDistance, 0.001);
             Assert.AreEqual(6.4, p.rxi, 0.1);
