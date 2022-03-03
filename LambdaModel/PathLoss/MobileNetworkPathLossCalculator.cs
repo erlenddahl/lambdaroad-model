@@ -75,23 +75,16 @@ namespace LambdaModel.PathLoss
             // out from the antenna.
             var horizontalDistance = rxIndex * DistanceScale;
 
-            // Initialized the regression parameters
-            var rxa = 0d;
-            var txa = 0d;
-            var rxi = 0d;
-            var txi = 0d;
-            var nobs = 0;
-
-            
             // Calculates fresnel obstructions between transmitter and receiver. Note that these "obstructions" don't have to be physical
             // obstructions. Even if there is a direct line of sight between transmitter and receiver, this will still keep track of the
             // parts of the terrain nearest to the transmitter (tx) and receiver (rx) that are closest to being an obstruction.
-            var txObstruction = FindFresnelObstruction(path, true, txHeightAboveTerrain, rxHeightAboveTerrain, rxIndex);
-            var rxObstruction = FindFresnelObstruction(path, false, txHeightAboveTerrain, rxHeightAboveTerrain, rxIndex);
+            var txObstruction = FindFresnelObstruction(path, CalculationDirection.TxToRx, txHeightAboveTerrain, rxHeightAboveTerrain, rxIndex);
+            var rxObstruction = FindFresnelObstruction(path, CalculationDirection.RxToTx, txHeightAboveTerrain, rxHeightAboveTerrain, rxIndex);
             // Optimization note: Tested twice; combining this into a single call that calculates the fresnel obstructions both ways
             // simultaneously is slower than doing it once in each direction. Keep it simple (at least when that is also fastest).
 
             // Check if there is a line of sight, or if there are one or more actual obstructions
+            var nobs = 0;
             if (txObstruction.angle < 0 && rxObstruction.angle < 0)
             {
                 nobs = 0; // Clear line of sight, no obstructions
@@ -117,10 +110,10 @@ namespace LambdaModel.PathLoss
             }
 
             // If there is a direct line of sight, all values will be 0. Otherwise, they will get their values from the obstructions found above.
-            txi = txObstruction.distance3d;
-            rxi = rxObstruction.distance3d;
-            txa = txObstruction.angle;
-            rxa = rxObstruction.angle;
+            var txi = txObstruction.distance3d;
+            var rxi = rxObstruction.distance3d;
+            var txa = txObstruction.angle;
+            var rxa = rxObstruction.angle;
 
             return (horizontalDistance, txa, rxa, txi, rxi, nobs);
         }
@@ -132,10 +125,12 @@ namespace LambdaModel.PathLoss
         /// transmitter (tx) and receiver (rx) that are closest to being an obstruction.
         /// </summary>
         /// <param name="path"></param>
-        /// <param name="direction"></param>
+        /// <param name="direction">The direction of calculation</param>
+        /// <param name="txHeightAboveTerrain">How high above the terrain the TX antenna is.</param>
+        /// <param name="rxHeightAboveTerrain">How high above the terrain the RX antenna is.</param>
         /// <param name="rxIndex"></param>
         /// <returns></returns>
-        protected (int index, double angle, double distance3d) FindFresnelObstruction(Point4D<double>[] path, bool direction, double txHeightAboveTerrain, double rxHeightAboveTerrain, int rxIndex = -1)
+        protected (int index, double angle, double distance3d) FindFresnelObstruction(Point4D<double>[] path, CalculationDirection direction, double txHeightAboveTerrain, double rxHeightAboveTerrain, int rxIndex = -1)
         {
             if (rxIndex == -1) rxIndex = path.Length - 1;
 
@@ -144,7 +139,7 @@ namespace LambdaModel.PathLoss
 
             // Depending on the direction, we want to start from the transmitter and move towards the receiver,
             // or the other way around.
-            if (direction)
+            if (direction == CalculationDirection.TxToRx)
             {
                 fromIx = 0;
                 toIx = rxIndex;
@@ -199,6 +194,7 @@ namespace LambdaModel.PathLoss
         /// Calculate the angle between the sight line source-target and the sight line source-max.
         /// </summary>
         /// <param name="source">The point we're calculating from, usually TX or RX, depending on calculation direction.</param>
+        /// <param name="sourceHeightAboveTerrain">How high above the terrain the source (TX or RX) is.</param>
         /// <param name="pointOfMaxObstruction">The point of max (fresnel) obstruction between source and target.</param>
         /// <returns></returns>
         protected (double angle, double distance3d) GetAngle(Point3D source, double sourceHeightAboveTerrain, Point3D pointOfMaxObstruction)
