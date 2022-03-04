@@ -37,7 +37,7 @@ namespace LambdaModel.PathLoss
             var p = GetParameters(path, txHeightAboveTerrain, rxHeightAboveTerrain, rxIndex);
 
             // This is the actual regression formula, using the parameters from above.
-            return 25.1 * Math.Log(p.horizontalDistance) - 1.8e-01 * txHeightAboveTerrain + 1.3e+01 * p.rxa - 1.4e-04 * p.txa - 1.4e-04 * p.rxi - 3.0e-05 * p.txi + 4.9 * p.nobs + 29.3;
+            return 25.1 * Math.Log10(p.horizontalDistance) - 1.8e-01 * txHeightAboveTerrain + 1.3e+01 * p.rxa - 1.4e-04 * p.txa - 1.4e-04 * p.rxi - 3.0e-05 * p.txi + 4.9 * p.nobs + 29.3;
         }
 
         /// <summary>
