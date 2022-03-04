@@ -23,6 +23,7 @@ namespace LambdaModel.Config
     {
         public string RoadShapeLocation { get; set; }
         public new RoadLinkBaseStation[] BaseStations { get; set; }
+        public int LinkCalculationPointFrequency { get; set; } = 20;
 
         public override void Run()
         {
@@ -36,12 +37,16 @@ namespace LambdaModel.Config
                     bs.Cip = Cip;
                     bs.BaseStationIndex = bix++;
                     if (bs.Calculator is MobileNetworkPathLossCalculator m && MobileRegression.HasValue)
+                    {
                         m.RegressionType = MobileRegression.Value;
+                        Cip.Set("Regression type", MobileRegression.Value.ToString());
+                    }
                 }
 
                 if (CalculationThreads.HasValue)
                     Cip.Set("Calculation threads", CalculationThreads.Value);
                 Cip.Set("Minimum signal", MinimumAllowableSignalValue);
+                Cip.Set("Calc point frequency", LinkCalculationPointFrequency);
 
                 Cip?.Set("Road network source", Path.GetFileName(RoadShapeLocation));
                 ShapeLink.ReadLinks(RoadShapeLocation, BaseStations);
@@ -66,7 +71,7 @@ namespace LambdaModel.Config
 
                         using (var tiles = Terrain.CreateCache(Cip))
                         {
-                            var (bsCalcs, bsDist) = bs.Calculate(tiles, ReceiverHeightAboveTerrain, BaseStations.Length, bs.BaseStationIndex);
+                            var (bsCalcs, bsDist) = bs.Calculate(tiles, LinkCalculationPointFrequency, ReceiverHeightAboveTerrain, BaseStations.Length, bs.BaseStationIndex);
 
                             Interlocked.Add(ref calculations, bsCalcs);
                             Interlocked.Add(ref distance, bsDist);
@@ -117,6 +122,7 @@ namespace LambdaModel.Config
             foreach (var bs in BaseStations)
                 bs.Validate();
             RoadShapeLocation = GetFullPath(configLocation, RoadShapeLocation);
+            if (LinkCalculationPointFrequency < 1) throw new Exception("Link calculation point frequency must be at least 1.");
             return base.Validate(configLocation);
         }
 

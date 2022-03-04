@@ -70,7 +70,7 @@ namespace LambdaModel.Stations
             });
         }
         
-        public (long calculations, long distance) Calculate(ITiffReader tiles, double receiverHeightAboveTerrain, int numBaseStations = 1, int baseStationIx = 0)
+        public (long calculations, long distance) Calculate(ITiffReader tiles, int linkCalculationPointFrequency, double receiverHeightAboveTerrain, int numBaseStations = 1, int baseStationIx = 0)
         {
             SortLinks();
             var calculations = 0;
@@ -85,8 +85,10 @@ namespace LambdaModel.Stations
                 var linkCalcs = 0;
                 var linkDist = 0L;
 
-                foreach (var c in link.Geometry)
+                for (var i = 0; i < link.Geometry.Length; i += linkCalculationPointFrequency)
                 {
+                    var c = link.Geometry[i];
+
                     if (Center.DistanceTo2D(c) > MaxRadius)
                     {
                         Cip?.Increment("Points outside of radius");

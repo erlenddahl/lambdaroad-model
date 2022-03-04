@@ -21,7 +21,7 @@ namespace LambdaModel.Tests.FullRun.RoadNetwork
             var bs = new RoadLinkBaseStation(271327, 7040324, 100, 500);
 
             var start = DateTime.Now;
-            var res = bs.Calculate(tiles, 2);
+            var res = bs.Calculate(tiles, 1, 2);
             var secs = DateTime.Now.Subtract(start).TotalSeconds;
             Console.WriteLine($"Calculation time: {secs:n2} seconds.");
             Console.WriteLine($"Calculations: {res.calculations:n0}, {(res.calculations / secs):n2} c/s");
