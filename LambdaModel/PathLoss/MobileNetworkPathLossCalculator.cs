@@ -17,6 +17,8 @@ namespace LambdaModel.PathLoss
         /// </summary>
         public int DistanceScale { get; set; } = 1;
 
+        public MobileNetworkRegressionType RegressionType { get; set; } = MobileNetworkRegressionType.Dynamic;
+
         /// <summary>
         /// Calculates the path loss along the given path from an antenna at path[0] to a receiver at path[rxIndex].
         /// </summary>
@@ -36,8 +38,16 @@ namespace LambdaModel.PathLoss
             // Calculate regression parameters/features for the path from 0 to rxIndex.
             var p = GetParameters(path, txHeightAboveTerrain, rxHeightAboveTerrain, rxIndex);
 
-            // This is the actual regression formula, using the parameters from above.
-            return 25.1 * Math.Log10(p.horizontalDistance) - 1.8e-01 * txHeightAboveTerrain + 1.3e+01 * p.rxa - 1.4e-04 * p.txa - 1.4e-04 * p.rxi - 3.0e-05 * p.txi + 4.9 * p.nobs + 29.3;
+            // If this calculator's regression type is set to All, use the ALL regression parameters.
+            if(RegressionType == MobileNetworkRegressionType.All)
+                return 25.1 * Math.Log10(p.horizontalDistance) - 1.8e-01 * txHeightAboveTerrain + 1.3e+01 * p.rxa - 1.4e-04 * p.txa - 1.4e-04 * p.rxi - 3.0e-05 * p.txi + 4.9 * p.nobs + 29.3;
+
+            // Otherwise, if the type is either LOS or Dynamic with p.nobs == 0 (LOS), we use the LOS regression parameters
+            if (RegressionType == MobileNetworkRegressionType.LineOfSight || (RegressionType==MobileNetworkRegressionType.Dynamic && p.nobs == 0))
+                return 21.8 * Math.Log10(p.horizontalDistance) - 1.4e-01 * txHeightAboveTerrain + 1.3e+01 * p.rxa - 4.0e-04 * p.txa - 4.0e-04 * p.rxi + 7.4e-04 * p.txi + 0.0 * p.nobs + 37.5;
+
+            // Finally, if the type is either NLOS or Dynamic with p.nobs > 0 (NLOS), we use the NLOS regression parameters.
+            return     29.3 * Math.Log10(p.horizontalDistance) - 1.9e-01 * txHeightAboveTerrain + 2.1e+01 * p.rxa - 6.9e-05 * p.txa - 6.9e-04 * p.rxi - 3.2e-04 * p.txi + 2.8 * p.nobs + 20.6;
         }
 
         /// <summary>
