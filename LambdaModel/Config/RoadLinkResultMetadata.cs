@@ -33,20 +33,20 @@ namespace LambdaModel.Config
 
             var sum = 0d;
             var count = 0;
-            foreach (var v in link.Geometry.Where(p => p.M!=null).Select(p => p.M))
+            Points = new JArray();
+            foreach (var v in link.Geometry.Where(p => p.M!=null))
             {
-                sum += v.MaxRssi;
+                sum += v.M.MaxRssi;
                 count++;
-                if (v.MaxRssi < Min) Min = v.MaxRssi;
-                if (v.MaxRssi > Max) Max = v.MaxRssi;
+                if (v.M.MaxRssi < Min) Min = v.M.MaxRssi;
+                if (v.M.MaxRssi > Max) Max = v.M.MaxRssi;
+
+                Points.Add(JArray.FromObject(new[] { v.X, v.Y }
+                    .Concat(v.M.BaseStationRssi.Select(c => (double)(int)Math.Round(c)))
+                    .ToArray()));
             }
 
             Average = sum / count;
-
-            Points = JArray.FromObject(link.Geometry.Select(p =>
-                new double[] {p.X, p.Y}
-                    .Concat(p.M.BaseStationRssi.Select(c => (double)(int) Math.Round(c)))
-                    .ToArray()));
         }
     }
 }
