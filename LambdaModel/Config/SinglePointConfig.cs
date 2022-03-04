@@ -14,7 +14,6 @@ namespace LambdaModel.Config
     {
         public BaseStation BaseStation { get; set; }
         public Point3D TargetCoordinates { get; set; }
-        public double ReceiverHeightAboveTerrain { get; set; }
         public TerrainConfig Terrain { get; set; }
 
         public object Run()

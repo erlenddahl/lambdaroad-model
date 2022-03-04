@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using ConsoleUtilities;
 using ConsoleUtilities.ConsoleInfoPanel;
+using LambdaModel.PathLoss;
 using LambdaModel.Stations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -16,7 +17,9 @@ namespace LambdaModel.Config
         private string _originalOutputDirectory;
         public CalculationMethod CalculationMethod { get; set; }
 
+        public MobileNetworkRegressionType? MobileRegression { get; set; } = MobileNetworkRegressionType.All;
         public double MinimumAllowableSignalValue { get; set; } = -150;
+        public double ReceiverHeightAboveTerrain { get; set; }
 
         public BaseStation[] BaseStations { get; set; }
         public string OutputDirectory { get; set; }

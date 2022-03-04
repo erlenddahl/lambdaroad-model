@@ -63,7 +63,7 @@ namespace LambdaModel.Config
 
                         using (var tiles = Terrain.CreateCache(Cip))
                         {
-                            var (bsCalcs, bsDist) = bs.Calculate(tiles, BaseStations.Length, bs.BaseStationIndex);
+                            var (bsCalcs, bsDist) = bs.Calculate(tiles, ReceiverHeightAboveTerrain, BaseStations.Length, bs.BaseStationIndex);
 
                             Interlocked.Add(ref calculations, bsCalcs);
                             Interlocked.Add(ref distance, bsDist);

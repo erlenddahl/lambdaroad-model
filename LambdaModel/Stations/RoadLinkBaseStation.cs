@@ -70,7 +70,7 @@ namespace LambdaModel.Stations
             });
         }
         
-        public (long calculations, long distance) Calculate(ITiffReader tiles, int numBaseStations = 1, int baseStationIx = 0)
+        public (long calculations, long distance) Calculate(ITiffReader tiles, double receiverHeightAboveTerrain, int numBaseStations = 1, int baseStationIx = 0)
         {
             SortLinks();
             var calculations = 0;
@@ -99,7 +99,7 @@ namespace LambdaModel.Stations
                     var vectorLength = tiles.FillVector(_vector, Center.X, Center.Y, c.X, c.Y, withHeights: true);
 
                     // Calculate the loss for this point, and store it in the results matrix
-                    var loss = Calculator.CalculateLoss(_vector, HeightAboveTerrain, 2, vectorLength - 1);
+                    var loss = Calculator.CalculateLoss(_vector, HeightAboveTerrain, receiverHeightAboveTerrain, vectorLength - 1);
                     var value = transmitPower - loss;
                     c.M.BaseStationRssi[baseStationIx] = value;
                     if (value > c.M.MaxRssi)
