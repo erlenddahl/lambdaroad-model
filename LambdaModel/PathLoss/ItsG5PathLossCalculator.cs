@@ -14,7 +14,7 @@ namespace LambdaModel.PathLoss
         {
             var trafficCase = 1; //1=no traffic, 2=car, 3=truck
             var p = GetParameters(path, rxIndex);
-            return 15.9 * Math.Log(p.horizontalDistance) - -0.55 * txHeightAboveTerrain + 1.83 * trafficCase - 0.66 * p.dmax - 9.66e-03 * p.dmax_tx - 9.66e-03 * p.dmax_rx + 59.2;
+            return 15.9 * Math.Log10(p.horizontalDistance) - -0.55 * txHeightAboveTerrain + 1.83 * trafficCase - 0.66 * p.dmax - 9.66e-03 * p.dmax_tx - 9.66e-03 * p.dmax_rx + 59.2;
         }
 
         public double CalculateMinPossibleLoss(double horizontalDistance, double txHeightAboveTerrain)
