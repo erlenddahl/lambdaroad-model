@@ -26,7 +26,10 @@ namespace LambdaModel.Config
                 BaseStation.Initialize();
 
                 if (BaseStation.Calculator is MobileNetworkPathLossCalculator m && MobileRegression.HasValue)
+                {
                     m.RegressionType = MobileRegression.Value;
+                    cip.Set("Regression type", MobileRegression.Value.ToString());
+                }
 
                 var start = DateTime.Now;
 
