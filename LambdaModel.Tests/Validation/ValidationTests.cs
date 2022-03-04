@@ -27,6 +27,8 @@ namespace LambdaModel.Tests.Validation
             public double Nobs { get; set; }
             public double PL1 { get; set; }
             public double PL2 { get; set; }
+            public double PL3 { get; set; }
+            public double PL4 { get; set; }
             public double RSRP1 { get; set; }
             public double RSRP2 { get; set; }
         }
@@ -59,14 +61,16 @@ namespace LambdaModel.Tests.Validation
             var txHeightAboveTerrain = 23;
             var rxHeightAboveTerrain = 2;
 
+            var all = new MobileNetworkPathLossCalculator() { RegressionType = MobileNetworkRegressionType.All };
+            var los = new MobileNetworkPathLossCalculator() {RegressionType = MobileNetworkRegressionType.LineOfSight};
+            var nlos = new MobileNetworkPathLossCalculator() { RegressionType = MobileNetworkRegressionType.NoLineOfSight };
+            var dynamic = new MobileNetworkPathLossCalculator() { RegressionType = MobileNetworkRegressionType.Dynamic };
+
             var path = _data.Select((p,i) => new Point4D<double>(0, i, p.TerrainHeight)).ToArray();
             for (var i = 1; i < path.Length; i++)
             {
-
                 var features = GetParameters(path, txHeightAboveTerrain, rxHeightAboveTerrain, i);
-
-                var loss = CalculateLoss(path, txHeightAboveTerrain, rxHeightAboveTerrain, i);
-
+                
                 _results.Add(new ValidationItem()
                 {
                     Distance = i,
@@ -75,7 +79,10 @@ namespace LambdaModel.Tests.Validation
                     TxA = features.txa,
                     RxI = features.rxi,
                     TxI = features.txi,
-                    PL1 = loss
+                    PL1 = dynamic.CalculateLoss(path, txHeightAboveTerrain, rxHeightAboveTerrain, i),
+                    PL2 = all.CalculateLoss(path, txHeightAboveTerrain, rxHeightAboveTerrain, i),
+                    PL3 = los.CalculateLoss(path, txHeightAboveTerrain, rxHeightAboveTerrain, i),
+                    PL4 = nlos.CalculateLoss(path, txHeightAboveTerrain, rxHeightAboveTerrain, i)
                 });
             }
         }
@@ -83,16 +90,25 @@ namespace LambdaModel.Tests.Validation
         [TestMethod]
         public void SetupVerification()
         {
-            Debug.WriteLine("ix;terrain;rx_a;tx_a;rx_i;tx_i;nobs;pl;r_rx_a;r_tx_a;r_rx_i;r_tx_i;r_nobs;r_pl");
+            Debug.WriteLine("ix;terrain;rx_a;tx_a;rx_i;tx_i;nobs;pl1;pl2;r_rx_a;r_tx_a;r_rx_i;r_tx_i;r_nobs;r_pl_dyn;r_pl_all;r_pl_los;r_pl_nlos");
             for (var i = 1; i < _data.Length; i++)
             {
                 var d = _data[i];
                 var r = _results[i];
-                Debug.WriteLine(i + ";" + d.TerrainHeight + ";" + d.RxA + ";" + d.TxA + ";" + d.RxI + ";" + d.TxI + ";" + d.Nobs + ";" + d.PL1
-                                + ";" + r.RxA + ";" + r.TxA + ";" + r.RxI + ";" + r.TxI + ";" + r.Nobs + ";" + r.PL1);
+                Debug.WriteLine(i + ";" + d.TerrainHeight + ";" + d.RxA + ";" + d.TxA + ";" + d.RxI + ";" + d.TxI + ";" + d.Nobs + ";" + d.PL1 + ";" + d.PL2
+                                + ";" + r.RxA + ";" + r.TxA + ";" + r.RxI + ";" + r.TxI + ";" + r.Nobs + ";" + r.PL1 + ";" + r.PL2 + ";" + r.PL3 + ";" + r.PL4);
             }
 
             Assert.AreEqual(_data.Length, _results.Count);
+        }
+
+        [TestMethod]
+        public void PathLossAll()
+        {
+            for (var i = 1; i < _data.Length; i++)
+            {
+                Assert.AreEqual(_data[i].PL2, _results[i].PL2, 0.01, "At index " + i);
+            }
         }
 
         [TestMethod]
