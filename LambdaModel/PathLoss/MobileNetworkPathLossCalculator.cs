@@ -63,6 +63,8 @@ namespace LambdaModel.PathLoss
         /// Calculates parameters/features for the regression formula.
         /// </summary>
         /// <param name="path"></param>
+        /// <param name="txHeightAboveTerrain">How high above the terrain the TX antenna is.</param>
+        /// <param name="rxHeightAboveTerrain">How high above the terrain the RX antenna is.</param>
         /// <param name="rxIndex"></param>
         /// <returns></returns>
         protected (double horizontalDistance, double txa, double rxa, double txi, double rxi, int nobs) GetParameters(Point4D<double>[] path, double txHeightAboveTerrain, double rxHeightAboveTerrain, int rxIndex = -1)
@@ -201,6 +203,7 @@ namespace LambdaModel.PathLoss
         /// <param name="pointOfMaxObstruction">The point of max (fresnel) obstruction between source and target.</param>
         /// <param name="direction"></param>
         /// <param name="sourceHeightAboveTerrain">How high above the terrain the source (TX or RX) is.</param>
+        /// <param name="targetHeightAboveTerrain">How high above the terrain the target (RX or TX) is.</param>
         /// <returns></returns>
         protected (double angle, double distance3d) GetAngle(Point3D source, Point3D target, Point3D pointOfMaxObstruction, CalculationDirection direction, double sourceHeightAboveTerrain, double targetHeightAboveTerrain)
         {
