@@ -84,7 +84,7 @@ namespace LambdaModel.PathLoss
             // simultaneously is slower than doing it once in each direction. Keep it simple (at least when that is also fastest).
 
             // Check if there is a line of sight, or if there are one or more actual obstructions
-            var nobs = 0;
+            int nobs;
             if (txObstruction.angle < 0 && rxObstruction.angle < 0)
             {
                 nobs = 0; // Clear line of sight, no obstructions
@@ -136,6 +136,7 @@ namespace LambdaModel.PathLoss
 
             int fromIx, toIx, inc;
             double sourceHeightAboveTerrain;
+            double targetHeightAboveTerrain;
 
             // Depending on the direction, we want to start from the transmitter and move towards the receiver,
             // or the other way around.
@@ -145,6 +146,7 @@ namespace LambdaModel.PathLoss
                 toIx = rxIndex;
                 inc = 1;
                 sourceHeightAboveTerrain = txHeightAboveTerrain;
+                targetHeightAboveTerrain = rxHeightAboveTerrain;
             }
             else
             {
@@ -152,6 +154,7 @@ namespace LambdaModel.PathLoss
                 toIx = 0;
                 inc = -1;
                 sourceHeightAboveTerrain = rxHeightAboveTerrain;
+                targetHeightAboveTerrain = txHeightAboveTerrain;
             }
 
             // Keep track of the data at the transmitter and receiver.
@@ -185,7 +188,7 @@ namespace LambdaModel.PathLoss
 
             // Calculate the angle between the sight line RX-TX/TX-RX and the sight line source-max.
             var pointOfMaxObstruction = path[maxIndex];
-            var (angle, distance3d) = GetAngle(source, sourceHeightAboveTerrain, pointOfMaxObstruction);
+            var (angle, distance3d) = GetAngle(source, target, pointOfMaxObstruction, direction, sourceHeightAboveTerrain, targetHeightAboveTerrain);
 
             return (maxIndex, angle, distance3d);
         }
@@ -194,21 +197,24 @@ namespace LambdaModel.PathLoss
         /// Calculate the angle between the sight line source-target and the sight line source-max.
         /// </summary>
         /// <param name="source">The point we're calculating from, usually TX or RX, depending on calculation direction.</param>
-        /// <param name="sourceHeightAboveTerrain">How high above the terrain the source (TX or RX) is.</param>
+        /// <param name="target">The point we're calculating to, usually RX or TX, depending on calculation direction.</param>
         /// <param name="pointOfMaxObstruction">The point of max (fresnel) obstruction between source and target.</param>
+        /// <param name="direction"></param>
+        /// <param name="sourceHeightAboveTerrain">How high above the terrain the source (TX or RX) is.</param>
         /// <returns></returns>
-        protected (double angle, double distance3d) GetAngle(Point3D source, double sourceHeightAboveTerrain, Point3D pointOfMaxObstruction)
+        protected (double angle, double distance3d) GetAngle(Point3D source, Point3D target, Point3D pointOfMaxObstruction, CalculationDirection direction, double sourceHeightAboveTerrain, double targetHeightAboveTerrain)
         {
-            // Calculate distances (in 2D and 3D) between the source point and the point of max obstruction.
-            var dx = source.DistanceTo2D(pointOfMaxObstruction);
-            
-            // Calculate the difference between the terrain obstruction and the sight line at this point
-            var dz = pointOfMaxObstruction.Z - (source.Z + sourceHeightAboveTerrain);
+            var dx = source.DistanceTo2D(target);
+            var dz = source.Z + sourceHeightAboveTerrain - (target.Z + targetHeightAboveTerrain);
+            var angleStations = Math.Atan(dz / dx);
 
-            // Calculate the angle between the sight line RX/TX and the sight line source/max.
-            var angle = Math.Atan(dz / dx);
+            dx = source.DistanceTo2D(pointOfMaxObstruction);
+            dz = source.Z + sourceHeightAboveTerrain - pointOfMaxObstruction.Z;
+            var angleSightLine = Math.Atan(dz/dx);
 
-            return (angle, dx);
+            var angleDiff = angleStations - angleSightLine;
+
+            return (angleDiff, dx);
         }
 
         /// <summary>
