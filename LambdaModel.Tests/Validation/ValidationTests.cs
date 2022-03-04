@@ -96,6 +96,42 @@ namespace LambdaModel.Tests.Validation
         }
 
         [TestMethod]
+        public void Rxi()
+        {
+            for (var i = 1; i < _data.Length; i++)
+            {
+                Assert.AreEqual(_data[i].RxI, _results[i].RxI, "At index " + i);
+            }
+        }
+
+        [TestMethod]
+        public void Rxa()
+        {
+            for (var i = 1; i < _data.Length; i++)
+            {
+                Assert.AreEqual(_data[i].RxA, _results[i].RxA, 0.0001, "At index " + i);
+            }
+        }
+
+        [TestMethod]
+        public void Txi()
+        {
+            for (var i = 1; i < _data.Length; i++)
+            {
+                Assert.AreEqual(_data[i].TxI, _results[i].TxI, "At index " + i);
+            }
+        }
+
+        [TestMethod]
+        public void Txa()
+        {
+            for (var i = 1; i < _data.Length; i++)
+            {
+                Assert.AreEqual(_data[i].TxA, _results[i].TxA, 0.0001, "At index " + i);
+            }
+        }
+
+        [TestMethod]
         public void Nobs()
         {
             for (var i = 1; i < _data.Length; i++)
