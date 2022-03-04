@@ -23,6 +23,7 @@ namespace LambdaModel.Stations
         public int HeightAboveTerrain { get; set; }
         public int MaxRadius { get; set; } = 50_000;
         public AntennaType? AntennaType { get; set; }
+        public MobileNetworkRegressionType? MobileRegression { get; set; } = MobileNetworkRegressionType.All;
 
         public double TotalTransmissionLevel { get; set; } = 46 + 18 - 2;
 
@@ -52,6 +53,9 @@ namespace LambdaModel.Stations
                 _vector[i] = new Point4D<double>(0, 0);
 
             Calculator = AntennaType == Stations.AntennaType.ItsG5 ? (IPathLossCalculator)new ItsG5PathLossCalculator() : new MobileNetworkPathLossCalculator();
+
+            if (Calculator is MobileNetworkPathLossCalculator m && MobileRegression.HasValue)
+                m.RegressionType = MobileRegression.Value;
         }
 
         public void Validate()
