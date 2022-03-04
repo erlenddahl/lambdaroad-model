@@ -15,6 +15,8 @@ namespace LambdaModel.Config
         public BaseStation BaseStation { get; set; }
         public Point3D TargetCoordinates { get; set; }
         public TerrainConfig Terrain { get; set; }
+        public MobileNetworkRegressionType? MobileRegression { get; set; } = MobileNetworkRegressionType.All;
+        public double ReceiverHeightAboveTerrain { get; set; }
 
         public object Run()
         {
@@ -22,6 +24,9 @@ namespace LambdaModel.Config
             using (var cache = Terrain.CreateCache(cip))
             {
                 BaseStation.Initialize();
+
+                if (BaseStation.Calculator is MobileNetworkPathLossCalculator m && MobileRegression.HasValue)
+                    m.RegressionType = MobileRegression.Value;
 
                 var start = DateTime.Now;
 

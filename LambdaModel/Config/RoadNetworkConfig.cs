@@ -11,6 +11,7 @@ using DotSpatial.Topology;
 using DotSpatial.Topology.Operation.Distance;
 using Extensions.StringExtensions;
 using LambdaModel.General;
+using LambdaModel.PathLoss;
 using LambdaModel.Stations;
 using LambdaModel.Utilities;
 using Newtonsoft.Json;
@@ -34,6 +35,8 @@ namespace LambdaModel.Config
                 {
                     bs.Cip = Cip;
                     bs.BaseStationIndex = bix++;
+                    if (bs.Calculator is MobileNetworkPathLossCalculator m && MobileRegression.HasValue)
+                        m.RegressionType = MobileRegression.Value;
                 }
 
                 if (CalculationThreads.HasValue)
