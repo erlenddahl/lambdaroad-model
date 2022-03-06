@@ -34,15 +34,18 @@ namespace LambdaModel.Config
                 var start = DateTime.Now;
 
                 var vector = cache.GetAltitudeVector(BaseStation.Center, TargetCoordinates).ToArray();
-                var rssi = new double[vector.Length];
+                var loss = new double[vector.Length];
+                var rsrp = new double[vector.Length];
                 for (var i = 2; i < vector.Length; i++)
                 {
-                    rssi[i] = BaseStation.TotalTransmissionLevel - BaseStation.Calculator.CalculateLoss(vector, BaseStation.HeightAboveTerrain, ReceiverHeightAboveTerrain, i - 1);
+                    var pl = BaseStation.Calculator.CalculateLoss(vector, BaseStation.HeightAboveTerrain, ReceiverHeightAboveTerrain, i - 1);
+                    loss[i] = pl;
+                    rsrp[i] = BaseStation.TotalTransmissionLevel - pl;
                 }
 
                 cip.Set("Calculation time", DateTime.Now.Subtract(start).TotalMilliseconds + "ms");
 
-                return new {rssi, vector = vector.Select(p => new {p.X, p.Y, p.Z}), snapshot = cip.GetSnapshot(), config = this};
+                return new {rsrp, loss, vector = vector.Select(p => new {p.X, p.Y, p.Z}), snapshot = cip.GetSnapshot(), config = this};
             }
         }
     }
