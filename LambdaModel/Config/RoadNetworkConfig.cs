@@ -66,8 +66,9 @@ namespace LambdaModel.Config
                     {
                         Cip?.Set("Calculation radius", bs.MaxRadius);
                         Cip?.Set("Relevant road links", bs.Links.Count);
-                        
-                        bs.RemoveLinksTooFarAway(bs.TotalTransmissionLevel - MinimumAllowableSignalValue);
+
+                        bs.RemoveLinksOutsideGainSectors();
+                        bs.RemoveLinksTooFarAway(MinimumAllowableSignalValue);
 
                         using (var tiles = Terrain.CreateCache(Cip))
                         {

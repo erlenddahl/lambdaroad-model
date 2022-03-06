@@ -36,11 +36,12 @@ namespace LambdaModel.Config
                 var vector = cache.GetAltitudeVector(BaseStation.Center, TargetCoordinates).ToArray();
                 var loss = new double[vector.Length];
                 var rsrp = new double[vector.Length];
+                var a = BaseStation.AngleTo(TargetCoordinates);
                 for (var i = 2; i < vector.Length; i++)
                 {
                     var pl = BaseStation.Calculator.CalculateLoss(vector, BaseStation.HeightAboveTerrain, ReceiverHeightAboveTerrain, i - 1);
                     loss[i] = pl;
-                    rsrp[i] = BaseStation.TotalTransmissionLevel - pl;
+                    rsrp[i] = BaseStation.CalculateRsrpAtAngle(a, pl);
                 }
 
                 cip.Set("Calculation time", DateTime.Now.Subtract(start).TotalMilliseconds + "ms");

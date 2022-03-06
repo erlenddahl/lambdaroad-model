@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using ConsoleUtilities.ConsoleInfoPanel;
 using Extensions.Utilities;
 using LambdaModel.General;
@@ -24,7 +25,12 @@ namespace LambdaModel.Stations
         public int MaxRadius { get; set; } = 100_000;
         public AntennaType? AntennaType { get; set; }
 
+        public AntennaGain Gain { get; set; }
+        public double Power { get; set; } = 46;
+        public double CableLoss { get; set; } = 2;
+
         public double TotalTransmissionLevel { get; set; } = 46 + 18 - 2;
+        public double ResourceBlockConstant { get; set; } = 10 * Math.Log10(12 * 50);
 
         public BaseStation()
         {
@@ -58,6 +64,28 @@ namespace LambdaModel.Stations
         {
             if (!AntennaType.HasValue)
                 throw new Exception("Base stations must have the AntennaType property, which may be one of these values: " + string.Join(", ", EnumHelper.GetValues<AntennaType>()));
+        }
+
+        /// <summary>
+        /// Calculates the angle in degrees between the base station's coordinates and the given coordinate.
+        /// Zero degrees is East, 90 degrees is North, 180 degrees is West, 270 degrees is South.
+        /// </summary>
+        /// <param name="targetCoordinates"></param>
+        /// <returns></returns>
+        public double AngleTo(Point3D targetCoordinates)
+        {
+            return Center.AngleFromHorizon(targetCoordinates);
+        }
+
+        /// <summary>
+        /// Returns the RSRP for the given angle (power + gain_angle - cable loss - path loss - resource block constant).
+        /// </summary>
+        /// <param name="angle"></param>
+        /// <param name="loss"></param>
+        /// <returns></returns>
+        public double CalculateRsrpAtAngle(double angle, double loss)
+        {
+            return Power + Gain.GetGainAtAngle(angle) - CableLoss - loss - ResourceBlockConstant;
         }
     }
 }
