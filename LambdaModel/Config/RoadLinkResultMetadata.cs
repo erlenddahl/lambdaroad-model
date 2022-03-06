@@ -36,13 +36,13 @@ namespace LambdaModel.Config
             Points = new JArray();
             foreach (var v in link.Geometry.Where(p => p.M!=null))
             {
-                sum += v.M.MaxRssi;
+                sum += v.M.MaxRsrp;
                 count++;
-                if (v.M.MaxRssi < Min) Min = v.M.MaxRssi;
-                if (v.M.MaxRssi > Max) Max = v.M.MaxRssi;
+                if (v.M.MaxRsrp < Min) Min = v.M.MaxRsrp;
+                if (v.M.MaxRsrp > Max) Max = v.M.MaxRsrp;
 
                 Points.Add(JArray.FromObject(new[] { v.X, v.Y }
-                    .Concat(v.M.BaseStationRssi.Select(c => (double)(int)Math.Round(c)))
+                    .Concat(v.M.BaseStationRsrp.Select(c => (double)(int)Math.Round(c)))
                     .ToArray()));
             }
 

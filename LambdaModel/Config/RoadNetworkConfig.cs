@@ -45,7 +45,7 @@ namespace LambdaModel.Config
 
                 if (CalculationThreads.HasValue)
                     Cip.Set("Calculation threads", CalculationThreads.Value);
-                Cip.Set("Minimum signal", MinimumAllowableSignalValue);
+                Cip.Set("Minimum rsrp", MinimumAllowableRsrp);
                 Cip.Set("Calc point frequency", LinkCalculationPointFrequency);
 
                 Cip?.Set("Road network source", Path.GetFileName(RoadShapeLocation));
@@ -68,7 +68,7 @@ namespace LambdaModel.Config
                         Cip?.Set("Relevant road links", bs.Links.Count);
 
                         bs.RemoveLinksOutsideGainSectors();
-                        bs.RemoveLinksTooFarAway(MinimumAllowableSignalValue);
+                        bs.RemoveLinksTooFarAway(MinimumAllowableRsrp);
 
                         using (var tiles = Terrain.CreateCache(Cip))
                         {
@@ -85,7 +85,7 @@ namespace LambdaModel.Config
                         Cip?.Set("Calculations per second", $"{(long)(calculations / secs):n0} c/s");
                         Cip?.Set("Terrain lookups per second", $"{(long)(distance / secs):n0} tl/s");
 
-                        bs.RemoveLinksWithTooLowRssi(MinimumAllowableSignalValue);
+                        bs.RemoveLinksWithTooLowRsrp(MinimumAllowableRsrp);
 
                         pb.Increment();
                     });
@@ -156,9 +156,9 @@ namespace LambdaModel.Config
                             writer.Write(c.X);
                             writer.Write(c.Y);
                             writer.Write(c.Z);
-                            writer.Write(c.M.MaxRssi);
-                            writer.Write(c.M.BaseStationRssi.Length);
-                            foreach (var bs in c.M.BaseStationRssi)
+                            writer.Write(c.M.MaxRsrp);
+                            writer.Write(c.M.BaseStationRsrp.Length);
+                            foreach (var bs in c.M.BaseStationRsrp)
                                 writer.Write(bs);
                         }
                     }
@@ -173,10 +173,10 @@ namespace LambdaModel.Config
 
             var table = shp.DataTable;
             table.Columns.Add("RoadLinkId", typeof(string));
-            table.Columns.Add("Max RSSI", typeof(double));
+            table.Columns.Add("Max RSRP", typeof(double));
 
             foreach (var bs in baseStations)
-                table.Columns.Add("RSSI_" + bs.Name, typeof(double));
+                table.Columns.Add("RSRP_" + bs.Name, typeof(double));
 
             table.AcceptChanges();
 
@@ -187,11 +187,11 @@ namespace LambdaModel.Config
                     {
                         if (c.M == null) continue;
                         var feature = shp.AddFeature(new Point(new Coordinate(c.X, c.Y, c.Z)));
-                        feature.DataRow["Max RSSI"] = c.M.MaxRssi;
+                        feature.DataRow["Max RSRP"] = c.M.MaxRsrp;
                         feature.DataRow["RoadLinkId"] = link.Name;
 
                         foreach (var bs in baseStations)
-                            feature.DataRow["RSSI_" + bs.Name] = c.M.BaseStationRssi[bs.BaseStationIndex];
+                            feature.DataRow["RSRP_" + bs.Name] = c.M.BaseStationRsrp[bs.BaseStationIndex];
                     }
 
                     pb?.Increment();
@@ -206,7 +206,7 @@ namespace LambdaModel.Config
             var ci = CultureInfo.InvariantCulture;
             using (var results = new StreamWriter(File.Create(pathFile)))
             {
-                results.WriteLine(string.Join(separator, "RoadLinkId", "X", "Y", "Z", "Max RSSI") + separator + string.Join(separator, baseStations.Select(p => p.Name)));
+                results.WriteLine(string.Join(separator, "RoadLinkId", "X", "Y", "Z", "Max RSRP") + separator + string.Join(separator, baseStations.Select(p => p.Name)));
 
                 using (var pb = cip?.SetProgress("Writing CSV", max: links.Count))
                     foreach (var link in links)
@@ -218,8 +218,8 @@ namespace LambdaModel.Config
                                               c.X.ToString(ci) + separator + 
                                               c.Y.ToString(ci) + separator +
                                               c.Z.ToString(ci) + separator +
-                                              c.M.MaxRssi.ToString(ci) + separator + 
-                                              string.Join(separator, c.M.BaseStationRssi.Select(p => p.ToString(ci))));
+                                              c.M.MaxRsrp.ToString(ci) + separator + 
+                                              string.Join(separator, c.M.BaseStationRsrp.Select(p => p.ToString(ci))));
                         }
 
                         pb?.Increment();

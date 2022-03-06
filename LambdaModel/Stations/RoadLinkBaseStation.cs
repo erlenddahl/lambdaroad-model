@@ -91,12 +91,12 @@ namespace LambdaModel.Stations
         /// Check all links and removes those that has too much path loss due to distance alone.
         /// </summary>
         /// <returns></returns>
-        public void RemoveLinksWithTooLowRssi(double minRssi)
+        public void RemoveLinksWithTooLowRsrp(double minRsrp)
         {
             RemoveLinksBy("Checking road link calculated path loss", "Road links removed (actual loss)", p =>
             {
-                var minPathLoss = p.Geometry.Max(c => c.M?.MaxRssi ?? double.MinValue);
-                return minPathLoss < minRssi;
+                var minPathLoss = p.Geometry.Max(c => c.M?.MaxRsrp ?? double.MinValue);
+                return minPathLoss < minRsrp;
             });
         }
         
@@ -132,7 +132,7 @@ namespace LambdaModel.Stations
                         continue;
                     }
 
-                    if (c.M == null) c.M = new CalculationDetails() {BaseStationRssi = new double[numBaseStations]};
+                    if (c.M == null) c.M = new CalculationDetails() {BaseStationRsrp = new double[numBaseStations]};
 
                     // Get the X,Y,Z vector from the center to these coordinates.
                     var vectorLength = tiles.FillVector(_vector, Center.X, Center.Y, c.X, c.Y, withHeights: true);
@@ -140,9 +140,9 @@ namespace LambdaModel.Stations
                     // Calculate the loss for this point, and store it in the results matrix
                     var loss = Calculator.CalculateLoss(_vector, HeightAboveTerrain, receiverHeightAboveTerrain, vectorLength - 1);
                     var value = CalculateRsrpAtAngle(angle, loss);
-                    c.M.BaseStationRssi[baseStationIx] = value;
-                    if (value > c.M.MaxRssi)
-                        c.M.MaxRssi = value;
+                    c.M.BaseStationRsrp[baseStationIx] = value;
+                    if (value > c.M.MaxRsrp)
+                        c.M.MaxRsrp = value;
 
                     linkCalcs++;
                     linkDist += vectorLength;

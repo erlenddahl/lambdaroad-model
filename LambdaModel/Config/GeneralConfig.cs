@@ -18,7 +18,7 @@ namespace LambdaModel.Config
         public CalculationMethod CalculationMethod { get; set; }
 
         public MobileNetworkRegressionType? MobileRegression { get; set; } = MobileNetworkRegressionType.All;
-        public double MinimumAllowableSignalValue { get; set; } = -150;
+        public double MinimumAllowableRsrp { get; set; } = -150;
         public double ReceiverHeightAboveTerrain { get; set; }
 
         public BaseStation[] BaseStations { get; set; }

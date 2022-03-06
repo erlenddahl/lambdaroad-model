@@ -2,7 +2,7 @@
 {
     public class CalculationDetails
     {
-        public double MaxRssi = double.MinValue;
-        public double[] BaseStationRssi;
+        public double MaxRsrp = double.MinValue;
+        public double[] BaseStationRsrp;
     }
 }
