@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using ConsoleUtilities.ConsoleInfoPanel;
 using DotSpatial.Topology.Utilities;
+using Extensions.ListExtensions;
 using LambdaModel.General;
 using LambdaModel.PathLoss;
 using LambdaModel.Stations;
@@ -46,7 +47,16 @@ namespace LambdaModel.Config
 
                 cip.Set("Calculation time", DateTime.Now.Subtract(start).TotalMilliseconds + "ms");
 
-                return new {rsrp, loss, vector = vector.Select(p => new {p.X, p.Y, p.Z}), snapshot = cip.GetSnapshot(), config = this};
+                var mc = 1000;
+                return new
+                {
+                    rsrp = rsrp.Thin(mc),
+                    loss = loss.Thin(mc),
+                    vector = vector.Thin(mc).Select(p => new {p.X, p.Y, p.Z}),
+                    distance = (int)Math.Round(vector.First().DistanceTo2D(vector.Last()), 0),
+                    snapshot = cip.GetSnapshot(),
+                    config = this
+                };
             }
         }
     }
