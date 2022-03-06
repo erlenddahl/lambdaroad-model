@@ -22,6 +22,8 @@ namespace LambdaRestApi.Controllers
         
         private static readonly Queue<JobData> JobQueue = new();
         private static JobData _currentJob;
+        private static object _lockObject = new object();
+
         private readonly string _resultsDirectory;
         private readonly IConfiguration _config;
 
@@ -55,7 +57,10 @@ namespace LambdaRestApi.Controllers
 
                 var job = new JobData(config, _resultsDirectory);
 
-                JobQueue.Enqueue(job);
+                lock (_lockObject)
+                {
+                    JobQueue.Enqueue(job);
+                }
 
                 jobId = job.Id;
             }
@@ -106,13 +111,17 @@ namespace LambdaRestApi.Controllers
 
         private void ProcessQueue()
         {
-            if (_currentJob != null && _currentJob.Finished > DateTime.MinValue)
-                _currentJob = null;
+            lock (_lockObject)
+            {
+                if (_currentJob != null && _currentJob.Finished > DateTime.MinValue)
+                    _currentJob = null;
 
-            if (_currentJob != null) return;
-            if (!JobQueue.Any()) return;
+                if (_currentJob != null) return;
+                if (!JobQueue.Any()) return;
 
-            _currentJob = JobQueue.Dequeue();
+                _currentJob = JobQueue.Dequeue();
+            }
+
             _currentJob.Run(ProcessQueue);
         }
 
@@ -162,8 +171,38 @@ namespace LambdaRestApi.Controllers
             try
             {
                 var dir = Path.Combine(_resultsDirectory, key);
-                if (!Directory.Exists(dir)) throw new NoSuchResultsException();
-                Directory.Delete(dir, true);
+                if (Directory.Exists(dir))
+                    Directory.Delete(dir, true);
+
+                lock (_lockObject)
+                {
+                    if (JobQueue.Any(p => p.Id == key))
+                    {
+                        var jobs = JobQueue.Where(p => p.Id != key).ToArray();
+                        JobQueue.Clear();
+                        foreach (var job in jobs)
+                            JobQueue.Enqueue(job);
+                    }
+                }
+                
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return new
+                {
+                    error = ex.Message
+                };
+            }
+        }
+
+        [HttpGet("abort")]
+        public object AbortRunningJob()
+        {
+            try
+            {
+                if (_currentJob == null) throw new Exception("No currently running job to abort.");
+                _currentJob.Config.Cancellor.Cancel();
                 return true;
             }
             catch (Exception ex)

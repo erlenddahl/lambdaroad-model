@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using ConsoleUtilities;
 using ConsoleUtilities.ConsoleInfoPanel;
 using LambdaModel.PathLoss;
@@ -35,6 +36,7 @@ namespace LambdaModel.Config
         public TerrainConfig Terrain { get; set; }
 
         public int? CalculationThreads { get; set; }
+        public CancellationTokenSource Cancellor { get; set; }
 
         [JsonIgnore]
         public ConsoleInformationPanel Cip { get; set; }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using ConsoleUtilities.ConsoleInfoPanel;
 using DotSpatial.Data;
 using DotSpatial.Topology;
@@ -100,7 +101,7 @@ namespace LambdaModel.Stations
             });
         }
         
-        public (long calculations, long distance) Calculate(ITiffReader tiles, int linkCalculationPointFrequency, double receiverHeightAboveTerrain, int numBaseStations = 1, int baseStationIx = 0)
+        public (long calculations, long distance) Calculate(ITiffReader tiles, int linkCalculationPointFrequency, double receiverHeightAboveTerrain, CancellationToken cancellationToken, int numBaseStations = 1, int baseStationIx = 0)
         {
             SortLinks();
             var calculations = 0;
@@ -116,6 +117,8 @@ namespace LambdaModel.Stations
 
                 for (var i = 0; i < link.Geometry.Length; i += linkCalculationPointFrequency)
                 {
+                    if (cancellationToken.IsCancellationRequested) throw new OperationCanceledException("Operation cancelled by user.");
+
                     var c = link.Geometry[i];
 
                     if (Center.DistanceTo2D(c) > MaxRadius)

@@ -54,6 +54,8 @@ namespace LambdaModel.Config
                 var calculations = 0L;
                 var distance = 0L;
 
+                Cancellor = new CancellationTokenSource();
+
                 var start = DateTime.Now;
                 using (var pb = Cip.SetProgress("Processing base stations", max: BaseStations.Length))
                 {
@@ -72,7 +74,7 @@ namespace LambdaModel.Config
 
                         using (var tiles = Terrain.CreateCache(Cip))
                         {
-                            var (bsCalcs, bsDist) = bs.Calculate(tiles, LinkCalculationPointFrequency, ReceiverHeightAboveTerrain, BaseStations.Length, bs.BaseStationIndex);
+                            var (bsCalcs, bsDist) = bs.Calculate(tiles, LinkCalculationPointFrequency, ReceiverHeightAboveTerrain, Cancellor.Token, BaseStations.Length, bs.BaseStationIndex);
 
                             Interlocked.Add(ref calculations, bsCalcs);
                             Interlocked.Add(ref distance, bsDist);
