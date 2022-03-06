@@ -52,8 +52,8 @@ namespace LambdaModel.Config
                 {
                     rsrp = rsrp.Thin(mc),
                     loss = loss.Thin(mc),
-                    vector = vector.Thin(mc).Select(p => new {p.X, p.Y, p.Z}),
-                    distance = (int)Math.Round(vector.First().DistanceTo2D(vector.Last()), 0),
+                    vector = vector.Thin(mc).Select(p => new {p.X, p.Y, Z = p.Z < -30000 ? 0 : p.Z}),
+                    distance = (int) Math.Round(vector.First().DistanceTo2D(vector.Last()), 0),
                     snapshot = cip.GetSnapshot(),
                     config = this
                 };
