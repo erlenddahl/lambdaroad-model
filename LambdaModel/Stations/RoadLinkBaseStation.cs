@@ -52,17 +52,12 @@ namespace LambdaModel.Stations
         {
             Func<double, double, double, double> rsrp = (x, y, loss) => CalculateRsrpAtAngle(AngleTo(new Point3D(x, y)), loss);
 
-            RemoveLinksBy("Checking road link min possible path loss", "Road links removed (max loss)", p =>
+            RemoveLinksBy("Checking road link min possible path loss", "Road links removed (max loss)", link =>
             {
-                var bounds = BoundingBox2D.FromPoints(p.Geometry);
-
-                var minDistToCenter = Center.DistanceTo2D(p.Cx, p.Cy) - p.Length;
+                var minDistToCenter = Center.DistanceTo2D(link.Cx, link.Cy) - link.Length;
                 var minPossiblePathLoss = Calculator.CalculateMinPossibleLoss(minDistToCenter, HeightAboveTerrain);
 
-                if (rsrp(bounds.Xmin, bounds.Ymin, minPossiblePathLoss) >= minimumAllowableRsrp) return false;
-                if (rsrp(bounds.Xmin, bounds.Ymax, minPossiblePathLoss) >= minimumAllowableRsrp) return false;
-                if (rsrp(bounds.Xmax, bounds.Ymin, minPossiblePathLoss) >= minimumAllowableRsrp) return false;
-                if (rsrp(bounds.Xmax, bounds.Ymax, minPossiblePathLoss) >= minimumAllowableRsrp) return false;
+                if (link.Geometry.Any(p => rsrp(p.X, p.Y, minPossiblePathLoss) >= minimumAllowableRsrp)) return false;
 
                 return true;
             });
