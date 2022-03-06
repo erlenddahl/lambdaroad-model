@@ -66,7 +66,7 @@ namespace LambdaModel.PathLoss
             // nothing usually shrank the path loss by more than -5.
             // This means that the minimum possible loss is decided by horizontal distance, tx height, and -5.
 
-            return 25.1 * Math.Log(horizontalDistance) - 1.8e-01 * txHeightAboveTerrain - 5;
+            return 21.8 * Math.Log(horizontalDistance) - 1.4e-01 * txHeightAboveTerrain - 10;
         }
 
         /// <summary>
