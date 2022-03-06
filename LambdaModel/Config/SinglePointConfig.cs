@@ -31,6 +31,8 @@ namespace LambdaModel.Config
                     m.RegressionType = MobileRegression.Value;
                     cip.Set("Regression type", MobileRegression.Value.ToString());
                 }
+                
+                cip.Set("Receiver height", ReceiverHeightAboveTerrain);
 
                 var start = DateTime.Now;
 

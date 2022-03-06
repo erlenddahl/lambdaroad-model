@@ -47,6 +47,7 @@ namespace LambdaModel.Config
                     Cip.Set("Calculation threads", CalculationThreads.Value);
                 Cip.Set("Minimum RSRP", MinimumAllowableRsrp);
                 Cip.Set("Calc point frequency", LinkCalculationPointFrequency);
+                Cip.Set("Receiver height", ReceiverHeightAboveTerrain);
 
                 Cip?.Set("Road network source", Path.GetFileName(RoadShapeLocation));
                 ShapeLink.ReadLinks(RoadShapeLocation, BaseStations);
