@@ -17,6 +17,9 @@ namespace LambdaModel.Stations
         /// <returns></returns>
         public static AntennaGain FromDefinition(string definition)
         {
+            if (double.TryParse(definition, out var res))
+                return FromConstant(res);
+
             var g = new AntennaGain();
 
             var sections = definition
@@ -27,7 +30,9 @@ namespace LambdaModel.Stations
 
             foreach (var s in sections)
             {
-                for (var i = (int) Math.Round(s.From); i < (int) Math.Round(s.To); i++)
+                var fromValue = (int) Math.Round(Math.Min(s.From, s.To));
+                var toValue = (int) Math.Round(Math.Max(s.From, s.To));
+                for (var i = fromValue; i < toValue; i++)
                     g._values[RestrictAngle(i)] = s.Value;
             }
 
@@ -70,6 +75,18 @@ namespace LambdaModel.Stations
             if (a >= 360) a = a % 360;
             if (a < 0) a += 360 * (int)Math.Ceiling(Math.Abs(a) / 360d);
             return a;
+        }
+
+        /// <summary>
+        /// Restricts an angle to the space between 0 (inclusive) and 360 (exclusive) degrees and rounds it to the nearest integer value.
+        /// </summary>
+        /// <param name="angle"></param>
+        /// <returns></returns>
+        public static int RestrictAngle(int angle)
+        {
+            if (angle >= 360) angle = angle % 360;
+            if (angle < 0) angle += 360 * (int)Math.Ceiling(Math.Abs(angle) / 360d);
+            return angle;
         }
     }
 }

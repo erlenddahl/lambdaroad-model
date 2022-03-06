@@ -25,11 +25,13 @@ namespace LambdaModel.Stations
         public int MaxRadius { get; set; } = 100_000;
         public AntennaType? AntennaType { get; set; }
 
+        public string GainDefinition { get; set; } = "64";
+
+        [JsonIgnore]
         public AntennaGain Gain { get; set; }
         public double Power { get; set; } = 46;
         public double CableLoss { get; set; } = 2;
-
-        public double TotalTransmissionLevel { get; set; } = 46 + 18 - 2;
+        
         public double ResourceBlockConstant { get; set; } = 10 * Math.Log10(12 * 50);
 
         public BaseStation()
@@ -58,6 +60,7 @@ namespace LambdaModel.Stations
                 _vector[i] = new Point4D<double>(0, 0);
 
             Calculator = AntennaType == Stations.AntennaType.ItsG5 ? (IPathLossCalculator)new ItsG5PathLossCalculator() : new MobileNetworkPathLossCalculator();
+            Gain = AntennaGain.FromDefinition(GainDefinition);
         }
 
         public void Validate()

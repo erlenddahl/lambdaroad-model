@@ -78,10 +78,10 @@ namespace LambdaModel.Stations
             RemoveLinksBy("Checking road links against gain sectors", "Road links removed (gain sector)", p =>
             {
                 var bounds = BoundingBox2D.FromPoints(p.Geometry);
-                if (gain(bounds.Xmin, bounds.Ymin) <= 0) return false;
-                if (gain(bounds.Xmin, bounds.Ymax) <= 0) return false;
-                if (gain(bounds.Xmax, bounds.Ymin) <= 0) return false;
-                if (gain(bounds.Xmax, bounds.Ymax) <= 0) return false;
+                if (gain(bounds.Xmin, bounds.Ymin) > 0) return false;
+                if (gain(bounds.Xmin, bounds.Ymax) > 0) return false;
+                if (gain(bounds.Xmax, bounds.Ymin) > 0) return false;
+                if (gain(bounds.Xmax, bounds.Ymax) > 0) return false;
 
                 return true;
             });

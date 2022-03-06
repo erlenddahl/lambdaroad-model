@@ -45,7 +45,7 @@ namespace LambdaModel.Config
 
                 if (CalculationThreads.HasValue)
                     Cip.Set("Calculation threads", CalculationThreads.Value);
-                Cip.Set("Minimum rsrp", MinimumAllowableRsrp);
+                Cip.Set("Minimum RSRP", MinimumAllowableRsrp);
                 Cip.Set("Calc point frequency", LinkCalculationPointFrequency);
 
                 Cip?.Set("Road network source", Path.GetFileName(RoadShapeLocation));
