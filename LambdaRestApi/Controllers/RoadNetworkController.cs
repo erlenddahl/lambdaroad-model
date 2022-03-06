@@ -156,6 +156,25 @@ namespace LambdaRestApi.Controllers
             return JObject.Parse(System.IO.File.ReadAllText(metaFile));
         }
 
+        [HttpGet("delete")]
+        public object DeleteJob(string key)
+        {
+            try
+            {
+                var dir = Path.Combine(_resultsDirectory, key);
+                if (!Directory.Exists(dir)) throw new NoSuchResultsException();
+                Directory.Delete(dir, true);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return new
+                {
+                    error = ex.Message
+                };
+            }
+        }
+
         [HttpGet("jobs")]
         public object Jobs()
         {
