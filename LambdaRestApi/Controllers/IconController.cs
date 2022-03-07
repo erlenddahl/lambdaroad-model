@@ -31,6 +31,7 @@ namespace LambdaRestApi.Controllers
             using var g = Graphics.FromImage(bm);
             g.CompositingQuality = CompositingQuality.HighQuality;
             g.InterpolationMode = InterpolationMode.High;
+            g.SmoothingMode = SmoothingMode.HighQuality;
 
             g.Clear(Color.Transparent);
 
