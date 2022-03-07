@@ -64,26 +64,6 @@ namespace LambdaModel.Stations
         }
 
         /// <summary>
-        /// Check all links and removes those that have no points inside of a gain sector with signal.
-        /// </summary>
-        /// <returns></returns>
-        public void RemoveLinksOutsideGainSectors()
-        {
-            Func<double, double, double> gain = (x, y) => Gain.GetGainAtAngle(AngleTo(new Point3D(x, y)));
-
-            RemoveLinksBy("Checking road links against gain sectors", "Road links removed (gain sector)", p =>
-            {
-                var bounds = BoundingBox2D.FromPoints(p.Geometry);
-                if (gain(bounds.Xmin, bounds.Ymin) > 0) return false;
-                if (gain(bounds.Xmin, bounds.Ymax) > 0) return false;
-                if (gain(bounds.Xmax, bounds.Ymin) > 0) return false;
-                if (gain(bounds.Xmax, bounds.Ymax) > 0) return false;
-
-                return true;
-            });
-        }
-
-        /// <summary>
         /// Check all links and removes those that has too much path loss due to distance alone.
         /// </summary>
         /// <returns></returns>
@@ -122,14 +102,6 @@ namespace LambdaModel.Stations
                         continue;
                     }
 
-                    var angle = AngleTo(c);
-
-                    if (Gain.GetGainAtAngle(angle) <= 0)
-                    {
-                        Cip?.Increment("Points outside of gain sectors");
-                        continue;
-                    }
-
                     if (c.M == null) c.M = new CalculationDetails() {BaseStationRsrp = new double[numBaseStations]};
 
                     // Get the X,Y,Z vector from the center to these coordinates.
@@ -137,6 +109,7 @@ namespace LambdaModel.Stations
 
                     // Calculate the loss for this point, and store it in the results matrix
                     var loss = Calculator.CalculateLoss(_vector, HeightAboveTerrain, receiverHeightAboveTerrain, vectorLength - 1);
+                    var angle = AngleTo(c);
                     var value = CalculateRsrpAtAngle(angle, loss);
                     c.M.BaseStationRsrp[baseStationIx] = value;
                     if (value > c.M.MaxRsrp)

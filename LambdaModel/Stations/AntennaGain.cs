@@ -88,5 +88,10 @@ namespace LambdaModel.Stations
             if (angle < 0) angle += 360 * (int)Math.Ceiling(Math.Abs(angle) / 360d);
             return angle;
         }
+
+        public double GetMaxGain()
+        {
+            return _values.Max();
+        }
     }
 }
