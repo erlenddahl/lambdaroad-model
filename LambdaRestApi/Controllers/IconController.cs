@@ -35,51 +35,20 @@ namespace LambdaRestApi.Controllers
 
             g.Clear(Color.Transparent);
 
-            if (state != "new" && state != "edit" && state != "preview")
-            {
-                AntennaGain gain;
-                try
-                {
-                    gain = AntennaGain.FromDefinition(gainDefinition);
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine(ex.Message);
-                    gain = AntennaGain.FromConstant(0);
-                }
-
-                var path = new GraphicsPath(FillMode.Alternate);
-                var centerRadius = 25;
-
-                var dbFactor = Math.Min(1, s / (centerRadius + power + gain.GetMaxGain()));
-
-                path.StartFigure();
-                for (var i = 0; i <= 360; i++)
-                {
-                    var db = (int) Math.Round((centerRadius + power + gain.GetGainAtAngle(i)) * dbFactor);
-                    path.AddArc(new Rectangle((s - db) / 2, (s - db) / 2, db, db), 360 - i, 1);
-                }
-
-                path.CloseFigure();
-
-                path.AddEllipse(new Rectangle((s - centerRadius) / 2, (s - centerRadius) / 2, centerRadius, centerRadius));
-
-                var brush = new PathGradientBrush(path)
-                {
-                    CenterColor = Color.FromArgb(255, Color.Red),
-                    SurroundColors = new[] {Color.FromArgb(215, Color.Green), Color.FromArgb(175, Color.Green)}
-                };
-
-                g.FillPath(brush, path);
-            }
-
             var ringColor = Color.DarkRed;
             var innerColor = Color.IndianRed;
+            var gradientCenter = Color.Red;
+            var gradientEdge = Color.Green;
 
             if (state == "new")
             {
-                ringColor = Color.GreenYellow;
+                ringColor = Color.Yellow;
                 innerColor = Color.Yellow;
+            }
+            else if(state == "preview")
+            {
+                ringColor = Color.LightGreen;
+                innerColor = Color.LightGreen;
             }
             else if (state == "selected")
             {
@@ -90,7 +59,44 @@ namespace LambdaRestApi.Controllers
             {
                 ringColor = Color.Black;
                 innerColor = Color.Gray;
+                gradientCenter = Color.DimGray;
+                gradientEdge = Color.DarkGray;
             }
+
+            AntennaGain gain;
+            try
+            {
+                gain = AntennaGain.FromDefinition(gainDefinition);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+                gain = AntennaGain.FromConstant(0);
+            }
+
+            var path = new GraphicsPath(FillMode.Alternate);
+            var centerRadius = 25;
+
+            var dbFactor = Math.Min(1, s / (centerRadius + power + gain.GetMaxGain()));
+
+            path.StartFigure();
+            for (var i = 0; i <= 360; i++)
+            {
+                var db = (int) Math.Round((centerRadius + power + gain.GetGainAtAngle(i)) * dbFactor);
+                path.AddArc(new Rectangle((s - db) / 2, (s - db) / 2, db, db), 360 - i, 1);
+            }
+
+            path.CloseFigure();
+
+            path.AddEllipse(new Rectangle((s - centerRadius) / 2, (s - centerRadius) / 2, centerRadius, centerRadius));
+
+            var brush = new PathGradientBrush(path)
+            {
+                CenterColor = Color.FromArgb(255, gradientCenter),
+                SurroundColors = new[] {Color.FromArgb(215, gradientEdge), Color.FromArgb(175, gradientEdge) }
+            };
+
+            g.FillPath(brush, path);
 
             g.FillEllipse(new SolidBrush(Color.FromArgb(255, ringColor)), new Rectangle(54, 54, 20, 20));
             g.FillEllipse(new SolidBrush(Color.FromArgb(255, innerColor)), new Rectangle(57, 57, 14, 14));
