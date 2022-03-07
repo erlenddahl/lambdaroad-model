@@ -38,12 +38,17 @@ namespace LambdaModel.PathLoss
             // Calculate regression parameters/features for the path from 0 to rxIndex.
             var p = GetParameters(path, txHeightAboveTerrain, rxHeightAboveTerrain, rxIndex);
 
+            return CalculateLoss(txHeightAboveTerrain, p);
+        }
+
+        protected double CalculateLoss(double txHeightAboveTerrain, (double horizontalDistance, double txa, double rxa, double txi, double rxi, int nobs) p)
+        {
             // If this calculator's regression type is set to All, use the ALL regression parameters.
-            if(RegressionType == MobileNetworkRegressionType.All)
+            if (RegressionType == MobileNetworkRegressionType.All)
                 return 25.1 * Math.Log10(p.horizontalDistance) - 1.8e-01 * txHeightAboveTerrain + 1.3e+01 * p.rxa - 1.4e-04 * p.txa - 1.4e-04 * p.rxi - 3.0e-05 * p.txi + 4.9 * p.nobs + 29.3;
 
             // Otherwise, if the type is either LOS or Dynamic with p.nobs == 0 (LOS), we use the LOS regression parameters
-            if (RegressionType == MobileNetworkRegressionType.LineOfSight || (RegressionType==MobileNetworkRegressionType.Dynamic && p.nobs == 0))
+            if (RegressionType == MobileNetworkRegressionType.LineOfSight || (RegressionType == MobileNetworkRegressionType.Dynamic && p.nobs == 0))
                 return 21.8 * Math.Log10(p.horizontalDistance) - 1.4e-01 * txHeightAboveTerrain + 1.3e+01 * p.rxa - 4.0e-04 * p.txa - 4.0e-04 * p.rxi + 7.4e-04 * p.txi + 0.0 * p.nobs + 37.5;
 
             // Finally, if the type is either NLOS or Dynamic with p.nobs > 0 (NLOS), we use the NLOS regression parameters.
@@ -59,14 +64,13 @@ namespace LambdaModel.PathLoss
         /// <returns></returns>
         public double CalculateMinPossibleLoss(double horizontalDistance, double txHeightAboveTerrain)
         {
-            // RangeTxa: -0,00007 - -0,00000         RangeRxa: 0,00411 - 10,20096
-            // RangeTxi: -0,25720 - -0,00003         RangeRxi: -4,26540 - -0,00014
+            // Using extreme values for all constants and features to find the lowest feasible path loss for a given horizontal distance and tx height.
+            var rxi = horizontalDistance;
+            var txi = horizontalDistance;
+            var rxa = -1.6;
+            var txa = 1.6;
 
-            // Running approximately 200 000 point calculations on approximately 1 700 random road links showed that
-            // nothing usually shrank the path loss by more than -5.
-            // This means that the minimum possible loss is decided by horizontal distance, tx height, and -5.
-
-            return 21.8 * Math.Log(horizontalDistance) - 1.4e-01 * txHeightAboveTerrain - 10;
+            return 21.8 * Math.Log(horizontalDistance) - 1.9e-01 * txHeightAboveTerrain + 1.3e+01 * rxa - 4.0e-04 * txa - 6.9e-04 * rxi - 3.2e-04 * txi + 20.6;
         }
 
         /// <summary>
