@@ -31,8 +31,8 @@ namespace LambdaModel.Tests.PathLoss
             var p = GetParameters(path, 1, 1);
 
             Assert.AreEqual(10, p.horizontalDistance, 0.001);
-            Assert.AreEqual(0, p.rxi, 0.001);
-            Assert.AreEqual(0, p.txi, 0.001);
+            Assert.AreEqual(10, p.rxi, 0.001);
+            Assert.AreEqual(10, p.txi, 0.001);
             Assert.AreEqual(0, p.nobs, 0.001);
         }
 
@@ -57,8 +57,8 @@ namespace LambdaModel.Tests.PathLoss
             var p = GetParameters(path, 1, 1);
 
             Assert.AreEqual(10, p.horizontalDistance, 0.001);
-            Assert.AreEqual(8.1, p.rxi, 0.1);
-            Assert.AreEqual(5, p.txi, 0.1);
+            Assert.AreEqual(7, p.rxi, 0.1);
+            Assert.AreEqual(3, p.txi, 0.1);
             Assert.AreEqual(1, p.nobs);
         }
 
@@ -83,8 +83,8 @@ namespace LambdaModel.Tests.PathLoss
             var p = GetParameters(path, 1, 1);
 
             Assert.AreEqual(10, p.horizontalDistance, 0.001);
-            Assert.AreEqual(5, p.rxi, 0.1);
-            Assert.AreEqual(5, p.txi, 0.1);
+            Assert.AreEqual(4, p.rxi, 0.1);
+            Assert.AreEqual(3, p.txi, 0.1);
             Assert.AreEqual(2, p.nobs);
         }
 
@@ -109,8 +109,8 @@ namespace LambdaModel.Tests.PathLoss
             var p = GetParameters(path, 1, 1);
 
             Assert.AreEqual(10, p.horizontalDistance, 0.001);
-            Assert.AreEqual(6.4, p.rxi, 0.1);
-            Assert.AreEqual(5, p.txi, 0.1);
+            Assert.AreEqual(4, p.rxi, 0.1);
+            Assert.AreEqual(3, p.txi, 0.1);
             Assert.AreEqual(3, p.nobs);
         }
     }
