@@ -127,8 +127,8 @@ namespace LambdaModel.PathLoss
             }
 
             // If there is a direct line of sight, all values will be 0. Otherwise, they will get their values from the obstructions found above.
-            var txi = txObstruction.distance3d;
-            var rxi = rxObstruction.distance3d;
+            var txi = txObstruction.distance2d;
+            var rxi = rxObstruction.distance2d;
             var txa = txObstruction.angle;
             var rxa = rxObstruction.angle;
 
@@ -147,7 +147,7 @@ namespace LambdaModel.PathLoss
         /// <param name="rxHeightAboveTerrain">How high above the terrain the RX antenna is.</param>
         /// <param name="rxIndex"></param>
         /// <returns></returns>
-        protected (int index, double angle, double distance3d) FindFresnelObstruction(Point4D<double>[] path, CalculationDirection direction, double txHeightAboveTerrain, double rxHeightAboveTerrain, int rxIndex = -1)
+        protected (int index, double angle, double distance2d) FindFresnelObstruction(Point4D<double>[] path, CalculationDirection direction, double txHeightAboveTerrain, double rxHeightAboveTerrain, int rxIndex = -1)
         {
             if (rxIndex == -1) rxIndex = path.Length - 1;
 
@@ -205,9 +205,9 @@ namespace LambdaModel.PathLoss
 
             // Calculate the angle between the sight line RX-TX/TX-RX and the sight line source-max.
             var pointOfMaxObstruction = path[maxIndex];
-            var (angle, distance3d) = GetAngle(source, target, pointOfMaxObstruction, direction, sourceHeightAboveTerrain, targetHeightAboveTerrain);
+            var (angle, distance2d) = GetAngle(source, target, pointOfMaxObstruction, direction, sourceHeightAboveTerrain, targetHeightAboveTerrain);
 
-            return (maxIndex, angle, distance3d);
+            return (maxIndex, angle, distance2d);
         }
 
         /// <summary>
@@ -220,7 +220,7 @@ namespace LambdaModel.PathLoss
         /// <param name="sourceHeightAboveTerrain">How high above the terrain the source (TX or RX) is.</param>
         /// <param name="targetHeightAboveTerrain">How high above the terrain the target (RX or TX) is.</param>
         /// <returns></returns>
-        protected (double angle, double distance3d) GetAngle(Point3D source, Point3D target, Point3D pointOfMaxObstruction, CalculationDirection direction, double sourceHeightAboveTerrain, double targetHeightAboveTerrain)
+        protected (double angle, double distance2d) GetAngle(Point3D source, Point3D target, Point3D pointOfMaxObstruction, CalculationDirection direction, double sourceHeightAboveTerrain, double targetHeightAboveTerrain)
         {
             var dx = source.DistanceTo2D(target);
             var dz = source.Z + sourceHeightAboveTerrain - (target.Z + targetHeightAboveTerrain);
