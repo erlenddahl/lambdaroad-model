@@ -17,7 +17,7 @@ namespace LambdaModel.PathLoss
             return 15.9 * Math.Log10(p.horizontalDistance) - -0.55 * txHeightAboveTerrain + 1.83 * (int)TrafficCase - 0.66 * p.dmax - 9.66e-03 * p.dmax_tx - 9.66e-03 * p.dmax_rx + 59.2;
         }
 
-        public double CalculateMinPossibleLoss(double horizontalDistance, double txHeightAboveTerrain)
+        public double CalculateMinPossibleLoss(double horizontalDistance, double txHeightAboveTerrain, double rxHeightAboveTerrain)
         {
             //TODO: Implement
             return 0;

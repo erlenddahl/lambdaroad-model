@@ -48,16 +48,17 @@ namespace LambdaModel.Stations
         /// Check all links and removes those that has too much path loss due to distance alone.
         /// </summary>
         /// <returns></returns>
-        public void RemoveLinksTooFarAway(double minimumAllowableRsrp)
+        public void RemoveLinksTooFarAway(double minimumAllowableRsrp, double rxHeightAboveTerrain)
         {
-            Func<double, double, double, double> rsrp = (x, y, loss) => CalculateRsrpAtAngle(AngleTo(new Point3D(x, y)), loss);
-
-            RemoveLinksBy("Checking road link min possible path loss", "Road links removed (max loss)", link =>
+            Func<double, double, double> rsrp = (x, y) =>
             {
-                var minDistToCenter = Center.DistanceTo2D(link.Cx, link.Cy) - link.Length;
-                var minPossiblePathLoss = Calculator.CalculateMinPossibleLoss(minDistToCenter, HeightAboveTerrain);
+                var loss = Calculator.CalculateMinPossibleLoss(Center.DistanceTo2D(x, y), HeightAboveTerrain, rxHeightAboveTerrain);
+                return CalculateRsrpAtAngle(AngleTo(new Point3D(x, y)), loss);
+            };
 
-                if (link.Geometry.Any(p => rsrp(p.X, p.Y, minPossiblePathLoss) >= minimumAllowableRsrp)) return false;
+            RemoveLinksBy("Checking road link min possible path loss", "Road links removed (min loss)", link =>
+            {
+                if (link.Geometry.Any(p => rsrp(p.X, p.Y) >= minimumAllowableRsrp)) return false;
 
                 return true;
             });

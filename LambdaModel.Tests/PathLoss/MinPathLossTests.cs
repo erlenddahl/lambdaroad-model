@@ -37,7 +37,7 @@ namespace LambdaModel.Tests.PathLoss
                 for (var i = 2; i < vector.Length; i++)
                 {
                     var loss = calc.CalculateLoss(vector, txHeightAboveTerrain, 2, i - 1);
-                    var minPossibleLoss = calc.CalculateMinPossibleLoss(vector[i].DistanceTo2D(vector[0]), txHeightAboveTerrain);
+                    var minPossibleLoss = calc.CalculateMinPossibleLoss(vector[i].DistanceTo2D(vector[0]), txHeightAboveTerrain, 2);
 
                     if (loss - minPossibleLoss < minDiff) minDiff = loss - minPossibleLoss;
 

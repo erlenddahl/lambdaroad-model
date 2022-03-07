@@ -62,15 +62,16 @@ namespace LambdaModel.PathLoss
         /// <param name="horizontalDistance"></param>
         /// <param name="txHeightAboveTerrain"></param>
         /// <returns></returns>
-        public double CalculateMinPossibleLoss(double horizontalDistance, double txHeightAboveTerrain)
+        public double CalculateMinPossibleLoss(double horizontalDistance, double txHeightAboveTerrain, double rxHeightAboveTerrain)
         {
             // Using extreme values for all constants and features to find the lowest feasible path loss for a given horizontal distance and tx height.
-            var rxi = horizontalDistance;
-            var txi = horizontalDistance;
-            var rxa = -1.6;
-            var txa = 1.6;
+            var source = new Point3D(0, 0, txHeightAboveTerrain);
+            var target = new Point3D(horizontalDistance, 0, rxHeightAboveTerrain);
 
-            return 21.8 * Math.Log(horizontalDistance) - 1.9e-01 * txHeightAboveTerrain + 1.3e+01 * rxa - 4.0e-04 * txa - 6.9e-04 * rxi - 3.2e-04 * txi + 20.6;
+            var (txa, txi) = GetAngle(source, target, target, CalculationDirection.TxToRx, txHeightAboveTerrain, rxHeightAboveTerrain);
+            var (rxa, rxi) = GetAngle(target, source, source, CalculationDirection.RxToTx, rxHeightAboveTerrain, txHeightAboveTerrain);
+
+            return 21.8 * Math.Log10(horizontalDistance) - 1.9e-01 * txHeightAboveTerrain + 1.3e+01 * rxa - 4.0e-04 * txa - 6.9e-04 * rxi - 3.2e-04 * txi + 20.6;
         }
 
         /// <summary>
