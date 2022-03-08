@@ -19,6 +19,7 @@ namespace LambdaModel.Stations
 
         [JsonIgnore]
         protected Point4D<double>[] _vector;
+        public string Id { get; set; }
         public string Name { get; set; }
         public Point3D Center { get; set; }
         public int HeightAboveTerrain { get; set; }

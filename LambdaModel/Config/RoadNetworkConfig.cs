@@ -122,6 +122,7 @@ namespace LambdaModel.Config
         public override GeneralConfig Validate(string configLocation = null)
         {
             if (BaseStations?.Any() != true) throw new ConfigException("No BaseStations defined.");
+            if (BaseStations.GroupBy(p => p.Id).Any(c => c.Count() > 1)) throw new ConfigException("BaseStation Ids must be unique");
             if (Terrain == null) throw new ConfigException("Missing Terrain config.");
             foreach (var bs in BaseStations)
                 bs.Validate();
@@ -180,7 +181,7 @@ namespace LambdaModel.Config
             table.Columns.Add("Max RSRP", typeof(double));
 
             foreach (var bs in baseStations)
-                table.Columns.Add(bs.Name, typeof(double));
+                table.Columns.Add(bs.Id, typeof(double));
 
             table.AcceptChanges();
 
@@ -195,7 +196,7 @@ namespace LambdaModel.Config
                         feature.DataRow["RoadLinkId"] = link.Name;
 
                         foreach (var bs in baseStations)
-                            feature.DataRow[bs.Name] = c.M.BaseStationRsrp[bs.BaseStationIndex];
+                            feature.DataRow[bs.Id] = c.M.BaseStationRsrp[bs.BaseStationIndex];
                     }
 
                     pb?.Increment();
@@ -224,7 +225,7 @@ namespace LambdaModel.Config
             var ci = CultureInfo.InvariantCulture;
             using (var results = new StreamWriter(File.Create(pathFile)))
             {
-                results.WriteLine(string.Join(separator, "RoadLinkId", "X", "Y", "Z", "Max RSRP") + separator + string.Join(separator, baseStations.Select(p => p.Name)));
+                results.WriteLine(string.Join(separator, "RoadLinkId", "X", "Y", "Z", "Max RSRP") + separator + string.Join(separator, baseStations.Select(p => p.Id)));
 
                 using (var pb = cip?.SetProgress("Writing CSV", max: links.Count))
                     foreach (var link in links)
