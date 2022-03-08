@@ -15,6 +15,8 @@ namespace LambdaModel.Config
 {
     public abstract class GeneralConfig : IRunnable
     {
+        public string ApiKey { get; set; }
+
         private string _originalOutputDirectory;
         public CalculationMethod CalculationMethod { get; set; }
 

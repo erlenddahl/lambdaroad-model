@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Extensions.StringExtensions;
+using Extensions.Utilities.Csv;
 using LambdaModel.Config;
 using LambdaModel.General;
 using LambdaModel.Stations;
@@ -22,24 +25,44 @@ namespace LambdaRestApi.Controllers
         
         private static readonly Queue<JobData> JobQueue = new();
         private static JobData _currentJob;
-        private static object _lockObject = new object();
+        private static readonly object LockObject = new();
 
-        private readonly string _resultsDirectory;
+        private readonly string _resultsBaseDirectory;
         private readonly IConfiguration _config;
+
+        private static Dictionary<string, string> _apiKeys = new();
 
         public RoadNetworkController(ILogger<RoadNetworkController> logger, IConfiguration config)
         {
             _logger = logger;
             _config = config;
-            _resultsDirectory = _config.GetValue<string>("ResultsLocation");
+            _resultsBaseDirectory = _config.GetValue<string>("ResultsLocation");
+            LoadApiKeys();
+        }
+
+        private void LoadApiKeys()
+        {
+            try
+            {
+                var keyLocation = _config.GetValue<string>("KeyLocation");
+                if (!System.IO.File.Exists(keyLocation)) return;
+
+                var csvReader = new CsvReader();
+                _apiKeys = csvReader.ReadFile(keyLocation).ToDictionary(k => k["key"], v => v["owner"]);
+            }
+            catch (Exception ex)
+            {
+                _logger.Log(LogLevel.Error, ex, "Failed to load API keys");
+            }
         }
 
         [HttpPost]
         public object Start(RoadNetworkConfig config)
         {
-            string jobId;
             try
             {
+                ValidateApiKey(config.ApiKey);
+
                 config.CalculationMethod = CalculationMethod.RoadNetwork;
                 config.RoadShapeLocation = _config.GetValue<string>("RoadShapeLocation");
 
@@ -55,14 +78,14 @@ namespace LambdaRestApi.Controllers
                     TileSize = 512
                 };
 
-                var job = new JobData(config, _resultsDirectory);
+                var job = new JobData(config, GetResultsDirectory(config.ApiKey));
 
-                lock (_lockObject)
+                lock (LockObject)
                 {
                     JobQueue.Enqueue(job);
                 }
 
-                jobId = job.Id;
+                return JobStatus(new BasicParameters() {ApiKey = config.ApiKey, Key = job.Id});
             }
             catch (Exception ex)
             {
@@ -71,10 +94,27 @@ namespace LambdaRestApi.Controllers
                     error = ex.Message
                 };
             }
+            finally
+            {
+                ProcessQueue();
+            }
+        }
 
-            ProcessQueue();
+        private string GetResultsDirectory(string key)
+        {
+            return Path.Combine(_resultsBaseDirectory, key.MakeSafeForFilename());
+        }
 
-            return JobStatus(jobId);
+        private void ValidateApiKey(string key)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+                throw new Exception("API key must be provided");
+
+            if (!_apiKeys.ContainsKey(key))
+                LoadApiKeys();
+
+            if (!_apiKeys.ContainsKey(key))
+                throw new Exception("The provided API key was not valid.");
         }
 
         [HttpPost("generateConfig")]
@@ -111,31 +151,43 @@ namespace LambdaRestApi.Controllers
         }
 
         [HttpGet("download")]
-        public object GenerateConfig(string key, string format)
+        public object Download(BasicParameters parameters)
         {
-            var dir = Path.Combine(_resultsDirectory, key);
-            if (!Directory.Exists(dir)) throw new NoSuchResultsException();
-
-            if (format == "csv")
+            try
             {
-                var file = Path.Combine(dir, "results.csv");
-                if (!System.IO.File.Exists(file)) throw new ResultsMissingMetadataException();
-                return File(System.IO.File.Open(file, FileMode.Open), "text/csv", "lambda-export.csv");
-            }
-           
-            if (format == "shp")
-            {
-                var file = Path.Combine(dir, "results.zip");
-                if (!System.IO.File.Exists(file)) throw new ResultsMissingMetadataException();
-                return File(System.IO.File.Open(file, FileMode.Open), "application/zip", "lambda-export.zip");
-            }
+                ValidateApiKey(parameters.ApiKey);
 
-            throw new Exception("Invalid format specified. Must be csv or shp.");
+                var dir = Path.Combine(GetResultsDirectory(parameters.ApiKey), parameters.Key);
+                if (!Directory.Exists(dir)) throw new NoSuchResultsException();
+
+                if (parameters.Format == "csv")
+                {
+                    var file = Path.Combine(dir, "results.csv");
+                    if (!System.IO.File.Exists(file)) throw new ResultsMissingMetadataException();
+                    return File(System.IO.File.Open(file, FileMode.Open), "text/csv", "lambda-export.csv");
+                }
+
+                if (parameters.Format == "shp")
+                {
+                    var file = Path.Combine(dir, "results.zip");
+                    if (!System.IO.File.Exists(file)) throw new ResultsMissingMetadataException();
+                    return File(System.IO.File.Open(file, FileMode.Open), "application/zip", "lambda-export.zip");
+                }
+
+                throw new Exception("Invalid format specified. Must be csv or shp.");
+            }
+            catch (Exception ex)
+            {
+                return new
+                {
+                    error = ex.Message
+                };
+            }
         }
 
         private void ProcessQueue()
         {
-            lock (_lockObject)
+            lock (LockObject)
             {
                 if (_currentJob != null && _currentJob.Finished > DateTime.MinValue)
                     _currentJob = null;
@@ -149,17 +201,19 @@ namespace LambdaRestApi.Controllers
             _currentJob.Run(ProcessQueue);
         }
 
-        [HttpGet]
-        public object JobStatus(string key)
+        [HttpPost("status")]
+        public object JobStatus(BasicParameters parameters)
         {
             try
             {
-                if (_currentJob?.Id == key) return new JobStatusData(_currentJob, Controllers.JobStatus.Processing);
+                ValidateApiKey(parameters.ApiKey);
+
+                if (_currentJob?.Id == parameters.Key) return new JobStatusData(_currentJob, Controllers.JobStatus.Processing);
 
                 var ix = 0;
                 foreach (var q in JobQueue)
                 {
-                    if (q.Id == key)
+                    if (q.Id == parameters.Key)
                     {
                         return new JobStatusData(q, Controllers.JobStatus.InQueue, ix);
                     }
@@ -178,31 +232,45 @@ namespace LambdaRestApi.Controllers
             }
         }
 
-        [HttpGet("results")]
-        public object Results(string key)
-        {
-            var dir = Path.Combine(_resultsDirectory, key);
-            if (!Directory.Exists(dir)) throw new NoSuchResultsException();
-
-            var metaFile = Path.Combine(dir, "links", "meta.json");
-            if (!System.IO.File.Exists(metaFile)) throw new ResultsMissingMetadataException();
-            return JObject.Parse(System.IO.File.ReadAllText(metaFile));
-        }
-
-        [HttpGet("delete")]
-        public object DeleteJob(string key)
+        [HttpPost("results")]
+        public object Results(BasicParameters parameters)
         {
             try
             {
-                var dir = Path.Combine(_resultsDirectory, key);
+                ValidateApiKey(parameters.ApiKey);
+
+                var dir = Path.Combine(GetResultsDirectory(parameters.ApiKey), parameters.Key);
+                if (!Directory.Exists(dir)) throw new NoSuchResultsException();
+
+                var metaFile = Path.Combine(dir, "links", "meta.json");
+                if (!System.IO.File.Exists(metaFile)) throw new ResultsMissingMetadataException();
+                return JObject.Parse(System.IO.File.ReadAllText(metaFile));
+            }
+            catch (Exception ex)
+            {
+                return new
+                {
+                    error = ex.Message
+                };
+            }
+        }
+
+        [HttpPost("delete")]
+        public object DeleteJob(BasicParameters parameters)
+        {
+            try
+            {
+                ValidateApiKey(parameters.ApiKey);
+
+                var dir = Path.Combine(GetResultsDirectory(parameters.ApiKey), parameters.Key);
                 if (Directory.Exists(dir))
                     Directory.Delete(dir, true);
 
-                lock (_lockObject)
+                lock (LockObject)
                 {
-                    if (JobQueue.Any(p => p.Id == key))
+                    if (JobQueue.Any(p => p.Id == parameters.Key))
                     {
-                        var jobs = JobQueue.Where(p => p.Id != key).ToArray();
+                        var jobs = JobQueue.Where(p => p.Id != parameters.Key).ToArray();
                         JobQueue.Clear();
                         foreach (var job in jobs)
                             JobQueue.Enqueue(job);
@@ -220,12 +288,15 @@ namespace LambdaRestApi.Controllers
             }
         }
 
-        [HttpGet("abort")]
-        public object AbortRunningJob()
+        [HttpPost("abort")]
+        public object AbortRunningJob(BasicParameters parameters)
         {
             try
             {
+                ValidateApiKey(parameters.ApiKey);
+
                 if (_currentJob == null) throw new Exception("No currently running job to abort.");
+                if(_currentJob.Id != parameters.Key) throw new Exception("Currently running job ID did not match.");
                 _currentJob.Config.Cancellor.Cancel();
                 return true;
             }
@@ -238,44 +309,64 @@ namespace LambdaRestApi.Controllers
             }
         }
 
-        [HttpGet("jobs")]
-        public object Jobs()
+        [HttpPost("jobs")]
+        public object Jobs(BasicParameters parameters)
         {
-            if (!Directory.Exists(_resultsDirectory)) return new string[0];
-            return Directory.GetDirectories(_resultsDirectory)
-                .Select(p =>
-                {
-                    var jobStatusData = Path.Combine(p, "jobstatusdata.json");
-                    if (!System.IO.File.Exists(jobStatusData)) return null;
-                    try
+            try
+            {
+                ValidateApiKey(parameters.ApiKey);
+
+                var resultsDirectory = GetResultsDirectory(parameters.ApiKey);
+                if (!Directory.Exists(resultsDirectory)) return new string[0];
+                return Directory.GetDirectories(resultsDirectory)
+                    .Select(p =>
                     {
-                        return JobStatusData.FromFile(jobStatusData);
-                    }
-                    catch (Exception ex)
-                    {
-                        JobData job;
+                        var jobStatusData = Path.Combine(p, "jobstatusdata.json");
+                        if (!System.IO.File.Exists(jobStatusData)) return null;
                         try
                         {
-                            job = JobData.FromFile(Path.Combine(p, "jobdata.json"));
-                            job.RunException = ex;
+                            return JobStatusData.FromFile(jobStatusData);
                         }
-                        catch (Exception ex2)
+                        catch (Exception ex)
                         {
-                            job = new JobData()
+                            JobData job;
+                            try
                             {
-                                Id = Path.GetFileName(Path.GetDirectoryName(p)),
-                                RunException = ex2
-                            };
-                        }
+                                job = JobData.FromFile(Path.Combine(p, "jobdata.json"));
+                                job.RunException = ex;
+                            }
+                            catch (Exception ex2)
+                            {
+                                job = new JobData()
+                                {
+                                    Id = Path.GetFileName(Path.GetDirectoryName(p)),
+                                    RunException = ex2
+                                };
+                            }
 
-                        return new JobStatusData(job, Controllers.JobStatus.Failed);
-                    }
-                })
-                .Concat(new[] {_currentJob == null ? null : new JobStatusData(_currentJob, Controllers.JobStatus.Processing)})
-                .Concat(JobQueue.Select(p => new JobStatusData(p, Controllers.JobStatus.InQueue)))
-                .Where(p => p != null)
-                .OrderBy(p => p.Data[nameof(JobData.Enqueued)])
-                .ToArray();
+                            return new JobStatusData(job, Controllers.JobStatus.Failed);
+                        }
+                    })
+                    .Concat(new[] {(_currentJob == null || _currentJob.Config.ApiKey != parameters.ApiKey) ? null : new JobStatusData(_currentJob, Controllers.JobStatus.Processing)})
+                    .Concat(JobQueue.Where(p => p.Config.ApiKey == parameters.ApiKey).Select(p => new JobStatusData(p, Controllers.JobStatus.InQueue)))
+                    .Where(p => p != null)
+                    .OrderBy(p => p.Data[nameof(JobData.Enqueued)])
+                    .ToArray();
+            }
+            catch (Exception ex)
+            {
+                return new
+                {
+                    error = ex.Message
+                };
+            }
         }
+    }
+
+    public class BasicParameters
+    {
+        public string ApiKey { get; set; }
+        public string Key { get; set; }
+        public string Format { get; set; }
     }
 }
