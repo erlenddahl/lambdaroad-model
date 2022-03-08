@@ -139,7 +139,8 @@ namespace LambdaModel.Config
                 links = JArray.FromObject(links.Select(p => new RoadLinkResultMetadata(p)))
             }).ToString(Formatting.None));
 
-            using (var pb = cip?.SetProgress("Saving results", max: links.Length))
+            // Not used for anything; disabled for now.
+            /*using (var pb = cip?.SetProgress("Saving results", max: links.Length))
                 foreach (var link in links)
                 {
                     var linkFile = Path.Combine(outputDirectory, link.ID + ".lnkres");
@@ -166,7 +167,7 @@ namespace LambdaModel.Config
                     }
 
                     pb?.Increment();
-                }
+                }*/
         }
 
         public static void SaveShape(string pathFile, IList<RoadLinkBaseStation> baseStations, IList<ShapeLink> links, ConsoleInformationPanel cip = null)
