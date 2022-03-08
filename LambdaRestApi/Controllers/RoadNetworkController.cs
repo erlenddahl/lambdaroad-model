@@ -110,6 +110,29 @@ namespace LambdaRestApi.Controllers
             }
         }
 
+        [HttpGet("download")]
+        public object GenerateConfig(string key, string format)
+        {
+            var dir = Path.Combine(_resultsDirectory, key);
+            if (!Directory.Exists(dir)) throw new NoSuchResultsException();
+
+            if (format == "csv")
+            {
+                var file = Path.Combine(dir, "results.csv");
+                if (!System.IO.File.Exists(file)) throw new ResultsMissingMetadataException();
+                return File(System.IO.File.Open(file, FileMode.Open), "text/csv", "lambda-export.csv");
+            }
+           
+            if (format == "shp")
+            {
+                var file = Path.Combine(dir, "results.zip");
+                if (!System.IO.File.Exists(file)) throw new ResultsMissingMetadataException();
+                return File(System.IO.File.Open(file, FileMode.Open), "application/zip", "lambda-export.zip");
+            }
+
+            throw new Exception("Invalid format specified. Must be csv or shp.");
+        }
+
         private void ProcessQueue()
         {
             lock (_lockObject)
