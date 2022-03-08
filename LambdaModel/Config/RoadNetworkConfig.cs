@@ -178,7 +178,7 @@ namespace LambdaModel.Config
             table.Columns.Add("Max RSRP", typeof(double));
 
             foreach (var bs in baseStations)
-                table.Columns.Add("RSRP_" + bs.Name, typeof(double));
+                table.Columns.Add(bs.Name, typeof(double));
 
             table.AcceptChanges();
 
@@ -193,7 +193,7 @@ namespace LambdaModel.Config
                         feature.DataRow["RoadLinkId"] = link.Name;
 
                         foreach (var bs in baseStations)
-                            feature.DataRow["RSRP_" + bs.Name] = c.M.BaseStationRsrp[bs.BaseStationIndex];
+                            feature.DataRow[bs.Name] = c.M.BaseStationRsrp[bs.BaseStationIndex];
                     }
 
                     pb?.Increment();
