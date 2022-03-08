@@ -36,6 +36,8 @@ namespace LambdaModel.Config
         public TerrainConfig Terrain { get; set; }
 
         public int? CalculationThreads { get; set; }
+        
+        [JsonIgnore]
         public CancellationTokenSource Cancellor { get; set; }
 
         [JsonIgnore]
