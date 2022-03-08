@@ -85,6 +85,7 @@ namespace LambdaRestApi.Controllers
                 config.OutputDirectory = "[INSERT ACTUAL PATH HERE]";
                 config.CalculationMethod = CalculationMethod.RoadNetwork;
                 config.RoadShapeLocation = "[INSERT ACTUAL PATH HERE]";
+                config.WriteApiResults = false;
                 config.Terrain = new TerrainConfig()
                 {
                     Type = TerrainType.OnlineCache,

@@ -30,7 +30,7 @@ namespace LambdaModelRunner
              * Eliminate further by looking at fresnel obstructions and eliminating once we know path loss gets too big
              */
 
-            args = new[] {@"..\..\..\..\Data\Configs\gui_test.json"};
+            args = new[] { @"..\..\..\..\Data\Configs\sector_gain_test.json" };
 
             new ConsoleConfigHelper(args)
                 .AutoResize()

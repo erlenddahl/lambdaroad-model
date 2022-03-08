@@ -1,0 +1,57 @@
+{
+    "RoadShapeLocation": "..\\RoadNetwork\\2021-05-28_smaller.shp",
+    "BaseStations": [
+        {
+            "BaseStationIndex": 0,
+            "Name": "Stasjon 1",
+            "Center": {
+                "X": 268283.4066450454,
+                "Y": 7040847.668103122
+            },
+            "HeightAboveTerrain": 12,
+            "MaxRadius": 10000,
+            "AntennaType": 0,
+            "GainDefinition": "125;140;5|90;125;25|65;90;15|40;65;4",
+            "Power": 46,
+            "CableLoss": 2,
+            "ResourceBlockConstant": 27.781512503836435
+        },
+        {
+            "BaseStationIndex": 0,
+            "Name": "Alfabra",
+            "Center": {
+                "X": 268202.61479943804,
+                "Y": 7039735.629424993
+            },
+            "HeightAboveTerrain": 4,
+            "MaxRadius": 10000,
+            "AntennaType": 0,
+            "GainDefinition": "-40;-30;8|-30;30;22|30;40;8",
+            "Power": 49,
+            "CableLoss": 2,
+            "ResourceBlockConstant": 27.781512503836435
+        }
+    ],
+    "LinkCalculationPointFrequency": 1,
+    "CalculationMethod": 1,
+    "MobileRegression": 0,
+    "MinimumAllowableRsrp": -115,
+    "ReceiverHeightAboveTerrain": 2,
+    "OutputDirectory": "..\\RoadNetwork",
+    "ShapeFileName": "results.shp",
+    "CsvFileName": "results.csv",
+    "ApiResultInnerFolder": "links",
+    "CsvSeparator": ";",
+    "LogFileName": "log.json",
+    "WriteShape": true,
+    "WriteCsv": true,
+    "WriteLog": true,
+    "WriteApiResults": false,
+    "Terrain": 
+    {
+        "Type": "LocalCache",
+        "Location": "I:\\Jobb\\Lambda\\Tiles_512",
+        "MaxCacheItems": 300,
+        "RemoveCacheItemsWhenFull": 100
+    }
+}
