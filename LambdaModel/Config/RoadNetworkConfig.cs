@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Threading;
 using BitMiracle.LibTiff.Classic;
@@ -202,6 +203,20 @@ namespace LambdaModel.Config
 
             using (var _ = cip?.SetUnknownProgress("Writing shape"))
                 shp.SaveAs(pathFile, true);
+
+            using (var _ = cip?.SetUnknownProgress("Zipping shape"))
+            {
+                using (var zipStream = File.Create(Path.Combine(pathFile.ChangeExtension(".zip"))))
+                using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Create, true))
+                    foreach (var file in new[] {pathFile, pathFile.ChangeExtension(".dbf"), pathFile.ChangeExtension(".shx")})
+                    {
+                        using (var entryStream = archive.CreateEntry(Path.GetFileName(file)).Open())
+                        using (var fileStream = File.OpenRead(file))
+                        {
+                            fileStream.CopyTo(entryStream);
+                        }
+                    }
+            }
         }
 
         public static void SaveCsv(string pathFile, string separator, IList<RoadLinkBaseStation> baseStations, IList<ShapeLink> links, ConsoleInformationPanel cip = null)
