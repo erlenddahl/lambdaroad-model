@@ -24,7 +24,7 @@ namespace LambdaModel.Stations
 
             var sections = definition
                 .Split('|')
-                .Select(p => p.Split(';').Select(double.Parse).ToArray())
+                .Select(p => p.Split(':').Select(double.Parse).ToArray())
                 .Select(p => new {From = p[0], To = p[1], Value = p[2]})
                 .ToArray();
 
