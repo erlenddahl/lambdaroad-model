@@ -18,7 +18,10 @@ namespace LambdaModel.Stations
         [JsonIgnore]
         public List<ShapeLink> Links { get; set; } = new List<ShapeLink>();
 
+        [JsonIgnore]
         public int BaseStationIndex { get; set; }
+
+        [JsonIgnore] public string CipName => Name + " (" + Id + ")";
 
         public RoadLinkBaseStation(double x, double y, int heightAboveTerrain, int maxRadius, ConsoleInformationPanel cip = null) : base(x, y, heightAboveTerrain, maxRadius, cip)
         {
@@ -31,7 +34,7 @@ namespace LambdaModel.Stations
 
         private void RemoveLinksBy(string desc, string removalDesc, Func<ShapeLink, bool> filter)
         {
-            using (var pb = Cip?.SetProgress(desc + " [" + Name + "]", max: Links.Count))
+            using (var pb = Cip?.SetProgress(desc + " [" + CipName + "]", max: Links.Count))
             {
                 var removed = Links.RemoveAll(p =>
                 {
@@ -86,7 +89,7 @@ namespace LambdaModel.Stations
             Center.Z = tiles.GetAltitude(Center);
             var process = System.Diagnostics.Process.GetCurrentProcess();
 
-            foreach (var link in Cip.Run("Calculating path loss [" + Name + "]", Links))
+            foreach (var link in Cip.Run("Calculating path loss [" + CipName + "]", Links))
             {
                 var linkCalcs = 0;
                 var linkDist = 0L;
