@@ -93,7 +93,7 @@ namespace LambdaModel.Stations
             {
                 var linkCalcs = 0;
                 var linkDist = 0L;
-
+                
                 for (var i = 0; i < link.Geometry.Length; i += linkCalculationPointFrequency)
                 {
                     if (cancellationToken.IsCancellationRequested) throw new OperationCanceledException("Operation cancelled by user.");

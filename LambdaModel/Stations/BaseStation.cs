@@ -33,7 +33,7 @@ namespace LambdaModel.Stations
         public double Power { get; set; } = 46;
         public double CableLoss { get; set; } = 2;
         
-        public double ResourceBlockConstant { get; set; } = 10 * Math.Log10(12 * 50);
+        public double ResourceBlockConstant { get; private set; }
 
         public BaseStation()
         {
@@ -61,6 +61,7 @@ namespace LambdaModel.Stations
                 _vector[i] = new Point4D<double>(0, 0);
 
             Calculator = AntennaType == Stations.AntennaType.ItsG5 ? (IPathLossCalculator)new ItsG5PathLossCalculator() : new MobileNetworkPathLossCalculator();
+            ResourceBlockConstant = AntennaType == Stations.AntennaType.MobileNetwork ? 10 * Math.Log10(12 * 50) : 0;
             Gain = AntennaGain.FromDefinition(GainDefinition);
         }
 
