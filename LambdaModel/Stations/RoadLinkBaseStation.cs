@@ -93,7 +93,8 @@ namespace LambdaModel.Stations
             {
                 var linkCalcs = 0;
                 var linkDist = 0L;
-                
+
+                var indexAdjustedForEndPoint = false;
                 for (var i = 0; i < link.Geometry.Length; i += linkCalculationPointFrequency)
                 {
                     if (cancellationToken.IsCancellationRequested) throw new OperationCanceledException("Operation cancelled by user.");
@@ -121,6 +122,13 @@ namespace LambdaModel.Stations
 
                     linkCalcs++;
                     linkDist += vectorLength;
+
+                    // Make sure the final point is calculated
+                    if (!indexAdjustedForEndPoint && i + linkCalculationPointFrequency >= link.Geometry.Length)
+                    {
+                        i = link.Geometry.Length - 1 - linkCalculationPointFrequency;
+                        indexAdjustedForEndPoint = true;
+                    }
                 }
 
                 calculations += linkCalcs;
