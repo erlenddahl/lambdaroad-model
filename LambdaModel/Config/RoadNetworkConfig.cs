@@ -121,6 +121,7 @@ namespace LambdaModel.Config
 
         public override GeneralConfig Validate(string configLocation = null)
         {
+            if (LinkCalculationPointFrequency < 1) throw new ConfigException("Link calculation point frequency must be at least 1.");
             if (BaseStations?.Any() != true) throw new ConfigException("No BaseStations defined.");
             if (BaseStations.GroupBy(p => p.Id).Any(c => c.Count() > 1)) throw new ConfigException("BaseStation Ids must be unique");
             if (Terrain == null) throw new ConfigException("Missing Terrain config.");
