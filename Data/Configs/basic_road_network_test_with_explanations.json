@@ -1,39 +1,82 @@
 {
-    "CalculationMethod": "RoadNetwork",      // Fortel modellen at det skal bereknast langs vegnettet. Kan også berekne for eit heilt område, men det tar mykje lengre tid.
-    "CalculationThreads": null,              // Kor mange trådar som kan køyre berekningar. Viss "null", så blir det automatisk bestemt ut frå antal kjernar i prosessoren. N trådar betyr N gongar så mykje minnebruk, så sett den til lågt tal ved minneproblem. Det vil aldri bli brukt fleire trådar enn det er basestasjonar (éin tråd prosesserer éin basestasjon om gangen).
-    "TileSize": 512,                         // Størrelse på høgdedata-tiles som blir benytta. 512 er ein fin verdi mellom små filer som kan opnast superraskt, og store filer som dekker eit stort område og ikkje må opnast så ofte.
-    "BaseStations": [                        // Ei liste (array, []) av alle relevante basestasjonar
+    "CalculationMethod": "RoadNetwork",      // Which type of operation this log file runs. Can be either RoadNetwork, Grid or GenerateTiles.
+
+    "CalculationThreads": null,              // How many threads that can be used to run calculation. 
+                                             // If set to null, the number of threads will automatically be determined based on the number of processing cores. 
+                                             // N threads means N times as much memory usage, so if you experience memory problems, try setting this to a low number. 
+                                             // There will never be more threads than base stations(one thread processes one base station at a time).
+
+    "BaseStations": [                        // A list (array, []) of all base stations to be included in this calculation.
         {
-            "name": "Mob1",                  // Eit namn, ikkje i bruk akkurat no, men tanken er ein enkel måte å skilje dei frå kvarandre for brukaren
-            "x": 268672,                     // X-koordinat i UTM 33N (EPSG 25833). Viss du må slå opp koordinatar kan du bruke QGis, eller feks her: https://epsg.io/map#srs=25833
-            "y": 7040224,                    // Y-koordinat i UTM 33N
-            "heightAboveTerrain": 100,       // Kor høgt over terrenget antenna står (meter)
-            "maxRadius": 50000,              // Teoretisk maks-radius antenna kan sende, brukt for å begrense antal veglenker som blir lest inn i minne før berekningane startar.
-            "antennaType": "MobileNetwork"   // Type antenne; kan vere MobileNetwork for 800Mhz mobilsignal, eller ItsG5 for ITS G5.
+            "id": "1254",                    // A unique ID for this base station. Must be unique across this configuration file.
+            "name": "Mob1",                  // A name for this base station. Does not have to be unique. Only used in progress presentation.
+            
+            "center": {
+                "x": 268283.4066450454,      // X-coordinate in UTM 33N (EPSG 25833, https://epsg.io/map#srs=25833)
+                "y": 7040847.668103122       // Y-coordinate in UTM 33N
+            },
+            
+            "heightAboveTerrain": 12,        // How many meters above the terrain this antenna is placed.
+
+            "maxRadius": 10000,              // The radius around this station that it is necessary for the road link calculation to consider road links. 
+                                             // A higher radius prolongs the calculation time, as more road links must be considered.
+
+            "antennaType": "MobileNetwork",  // The type of antenna. Can be either MobileNetwork for mobile network signals (800MHz) or ItsG5 for ITS G5.
+
+            "gainDefinition": "125:140:5|90:125:25|65:90:15|40:65:4", // The (directional) gain of this station. 
+                                             // It can be a single number for constant gain in all directions, or a sector definition for different gain in different directions. 
+                                             // Constant example: '10' (10 Db all around the station)
+                                             // Angle dependent example: '-45:45:18|45:60:7' (18 Db between -45 and 45 degrees, and 7 Db between 45 and 60 degrees).
+                                             // Default value if undefined: 0 (all around the station)
+            
+            "power": 46,                     // The base transmit power of this station. It is equal in all directions.
+                                             // For RSRP calculations, power and (directional) gain is added before subtracting the different losses.
+
+            "cableLoss": 2,                  // Used in RSRP and RSSI calculations -- this value is subtracted from the sum of power and gain, before the path loss is calculated and subtracted.
+                                             // Default value if undefined: 2
+
+            "resourceBlockConstant": null    // Used in RSRP and RSSI calculations -- this value is subtracted from the sum of power and gain, before the path loss is calculated and subtracted.
+                                             // If undefined or set to null, it will be automatically set depending on antenna type (10log(50) for MobileNetwork, and 0 for ItsG5.
         },
         {
-            "name": "Its2151",               
-            "x": 271327, 
-            "y": 7040324, 
-            "heightAboveTerrain": 50, 
-            "maxRadius": 10000,
-            "antennaType": "ItsG5"
+            "id": "1255",
+            "name": "Its2151",
+            "center": {
+                "x": 268283.4066450454,
+                "y": 7040847.668103122 
+            },
+            "heightAboveTerrain": 3, 
+            "maxRadius": 5000,
+            "antennaType": "ItsG5",
+            "power": 42,
         },
         {
-            "name": "3",
-            "x": 271209, 
-            "y": 7041460, 
-            "heightAboveTerrain": 50,
-            "maxRadius": 10000,
-            "antennaType": "ItsG5"
+            "id": "1256b",
+            "name": "Another station",
+            "center": {
+                "x": 268283.4066450454,
+                "y": 7040847.668103122 
+            },
+            "heightAboveTerrain": 3,
+            "maxRadius": 5000,
+            "antennaType": "ItsG5",
+            "power": 15
         }
     ],
-    "MinimumAllowableSignalValue": -150,                                // Minste tillatte signal (verdiar under dette blir ikkje tatt med i resultatfila, og lenker som basert på avstand er for langt unna til å kunne oppnå høgare signal blir ignorert)
+    "LinkCalculationPointFrequency": 10,
+    "MobileRegression": 0, // Dynamic, All, LineOfSight, NoLineOfSight
+    "ReceiverHeightAboveTerrain": 2,
+    "MinimumAllowableRsrp": -115,                                // Minste tillatte signal (verdiar under dette blir ikkje tatt med i resultatfila, og lenker som basert på avstand er for langt unna til å kunne oppnå høgare signal blir ignorert)
     "RoadShapeLocation": "..\\RoadNetwork\\2021-05-28_smaller.shp",     // Shape-fil som inneheld vegnettverket
     "OutputDirectory": "..\\RoadNetwork",                               // Mappa som skal innehalde resultatfila/-ene.
     "ShapeFileName": "test-results-huge_itsg5.shp",                     // Filnamnet for shape-fila som blir skrive viss WriteShape er true.
+    "CsvFileName": "results.csv",
+    "LogFileName": "log.json",
+    "CsvSeparator": ";",
+    "ApiResultInnerFolderName": "links",
     "WriteCsv": true,                                                   // Skriv resultat som CSV. Kan modifiserast vha CsvFileName og CsvSeparator.
     "WriteShape": true,
+    "WriteLog": true,
     "WriteApiResults": false,                                           // Kan også skrive meir detaljerte resultat (først og fremst for Api-et til nettsida) ved å sette denne til true.
     "Terrain":                                                          // Innstillingar for terreng/høgdedata
     {
@@ -41,6 +84,7 @@
         "WmsUrl": "https://wms.geonorge.no/skwms1/wms.hoyde-dom?bbox={0}&format=image/tiff&service=WMS&version=1.1.1&request=GetMap&srs=EPSG:25833&transparent=true&width={1}&height={2}&layers=dom1_33:None", // Dynamisk url til høgdedata-WMS (tjeneste for nedlasting av TIFF-filer med høgdedata for område angitt i lenka)
         "Location": "I:\\Jobb\\Lambda\\Tiles_512_Online",               // Sti til kvar høgdedata kan lagrast. Anbefaler rask harddisk (SSD) med nok plass.
         "MaxCacheItems": 300,                                           // Innstilling for minnehandtering. Dette er kor mange tiles me kan ha i minne samtidig. For høgt tall krasjar programmet når det går tomt for minne, for lågt tal fører til at filer må lesast om og om igjen, og prosessen tar lengre tid.
-        "RemoveCacheItemsWhenFull": 100                                 // Innstilling for minnehandtering. Dette er kor mange tiles som blir fjerna når minne-cachen er full. For høgt tal fører til at unødvendig mange tiles må lesast inn på nytt, for lågt tal fører til at cachen må renskast for ofte.
+        "RemoveCacheItemsWhenFull": 100,                                 // Innstilling for minnehandtering. Dette er kor mange tiles som blir fjerna når minne-cachen er full. For høgt tal fører til at unødvendig mange tiles må lesast inn på nytt, for lågt tal fører til at cachen må renskast for ofte.
+        "TileSize": 512,                         // The size of elevation data tiles that is used in this calculation. 512 is a good balance between small files where a lot of them has to be opened, but they can be opened very quickly, and large files that cover a larger area, takes a longer time to open, but a fewer number of files has to be opened.
     }
 }

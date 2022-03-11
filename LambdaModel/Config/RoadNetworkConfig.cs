@@ -101,8 +101,8 @@ namespace LambdaModel.Config
                 if (WriteApiResults)
                 {
                     var dir = OutputDirectory;
-                    if (!string.IsNullOrWhiteSpace(ApiResultInnerFolder))
-                        dir = Path.Combine(dir, ApiResultInnerFolder);
+                    if (!string.IsNullOrWhiteSpace(ApiResultInnerFolderName))
+                        dir = Path.Combine(dir, ApiResultInnerFolderName);
                     Directory.CreateDirectory(dir);
                     SaveApiResults(dir, BaseStations, Cip);
                 }

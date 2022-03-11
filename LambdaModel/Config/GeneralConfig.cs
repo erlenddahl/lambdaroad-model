@@ -28,7 +28,7 @@ namespace LambdaModel.Config
         public string OutputDirectory { get; set; }
         public string ShapeFileName { get; set; } = "results.shp";
         public string CsvFileName { get; set; } = "results.csv";
-        public string ApiResultInnerFolder { get; set; } = "links";
+        public string ApiResultInnerFolderName { get; set; } = "links";
         public string CsvSeparator { get; set; } = ";";
         public string LogFileName { get; set; } = "log.json";
         public bool WriteShape { get; set; } = true;

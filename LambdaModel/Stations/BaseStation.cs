@@ -26,14 +26,14 @@ namespace LambdaModel.Stations
         public int MaxRadius { get; set; } = 100_000;
         public AntennaType? AntennaType { get; set; }
 
-        public string GainDefinition { get; set; } = "64";
+        public string GainDefinition { get; set; } = "0";
 
         [JsonIgnore]
         public AntennaGain Gain { get; set; }
-        public double Power { get; set; } = 46;
+        public double Power { get; set; } = double.MinValue;
         public double CableLoss { get; set; } = 2;
         
-        public double ResourceBlockConstant { get; private set; }
+        public double? ResourceBlockConstant { get; private set; }
 
         public BaseStation()
         {
@@ -61,12 +61,16 @@ namespace LambdaModel.Stations
                 _vector[i] = new Point4D<double>(0, 0);
 
             Calculator = AntennaType == Stations.AntennaType.ItsG5 ? (IPathLossCalculator)new ItsG5PathLossCalculator() : new MobileNetworkPathLossCalculator();
-            ResourceBlockConstant = AntennaType == Stations.AntennaType.MobileNetwork ? 10 * Math.Log10(12 * 50) : 0;
+
+            if (!ResourceBlockConstant.HasValue)
+                ResourceBlockConstant = AntennaType == Stations.AntennaType.MobileNetwork ? 10 * Math.Log10(12 * 50) : 0;
+
             Gain = AntennaGain.FromDefinition(GainDefinition);
         }
 
         public void Validate()
         {
+            if (Power < 0) throw new Exception("Power must be defined as a positive number.");
             if (!AntennaType.HasValue)
                 throw new Exception("Base stations must have the AntennaType property, which may be one of these values: " + string.Join(", ", EnumHelper.GetValues<AntennaType>()));
         }
@@ -90,7 +94,7 @@ namespace LambdaModel.Stations
         /// <returns></returns>
         public double CalculateRsrpAtAngle(double angle, double loss)
         {
-            return Power + Gain.GetGainAtAngle(angle) - CableLoss - loss - ResourceBlockConstant;
+            return Power + Gain.GetGainAtAngle(angle) - CableLoss - loss - (ResourceBlockConstant ?? 0);
         }
     }
 }
