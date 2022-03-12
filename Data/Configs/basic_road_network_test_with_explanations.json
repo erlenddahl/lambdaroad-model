@@ -1,5 +1,23 @@
 {
-    "CalculationMethod": "RoadNetwork",      // Which type of operation this log file runs. Can be either RoadNetwork, Grid or GenerateTiles.
+    "Operation": "RoadNetwork",              // Which type of operation this log file runs. Can be either RoadNetwork, Grid or GenerateTiles.
+
+    "RoadShapeLocation": "2021-05-28.shp",   // A shape-file that contains the road network. Can be absolute or relative to the config location.
+
+    "LinkCalculationPointFrequency": 10,     // How many meters between each point on a road link that is calculated. 
+                                             // The lowest possible value is 1. A higher value will result in a more detailed result, but longer calculation times. 
+                                             // The first and last point on the road link is guaranteed to be calculated even if this value is larger than the length of the link.
+
+    "MobileRegression": 0,                   // The regression formula used in path loss calculations for the mobile network has three different sets of constants.
+                                             // Possible values are:
+                                             //     'All' is trained on all values in the test set, 
+                                             //     'LineOfSight' is trained on values with line of sight, 
+                                             //     'NoLineOfSight' is trained on values without line of sight. 
+                                             //     'Dynamic' will automatically pick either LOS or NLOS constants depending on whether the current path loss calculation has line of sight or not.
+
+    "ReceiverHeightAboveTerrain": 2,         // The height of the receiver above the terrain (meters).
+    "MinimumAllowableRsrp": -115,            // The minimum accepted RSRP. Any road links with a guaranteed lower RSRP than this (calculated using horizontal and vertical distances) 
+                                             // will be excluded from the calculation. Any road links with a lower RSRP than this will be excluded from the results. 
+                                             // A higher value will result in much faster calculations and a smaller result file size.
 
     "CalculationThreads": null,              // How many threads that can be used to run calculation. 
                                              // If set to null, the number of threads will automatically be determined based on the number of processing cores. 
@@ -63,28 +81,29 @@
             "power": 15
         }
     ],
-    "LinkCalculationPointFrequency": 10,
-    "MobileRegression": 0, // Dynamic, All, LineOfSight, NoLineOfSight
-    "ReceiverHeightAboveTerrain": 2,
-    "MinimumAllowableRsrp": -115,                                // Minste tillatte signal (verdiar under dette blir ikkje tatt med i resultatfila, og lenker som basert på avstand er for langt unna til å kunne oppnå høgare signal blir ignorert)
-    "RoadShapeLocation": "..\\RoadNetwork\\2021-05-28_smaller.shp",     // Shape-fil som inneheld vegnettverket
-    "OutputDirectory": "..\\RoadNetwork",                               // Mappa som skal innehalde resultatfila/-ene.
-    "ShapeFileName": "test-results-huge_itsg5.shp",                     // Filnamnet for shape-fila som blir skrive viss WriteShape er true.
-    "CsvFileName": "results.csv",
-    "LogFileName": "log.json",
-    "CsvSeparator": ";",
-    "ApiResultInnerFolderName": "links",
-    "WriteCsv": true,                                                   // Skriv resultat som CSV. Kan modifiserast vha CsvFileName og CsvSeparator.
-    "WriteShape": true,
-    "WriteLog": true,
-    "WriteApiResults": false,                                           // Kan også skrive meir detaljerte resultat (først og fremst for Api-et til nettsida) ved å sette denne til true.
-    "Terrain":                                                          // Innstillingar for terreng/høgdedata
+
+    "OutputDirectory": "..\\RoadNetwork",    // The directory where you want results to be stored.
+
+    "WriteShape": true,                      // If set to true, a shape file containing each calculated point and its results will be written to the results directory.
+    "ShapeFileName": "results.shp",          // The filename of the shape file that is written if WriteShape is true.
+
+    "WriteCsv": true,                        // If set to true, a CSV file containing each calculated point and its results will be written to the results directory.
+    "CsvFileName": "results.csv",            // The filename of the CSV file that is written if WriteCsv is true.
+    "CsvSeparator": ";",                     // The separator between columns in the CSV file.
+
+    "WriteLog": true,                        // If set to true, a log file containing information about the calculation process will be written to the results directory.
+    "LogFileName": "log.json",               // The filename of the log file that is written if WriteLog is true.
+
+    "WriteApiResults": false,                // If set to true, various API result files will be written. The most important part of this is a GeoJSON file containing the data that can be displayed on the web-based map.
+    "ApiResultInnerFolderName": "links",     // The name of the API results directory that will be written inside the results directory.
+
+    "Terrain":                               // Settings for where elevation data is stored.
     {
-        "Type": "OnlineCache",                                          // Brukar OnlineCache for å spare diskplass. Det betyr at høgdedata blir lasta ned ved behov, som igjen betyr at første berekning på nytt område vil ta ein del lengre tid en etterfølgande berekningar.
-        "WmsUrl": "https://wms.geonorge.no/skwms1/wms.hoyde-dom?bbox={0}&format=image/tiff&service=WMS&version=1.1.1&request=GetMap&srs=EPSG:25833&transparent=true&width={1}&height={2}&layers=dom1_33:None", // Dynamisk url til høgdedata-WMS (tjeneste for nedlasting av TIFF-filer med høgdedata for område angitt i lenka)
-        "Location": "I:\\Jobb\\Lambda\\Tiles_512_Online",               // Sti til kvar høgdedata kan lagrast. Anbefaler rask harddisk (SSD) med nok plass.
-        "MaxCacheItems": 300,                                           // Innstilling for minnehandtering. Dette er kor mange tiles me kan ha i minne samtidig. For høgt tall krasjar programmet når det går tomt for minne, for lågt tal fører til at filer må lesast om og om igjen, og prosessen tar lengre tid.
-        "RemoveCacheItemsWhenFull": 100,                                 // Innstilling for minnehandtering. Dette er kor mange tiles som blir fjerna når minne-cachen er full. For høgt tal fører til at unødvendig mange tiles må lesast inn på nytt, for lågt tal fører til at cachen må renskast for ofte.
-        "TileSize": 512,                         // The size of elevation data tiles that is used in this calculation. 512 is a good balance between small files where a lot of them has to be opened, but they can be opened very quickly, and large files that cover a larger area, takes a longer time to open, but a fewer number of files has to be opened.
+        "Type": "OnlineCache",               // Brukar OnlineCache for å spare diskplass. Det betyr at høgdedata blir lasta ned ved behov, som igjen betyr at første berekning på nytt område vil ta ein del lengre tid en etterfølgande berekningar.
+        "WmsUrl": "https://wms.geonorge.no/skwms1/wms.hoyde-dom?bbox={0}&format=image/tiff&service=WMS&version=1.1.1&request=GetMap&srs=EPSG:25833&transparent=true&width={1}&height={2}&layers=dom1_33:None", // Dynamic url to elevation data WMS (allows downloading TIFF-files with elevation for the area defined in the url parameters).
+        "Location": "I:\\Lambda\\Tiles_512", // Path where elevation data will be read from (and downloaded to if OnlineCache). A fast and large SSD is recommended.
+        "MaxCacheItems": 300,                // Setting for memory handling. This sets how many tiles can be kept in memory at the same time. Too high number, and the application will crash when it is out of memory. Too low, and the application will have to read files over and over again, resulting in longer calculation times.
+        "RemoveCacheItemsWhenFull": 100,     // Setting for memory handling. This sets how many of the least recently used tiles that are removed once the memory cache has been filled.
+        "TileSize": 512,                     // The size of elevation data tiles that is used in this calculation. 512 is a good balance between small files where a lot of them has to be opened, but they can be opened very quickly, and large files that cover a larger area, takes a longer time to open, but a fewer number of files has to be opened.
     }
 }
