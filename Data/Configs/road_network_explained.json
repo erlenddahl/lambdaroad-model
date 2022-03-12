@@ -1,0 +1,177 @@
+{
+    // Which type of operation this log file runs. Can be either RoadNetwork, Grid or GenerateTiles.
+    "Operation": "RoadNetwork",              
+
+    // A shape-file that contains the road network. Can be absolute or relative to the config location.
+    "RoadShapeLocation": "2021-05-28.shp",   
+
+    // How many meters between each point on a road link that is calculated. 
+    // The lowest possible value is 1. A higher value will result in a more detailed result, but longer 
+    // calculation times. 
+    // The first and last point on the road link is guaranteed to be calculated even if this value is 
+    // larger than the length of the link.
+    "LinkCalculationPointFrequency": 10,
+                                             
+
+    // The regression formula used in path loss calculations for the mobile network has three different 
+    // sets of constants. Possible values are:                                             
+    //     'All' is trained on all values in the test set, 
+    //     'LineOfSight' is trained on values with line of sight, 
+    //     'NoLineOfSight' is trained on values without line of sight. 
+    //     'Dynamic' will automatically pick either LOS or NLOS constants depending on whether the current 
+    //         path loss calculation has line of sight or not.
+    "MobileRegression": "Dynamic",
+    
+    // The height of the receiver above the terrain (meters).
+    "ReceiverHeightAboveTerrain": 2,      
+
+    // The minimum accepted RSRP. Any road links with a guaranteed lower RSRP than this (calculated 
+    // using horizontal and vertical distances) will be excluded from the calculation. Any road links
+    // with a lower RSRP than this will be excluded from the results. 
+    // A higher value will result in much faster calculations and a smaller result file size.
+    "MinimumAllowableRsrp": -115,            
+                                             
+
+    // How many threads that can be used to run calculation. 
+    // If set to null, the number of threads will automatically be determined based on the number of 
+    // processing cores. N threads means N times as much memory usage, so if you experience memory problems,
+    // try setting this to a low number. There will never be more threads than base stations(one thread
+    // processes one base station at a time).
+    "CalculationThreads": null,              
+                                             
+    // A list (array, []) of all base stations to be included in this calculation.
+    "BaseStations": [                        
+        {
+            // A unique ID for this base station. Must be unique across this configuration file.
+            "id": "1254",                    
+            // A name for this base station. Does not have to be unique. Only used in progress presentation.
+            "name": "Mob1",                  
+            
+            "center": {
+                // X-coordinate in UTM 33N (EPSG 25833, https://epsg.io/map#srs=25833)
+                "x": 268283.4066450454,      
+                // Y-coordinate in UTM 33N
+                "y": 7040847.668103122       
+            },
+            
+            // How many meters above the terrain this antenna is placed.
+            "heightAboveTerrain": 12,        
+
+            // The radius around this station that it is necessary for the road link calculation to consider 
+            // road links. A higher radius prolongs the calculation time, as more road links must be considered.
+            "maxRadius": 10000,              
+
+            // The type of antenna. Can be either MobileNetwork for mobile network signals (800MHz) or ItsG5 
+            // for ITS G5.
+            "antennaType": "MobileNetwork",  
+
+            // The (directional) gain of this station. 
+            // It can be a single number for constant gain in all directions, or a sector definition for 
+            // different gain in different directions. 
+            // Constant example: '10' (10 Db all around the station)
+            // Angle dependent example: '-45:45:18|45:60:7' (18 Db between -45 and 45 degrees, and 7 Db between
+            // 45 and 60 degrees).
+            // Default value if undefined: 0 (all around the station)
+            "gainDefinition": "125:140:5|90:125:25|65:90:15|40:65:4", 
+            
+            // The base transmit power of this station. It is equal in all directions.
+            // For RSRP calculations, power and (directional) gain is added before subtracting the different losses.
+            "power": 46,                     
+
+            // Used in RSRP and RSSI calculations -- this value is subtracted from the sum of power and gain, 
+            // before the path loss is calculated and subtracted.
+            // Default value if undefined: 2
+            "cableLoss": 2,                  
+
+            // Used in RSRP and RSSI calculations -- this value is subtracted from the sum of power and gain, 
+            // before the path loss is calculated and subtracted.
+            // If undefined or set to null, it will be automatically set depending on antenna type (10log(50)
+            // for MobileNetwork, and 0 for ItsG5.
+            "resourceBlockConstant": null    
+                                             
+        },
+        // A few more station examples:
+        {
+            "id": "1255",
+            "name": "Its2151",
+            "center": {
+                "x": 268283.4066450454,
+                "y": 7040847.668103122 
+            },
+            "heightAboveTerrain": 3, 
+            "maxRadius": 5000,
+            "antennaType": "ItsG5",
+            "power": 42,
+        },
+        {
+            "id": "1256b",
+            "name": "Another station",
+            "center": {
+                "x": 268283.4066450454,
+                "y": 7040847.668103122 
+            },
+            "heightAboveTerrain": 3,
+            "maxRadius": 5000,
+            "antennaType": "ItsG5",
+            "power": 15
+        }
+    ],
+
+    // The directory where you want results to be stored.
+    "OutputDirectory": "..\\RoadNetwork",    
+
+    // If set to true, a shape file containing each calculated point and its results will be written
+    // to the results directory.
+    "WriteShape": true,                      
+    // The filename of the shape file that is written if WriteShape is true.
+    "ShapeFileName": "results.shp",          
+
+    // If set to true, a CSV file containing each calculated point and its results will be written
+    // to the results directory.
+    "WriteCsv": true,                        
+    // The filename of the CSV file that is written if WriteCsv is true.
+    "CsvFileName": "results.csv",            
+    // The separator between columns in the CSV file.
+    "CsvSeparator": ";",                     
+
+    // If set to true, a log file containing information about the calculation process will be written
+    // to the results directory.
+    "WriteLog": true,                        
+    // The filename of the log file that is written if WriteLog is true.
+    "LogFileName": "log.json",               
+
+    // If set to true, various API result files will be written. The most important part of this is a 
+    // GeoJSON file containing the data that can be displayed on the web-based map.
+    "WriteApiResults": false,                
+    // The name of the API results directory that will be written inside the results directory.
+    "ApiResultInnerFolderName": "links",     
+
+    // Settings for where elevation data is stored.
+    "Terrain":                               
+    {
+        // Using an online cache means that the application will download tiles as requiered, convert them
+        // to an optimized binary format, then store them in the defined location. This means that the 
+        // application will spend a lot of time downloading elevation data every time you run it for a new
+        // geographic area. 
+        // You can use "LocalCache" if you have prepared elevation data yourself (see the 'Elevation data'
+        // section in the documentation). This mode will only use already downloaded data.
+        "Type": "OnlineCache",               
+        // Dynamic url to elevation data WMS (allows downloading TIFF-files with elevation for the area 
+        // defined in the url parameters).
+        "WmsUrl": "https://wms.geonorge.no/skwms1/wms.hoyde-dom?bbox={0}&format=image/tiff&service=WMS&version=1.1.1&request=GetMap&srs=EPSG:25833&transparent=true&width={1}&height={2}&layers=dom1_33:None", 
+        // Path where elevation data will be read from (and downloaded to if OnlineCache). A fast and 
+        // large SSD is recommended.
+        "Location": "I:\\Lambda\\Tiles_512", 
+        // Setting for memory handling. This sets how many tiles can be kept in memory at the same time.
+        // Too high number, and the application will crash when it is out of memory. Too low, and the
+        // application will have to read files over and over again, resulting in longer calculation times.
+        "MaxCacheItems": 300,                
+        // Setting for memory handling. This sets how many of the least recently used tiles that are 
+        // removed once the memory cache has been filled.
+        "RemoveCacheItemsWhenFull": 100,     
+        // The size of elevation data tiles that is used in this calculation. 512 is a good balance between
+        // small files where a lot of them has to be opened, but they can be opened very quickly, and large
+        // files that cover a larger area, takes a longer time to open, but a fewer number of files has to be opened.
+        "TileSize": 512,                     
+    }
+}
