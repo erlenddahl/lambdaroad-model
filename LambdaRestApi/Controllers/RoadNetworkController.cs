@@ -63,7 +63,7 @@ namespace LambdaRestApi.Controllers
             {
                 ValidateApiKey(config.ApiKey);
 
-                config.CalculationMethod = CalculationMethod.RoadNetwork;
+                config.Operation = OperationType.RoadNetwork;
                 config.RoadShapeLocation = _config.GetValue<string>("RoadShapeLocation");
 
                 foreach (var bs in config.BaseStations)
@@ -123,7 +123,7 @@ namespace LambdaRestApi.Controllers
             try
             {
                 config.OutputDirectory = "[INSERT ACTUAL PATH HERE]";
-                config.CalculationMethod = CalculationMethod.RoadNetwork;
+                config.Operation = OperationType.RoadNetwork;
                 config.RoadShapeLocation = "[INSERT ACTUAL PATH HERE]";
                 config.WriteApiResults = false;
                 config.Terrain = new TerrainConfig()

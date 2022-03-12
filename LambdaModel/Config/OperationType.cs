@@ -1,6 +1,6 @@
 ﻿namespace LambdaModel.Config
 {
-    public enum CalculationMethod
+    public enum OperationType
     {
         Invalid,
         RoadNetwork,
