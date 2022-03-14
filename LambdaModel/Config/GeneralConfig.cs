@@ -26,15 +26,8 @@ namespace LambdaModel.Config
 
         public BaseStation[] BaseStations { get; set; }
         public string OutputDirectory { get; set; }
-        public string ShapeFileName { get; set; } = "results.shp";
-        public string CsvFileName { get; set; } = "results.csv";
-        public string ApiResultInnerFolderName { get; set; } = "links";
-        public string CsvSeparator { get; set; } = ";";
         public string LogFileName { get; set; } = "log.json";
-        public bool WriteShape { get; set; } = true;
-        public bool WriteCsv { get; set; } = true;
         public bool WriteLog { get; set; } = true;
-        public bool WriteApiResults { get; set; } = true;
         public TerrainConfig Terrain { get; set; }
 
         public int? CalculationThreads { get; set; }
@@ -65,7 +58,6 @@ namespace LambdaModel.Config
             OutputDirectory = GetFullPath(configLocation, OutputDirectory);
             PrepareOutputDirectory();
 
-            if (WriteShape && ShapeFileName.Contains("\\")) throw new ConfigException("ShapeFileName must be a file name only, not a path.");
             if (WriteLog && LogFileName.Contains("\\")) throw new ConfigException("LogFileName must be a file name only, not a path.");
 
             Terrain.Config = this;
