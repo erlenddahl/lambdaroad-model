@@ -25,6 +25,13 @@ namespace LambdaModel.Config
         public string RoadShapeLocation { get; set; }
         public new RoadLinkBaseStation[] BaseStations { get; set; }
         public int LinkCalculationPointFrequency { get; set; } = 20;
+        public string ShapeFileName { get; set; } = "results.shp";
+        public string CsvFileName { get; set; } = "results.csv";
+        public string ApiResultInnerFolderName { get; set; } = "links";
+        public string CsvSeparator { get; set; } = ";";
+        public bool WriteShape { get; set; } = true;
+        public bool WriteCsv { get; set; } = true;
+        public bool WriteApiResults { get; set; } = true;
 
         public override void Run()
         {
@@ -121,6 +128,7 @@ namespace LambdaModel.Config
 
         public override GeneralConfig Validate(string configLocation = null)
         {
+            if (WriteShape && ShapeFileName.Contains("\\")) throw new ConfigException("ShapeFileName must be a file name only, not a path.");
             if (LinkCalculationPointFrequency < 1) throw new ConfigException("Link calculation point frequency must be at least 1.");
             if (BaseStations?.Any() != true) throw new ConfigException("No BaseStations defined.");
             if (BaseStations.GroupBy(p => p.Id).Any(c => c.Count() > 1)) throw new ConfigException("BaseStation Ids must be unique");
