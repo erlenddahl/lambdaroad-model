@@ -1,6 +1,6 @@
 # LambdaRoad - Command line application and tool backend
 
-This is the repo for the LambdaRoad command line application, its unit tests, and a simple REST API which serves as a backend for the web-based map tool.
+This is the repo for the LambdaRoad command line application, its unit tests, and a simple REST API which serves as a backend for the [web-based map tool](http://mobilitet.sintef.no/lambda/).
 
 ## All LambdaRoad repositories:
  - [Command line application and tool backend](https://github.com/erlenddahl/lambdaroad-model)
