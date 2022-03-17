@@ -2,6 +2,8 @@
 
 This is the repo for the LambdaRoad command line application, its unit tests, and a simple REST API which serves as a backend for the [web-based map tool](http://mobilitet.sintef.no/lambda/).
 
+This readme is a very technical description of how to use the command line application. For a more visual documentation of the capabilities of the application, see the readme in the [tool repository](https://github.com/erlenddahl/lambdaroad-interface).
+
 ## All LambdaRoad repositories:
  - [Command line application and tool backend](https://github.com/erlenddahl/lambdaroad-model)
  - [Web-based map tool](https://github.com/erlenddahl/lambdaroad-interface)
@@ -12,7 +14,7 @@ The command line application is a .NET Standard application written in C#. It co
 
  - LambdaModel is a library containing most of the code.
  - LambdaModel.Tests is a set of unit tests for various parts of the LambdaModel code.
- - LambdaModelRunner is the command line application utilizing the above library to run calculations using a configuration file.
+ - LambdaModelRunner is the command line application utilizing the LambdaModel library to run calculations described in a JSON configuration file.
  - LambdaRestApi is the REST API that serves as a backend for the web-based map tool.
 
 There are currently two implemented path loss models (mobile network 800MHz and ITS G5), as well as a framework for running path loss calculations on a road network, in a grid, or to a single point. It also includes methods for preprocessing elevation data from Hoydedata.no (or other equivalent sources) and converting it to a custom binary format that is quicker to read, ensuring speedy calculations.
@@ -22,12 +24,12 @@ The application is run by dragging a config file onto its file icon in Windows E
 If you want to use the command line application, you can either download this code and compile it yourself, or download the compiled version from the [release section](https://github.com/erlenddahl/lambdaroad-model/releases).
 
 ## Calculation modes
-The application can handle two different types of config files, either for running a road network calculation, or for running an elevation data pre-processing. In addition, the application can run grid calculations and single point calculations, but these have not been the focus of the LambdaRoad project, and there has not been implemented a config entry point for them. A user competent in C# would be able to run them anyway, with some modifications to the application.
+The application can handle two different types of config files, either for running a road network calculation, or for running an elevation data pre-processing. In addition, the application can run grid calculations and single point calculations, but these have not been the focus of the LambdaRoad project, and there has not been implemented a config entry point for them. A user competent in C# would be able to run them anyway, with some minor modifications to the application.
 
 ### Road network
 A road network calculation is a calculation where the received signal strength from one or more base stations is calculated along all roads within the base station's range.
 
-Road network calculations are described in detail in the section 'Running road network calculations' above.
+Road network calculations are described in detail in the section 'Running road network calculations' in the readme in the [tool repository](https://github.com/erlenddahl/lambdaroad-interface).
 
 The JSON below shows an example of a config file for a road network calculation:
 
