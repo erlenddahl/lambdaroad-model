@@ -39,6 +39,7 @@ The JSON below shows an example of a config file for a road network calculation:
     "Operation": "RoadNetwork",              
 
     // A shape-file that contains the road network. Can be absolute or relative to the config location.
+    // The road network can be downloaded from here: https://kartkatalog.geonorge.no/metadata/nvdb-ruteplan-nettverksdatasett/8d0f9066-34f9-4423-be12-8e8523089313
     "RoadShapeLocation": "2021-05-28.shp",   
 
     // How many meters between each point on a road link that is calculated. 
