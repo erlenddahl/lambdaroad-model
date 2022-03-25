@@ -30,8 +30,10 @@ namespace LambdaRestApi.Controllers
             using var bm = new Bitmap(s, s);
             using var g = Graphics.FromImage(bm);
             g.CompositingQuality = CompositingQuality.HighQuality;
+            g.CompositingMode = CompositingMode.SourceOver;
             g.InterpolationMode = InterpolationMode.High;
             g.SmoothingMode = SmoothingMode.HighQuality;
+            g.PixelOffsetMode = PixelOffsetMode.HighQuality;
 
             g.Clear(Color.Transparent);
 
@@ -80,10 +82,30 @@ namespace LambdaRestApi.Controllers
             var dbFactor = Math.Min(1, s / (centerRadius + power + gain.GetMaxGain()));
 
             path.StartFigure();
-            for (var i = 0; i <= 360; i++)
+            var previousDb = int.MinValue;
+            var startAngle = 0;
+            for (var i = 0; i < 360; i++)
             {
-                var db = (int) Math.Round((centerRadius + power + gain.GetGainAtAngle(i)) * dbFactor);
-                path.AddArc(new Rectangle((s - db) / 2, (s - db) / 2, db, db), 360 - i, 1);
+                // Request gain for 360-i, since GraphicsPath draws in the opposite direction (and is very
+                // peculiar on the sequence of arcs and their direction).
+                var db = (int) Math.Round((centerRadius + power + gain.GetGainAtAngle(360 - i)) * dbFactor);
+                if (previousDb == int.MinValue) previousDb = db;
+
+                if (db != previousDb)
+                {
+                    path.AddArc(new Rectangle((s - previousDb) / 2, (s - previousDb) / 2, previousDb, previousDb), startAngle, (i - 1 - startAngle));
+                    Debug.WriteLine(startAngle + " to " + (i - 1) + ": " + previousDb + ", " + (s - previousDb) / 2);
+                    startAngle = i;
+                }
+
+                previousDb = db;
+            }
+
+            if (startAngle != 359)
+            {
+                var i = 359;
+                path.AddArc(new Rectangle((s - previousDb) / 2, (s - previousDb) / 2, previousDb, previousDb), startAngle, (i - 1 - startAngle));
+                Debug.WriteLine(startAngle + " to " + (i - 1) + ": " + previousDb + ", " + (s - previousDb) / 2);
             }
 
             path.CloseFigure();
@@ -96,6 +118,7 @@ namespace LambdaRestApi.Controllers
                 SurroundColors = new[] {Color.FromArgb(215, gradientEdge), Color.FromArgb(175, gradientEdge) }
             };
 
+            g.FillPath(new SolidBrush(Color.FromArgb(175, gradientEdge)), path);
             g.FillPath(brush, path);
 
             g.FillEllipse(new SolidBrush(Color.FromArgb(255, ringColor)), new Rectangle(54, 54, 20, 20));
