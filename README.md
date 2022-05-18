@@ -42,6 +42,7 @@ The JSON below shows an example of a config file for a road network calculation:
     // The road network can be downloaded from here: https://kartkatalog.geonorge.no/metadata/nvdb-ruteplan-nettverksdatasett/8d0f9066-34f9-4423-be12-8e8523089313
     // It is recommended to download it as an FGDB, then extract the ERFKPS layer as a shape file, for 
     // example by using QGis (import GDB, pick ERFKPS layer, right click, export objects as, ESRI Shapefile).
+    // NOTE: Shape files (including its sub files) larger than 2GB will crash -- this is a limitation of the ESRI spesification.
     "RoadShapeLocation": "2021-05-28.shp",   
 
     // How many meters between each point on a road link that is calculated. 
