@@ -58,7 +58,7 @@ namespace LambdaModel.Config
                 Cip.Set("Receiver height", ReceiverHeightAboveTerrain);
 
                 Cip?.Set("Road network source", Path.GetFileName(RoadShapeLocation));
-                ShapeLink.ReadLinks(RoadShapeLocation, BaseStations);
+                ShapeLink.ReadLinks(RoadShapeLocation, BaseStations, Cip);
 
                 var calculations = 0L;
                 var distance = 0L;

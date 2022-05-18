@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using ConsoleUtilities.ConsoleInfoPanel;
 using DotSpatial.Data;
 using DotSpatial.Topology;
 using LambdaModel.Stations;
 using no.sintef.SpeedModule.Geometry;
-using no.sintef.SpeedModule.Geometry.SimpleStructures;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
 
 namespace LambdaModel.General
 {
@@ -31,7 +29,7 @@ namespace LambdaModel.General
             Length = length;
 
             var line = new CachedLineTools(geometry.ToArray());
-            Geometry = new Point4D<CalculationDetails>[(int) line.Length + 1];
+            Geometry = new Point4D<CalculationDetails>[(int)line.Length + 1];
             for (var i = 0; i < Geometry.Length; i++)
             {
                 var pi = line.QueryPointInfo(i);
@@ -45,12 +43,21 @@ namespace LambdaModel.General
         /// </summary>
         /// <param name="geometryPath"></param>
         /// <param name="stations"></param>
+        /// <param name="cip"></param>
         /// <returns></returns>
-        public static void ReadLinks(string geometryPath, IList<RoadLinkBaseStation> stations)
+        public static void ReadLinks(string geometryPath, IList<RoadLinkBaseStation> stations, ConsoleInformationPanel cip = null)
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             if (!File.Exists(geometryPath + ".cache"))
-                GenerateShapeCache(geometryPath);
+                try
+                {
+                    GenerateShapeCache(geometryPath, cip);
+                }
+                catch (Exception ex)
+                {
+                    File.Delete(geometryPath + ".cache");
+                    throw new Exception("Failed to create road network cache. Please ensure that the shape file is no larger than 2GB (due to limitations in the ESRI specification).", ex);
+                }
 
             foreach (var bs in stations)
             {
@@ -123,11 +130,18 @@ namespace LambdaModel.General
             }
         }
 
-        private static void GenerateShapeCache(string geometryPath)
+        private static void GenerateShapeCache(string geometryPath, ConsoleInformationPanel cip = null)
         {
+            var progressTitle = "Generating road network cache";
+            cip?.SetUnknownProgress(progressTitle);
+
             using (var fs = FeatureSet.Open(geometryPath))
-            using (var writer = new BinaryWriter(File.Create(geometryPath + ".cache")))
+            using (var writer = new BinaryWriter(File.Create(geometryPath + ".cachepart")))
             {
+                cip?.SetUnknownProgress(progressTitle).Finish();
+                cip?.Remove(progressTitle);
+                var pb = cip?.SetProgress(progressTitle, max: fs.NumRows());
+
                 //Note: using foreach() on fs.Features loads the entire file to memory. Slow and OOM.
                 for (var i = 0; i < fs.NumRows(); i++)
                 {
@@ -152,8 +166,14 @@ namespace LambdaModel.General
                         writer.Write(c.Y);
                         writer.Write(c.Z);
                     }
+
+                    pb?.Increment();
                 }
+
+                pb?.Finish();
             }
+
+            File.Move(geometryPath + ".cachepart", geometryPath + ".cache");
         }
 
         private static double CalculateLength(IList<Coordinate> coordinates)
