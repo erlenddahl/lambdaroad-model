@@ -125,8 +125,8 @@ namespace LambdaModel.General
 
         private static void GenerateShapeCache(string geometryPath)
         {
-            using(var writer = new BinaryWriter(File.Create(geometryPath + ".cache")))
             using (var fs = FeatureSet.Open(geometryPath))
+            using (var writer = new BinaryWriter(File.Create(geometryPath + ".cache")))
             {
                 //Note: using foreach() on fs.Features loads the entire file to memory. Slow and OOM.
                 for (var i = 0; i < fs.NumRows(); i++)
