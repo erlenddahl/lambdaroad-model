@@ -5,6 +5,7 @@ using LambdaModel.Stations;
 using no.sintef.SpeedModule.Geometry;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -66,12 +67,12 @@ namespace LambdaModel.General
 
             using (var reader = new BinaryReader(File.OpenRead(geometryPath + ".cache")))
             {
-                var fileSize = reader.BaseStream.Length;
-                var position = 0;
+                var linkCount = reader.ReadInt32();
+                var ix = -1;
 
-                while (position < fileSize)
+                while (ix + 1 < linkCount)
                 {
-                    var ix = reader.ReadInt32();
+                    ix = reader.ReadInt32();
 
                     var cx = reader.ReadInt32();
                     var cy = reader.ReadInt32();
@@ -82,7 +83,6 @@ namespace LambdaModel.General
                     var pointCount = reader.ReadInt32();
 
                     var pointBytes = reader.ReadBytes(pointCount * 24);
-                    position += 4 + 4 * 3 + 4 + name.Length + 4 + pointBytes.Length;
 
                     if (pointCount < 2) continue;
 
@@ -138,6 +138,8 @@ namespace LambdaModel.General
             using (var fs = FeatureSet.Open(geometryPath))
             using (var writer = new BinaryWriter(File.Create(geometryPath + ".cachepart")))
             {
+                writer.Write(fs.NumRows());
+
                 cip?.SetUnknownProgress(progressTitle).Finish();
                 cip?.Remove(progressTitle);
                 var pb = cip?.SetProgress(progressTitle, max: fs.NumRows());

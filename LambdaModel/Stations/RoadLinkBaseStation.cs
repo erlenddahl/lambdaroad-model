@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -62,7 +63,6 @@ namespace LambdaModel.Stations
             RemoveLinksBy("Checking road link min possible path loss", "Road links removed (min loss)", link =>
             {
                 if (link.Geometry.Any(p => rsrp(p.X, p.Y) >= minimumAllowableRsrp)) return false;
-
                 return true;
             });
         }
