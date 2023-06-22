@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Threading;
 using ConsoleUtilities.ConsoleInfoPanel;
+using Extensions.StringExtensions;
 using LambdaModel.General;
 using LambdaModel.Terrain.Tiff;
 using LambdaModel.Utilities;
@@ -75,19 +76,44 @@ namespace LambdaModel.Terrain.Cache
             if (TiffCache.TryGetValue(key, out var tiff))
                 return tiff;
 
-            var fn = GetFilename(key);
-            tiff = CreateTiff(fn);
+            Exception exception = null;
+            var fn = "";
 
-            TiffCache.Add(key, tiff);
+            for (var i = 0; i < 3; i++)
+            {
+                try
+                {
+                    fn = GetFilename(key);
+                    tiff = CreateTiff(fn);
 
-            var retrieved = TiffCache.RetrievedFromCache - _lastRetrieved;
-            _lastRetrieved = TiffCache.RetrievedFromCache;
-            _cip?.Increment("Tiles retrieved from memcache", retrieved);
+                    TiffCache.Add(key, tiff);
 
-            _cip?.Set("Memcache added/current [" + _cacheIx + "]", TiffCache.AddedToCache + " / " + TiffCache.CurrentlyInCache);
-            _cip?.Set("Memcache rem/rem.ops [" + _cacheIx + "]", TiffCache.RemovedFromCache + " / " + TiffCache.CacheRemovals);
+                    var retrieved = TiffCache.RetrievedFromCache - _lastRetrieved;
+                    _lastRetrieved = TiffCache.RetrievedFromCache;
+                    _cip?.Increment("Tiles retrieved from memcache", retrieved);
 
-            return tiff;
+                    _cip?.Set("Memcache added/current [" + _cacheIx + "]", TiffCache.AddedToCache + " / " + TiffCache.CurrentlyInCache);
+                    _cip?.Set("Memcache rem/rem.ops [" + _cacheIx + "]", TiffCache.RemovedFromCache + " / " + TiffCache.CacheRemovals);
+
+                    return tiff;
+                }
+                catch (Exception ex)
+                {
+                    _cip?.Increment("Failed TIFF parsings [" + _cacheIx + "]");
+
+                    if (!string.IsNullOrWhiteSpace(fn))
+                    {
+                        System.IO.File.Delete(fn);
+                        System.IO.File.Delete(fn.ChangeExtension(".bin"));
+                    }
+
+                    exception = ex;
+                    
+                    Thread.Sleep(500);
+                }
+            }
+            
+            throw new Exception("Repeatedly failed to parse TIFF file '" + fn + "', see inner exception.", exception);
         }
 
         public virtual T GetTileKey(double x, double y)
