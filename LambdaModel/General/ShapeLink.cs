@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using ConsoleUtilities.ConsoleProgressBar;
 
 namespace LambdaModel.General
 {
@@ -64,6 +65,8 @@ namespace LambdaModel.General
             {
                 bs.Links.Clear();
             }
+
+            var pb = cip?.SetUnknownProgress("Reading road network");
 
             using (var reader = new BinaryReader(File.OpenRead(geometryPath + ".cache")))
             {
@@ -128,6 +131,8 @@ namespace LambdaModel.General
                     }
                 }
             }
+
+            pb?.Finish();
         }
 
         private static void GenerateShapeCache(string geometryPath, ConsoleInformationPanel cip = null)
