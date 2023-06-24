@@ -32,6 +32,7 @@ namespace LambdaModel.Config
         public bool WriteShape { get; set; } = true;
         public bool WriteCsv { get; set; } = true;
         public bool WriteApiResults { get; set; } = true;
+        public bool IncludeEmptyPoints { get; set; } = false;
 
         public override void Run()
         {
@@ -115,7 +116,7 @@ namespace LambdaModel.Config
                 }
 
                 if (WriteCsv)
-                    SaveCsv(Path.Combine(OutputDirectory, CsvFileName), CsvSeparator, BaseStations, BaseStations.SelectMany(p => p.Links).Distinct().ToArray(), Cip);
+                    SaveCsv(Path.Combine(OutputDirectory, CsvFileName), CsvSeparator, BaseStations, BaseStations.SelectMany(p => p.Links).Distinct().ToArray(), IncludeEmptyPoints, Cip);
 
                 Cip.Set("Saving time", $"{DateTime.Now.Subtract(start).TotalSeconds:n2} seconds.");
 
@@ -229,7 +230,7 @@ namespace LambdaModel.Config
             }
         }
 
-        public static void SaveCsv(string pathFile, string separator, IList<RoadLinkBaseStation> baseStations, IList<ShapeLink> links, ConsoleInformationPanel cip = null)
+        public static void SaveCsv(string pathFile, string separator, IList<RoadLinkBaseStation> baseStations, IList<ShapeLink> links, bool includeEmptyPoints, ConsoleInformationPanel cip = null)
         {
             var ci = CultureInfo.InvariantCulture;
             using (var results = new StreamWriter(File.Create(pathFile)))
@@ -241,13 +242,13 @@ namespace LambdaModel.Config
                     {
                         foreach (var c in link.Geometry)
                         {
-                            if (c.M == null) continue;
-                            results.WriteLine(link.Name + separator + 
-                                              c.X.ToString(ci) + separator + 
+                            if (!includeEmptyPoints && c.M == null) continue;
+                            results.WriteLine(link.Name + separator +
+                                              c.X.ToString(ci) + separator +
                                               c.Y.ToString(ci) + separator +
                                               c.Z.ToString(ci) + separator +
-                                              c.M.MaxRsrp.ToString(ci) + separator + 
-                                              string.Join(separator, c.M.BaseStationRsrp.Select(p => p.ToString(ci))));
+                                              (c.M == null ? "0" : c.M.MaxRsrp.ToString(ci)) + separator +
+                                              string.Join(separator, c.M == null ? baseStations.Select(p => "0") : c.M.BaseStationRsrp.Select(p => p.ToString(ci))));
                         }
 
                         pb?.Increment();
