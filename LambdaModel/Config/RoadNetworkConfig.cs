@@ -135,7 +135,11 @@ namespace LambdaModel.Config
             if (BaseStations.GroupBy(p => p.Id).Any(c => c.Count() > 1)) throw new ConfigException("BaseStation Ids must be unique");
             if (Terrain == null) throw new ConfigException("Missing Terrain config.");
             foreach (var bs in BaseStations)
+            {
                 bs.Validate();
+                bs.Initialize();
+            }
+
             RoadShapeLocation = GetFullPath(configLocation, RoadShapeLocation);
             if (LinkCalculationPointFrequency < 1) throw new Exception("Link calculation point frequency must be at least 1.");
             return base.Validate(configLocation);

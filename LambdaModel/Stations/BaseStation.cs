@@ -54,6 +54,8 @@ namespace LambdaModel.Stations
 
         public void Initialize()
         {
+            if (_vector != null) return;
+
             // Initialize a PointUtm array that is to be (re)used as the vector of points from
             // the center to each of the points that should be calculated.
             _vector = new Point4D<double>[(int)Math.Sqrt((long)MaxRadius * MaxRadius * 2L) + 1];
