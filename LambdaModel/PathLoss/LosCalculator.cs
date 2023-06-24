@@ -51,6 +51,7 @@ namespace LambdaModel.PathLoss
         /// </summary>
         /// <param name="horizontalDistance"></param>
         /// <param name="txHeightAboveTerrain"></param>
+        /// <param name="rxHeightAboveTerrain"></param>
         /// <returns></returns>
         public double CalculateMinPossibleLoss(double horizontalDistance, double txHeightAboveTerrain, double rxHeightAboveTerrain)
         {

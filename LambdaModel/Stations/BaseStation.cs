@@ -79,9 +79,9 @@ namespace LambdaModel.Stations
 
         public void Validate()
         {
-            if (Power < 0) throw new Exception("Power must be defined as a positive number.");
             if (!AntennaType.HasValue)
                 throw new Exception("Base stations must have the AntennaType property, which may be one of these values: " + string.Join(", ", EnumHelper.GetValues<AntennaType>()));
+            if (AntennaType != Stations.AntennaType.Los && Power < 0) throw new Exception("Power must be defined as a positive number.");
         }
 
         /// <summary>
