@@ -3,6 +3,7 @@
     public enum AntennaType
     {
         MobileNetwork,
-        ItsG5
+        ItsG5,
+        Los
     }
 }

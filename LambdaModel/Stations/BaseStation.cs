@@ -62,7 +62,14 @@ namespace LambdaModel.Stations
             for (var i = 0; i < _vector.Length; i++)
                 _vector[i] = new Point4D<double>(0, 0);
 
-            Calculator = AntennaType == Stations.AntennaType.ItsG5 ? (IPathLossCalculator)new ItsG5PathLossCalculator() : new MobileNetworkPathLossCalculator();
+            if (AntennaType == Stations.AntennaType.ItsG5)
+                Calculator = new ItsG5PathLossCalculator();
+            else if (AntennaType == Stations.AntennaType.MobileNetwork)
+                Calculator = new MobileNetworkPathLossCalculator();
+            else if (AntennaType == Stations.AntennaType.Los)
+                Calculator = new LosCalculator();
+            else
+                throw new Exception("No calculator for AntennaType=" + AntennaType);
 
             if (!ResourceBlockConstant.HasValue)
                 ResourceBlockConstant = AntennaType == Stations.AntennaType.MobileNetwork ? 10 * Math.Log10(12 * 50) : 0;
