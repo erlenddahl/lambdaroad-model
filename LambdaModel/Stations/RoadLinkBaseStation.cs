@@ -116,8 +116,16 @@ namespace LambdaModel.Stations
 
                     // Calculate the loss for this point, and store it in the results matrix
                     var loss = Calculator.CalculateLoss(_vector, HeightAboveTerrain, receiverHeightAboveTerrain, vectorLength - 1);
-                    var angle = AngleTo(c);
-                    var value = CalculateRsrpAtAngle(angle, loss);
+                    double value;
+                    if (AntennaType == Stations.AntennaType.Los)
+                    {
+                        value = loss;
+                    }
+                    else
+                    {
+                        var angle = AngleTo(c);
+                        value = CalculateRsrpAtAngle(angle, loss);
+                    }
                     c.M.BaseStationRsrp[baseStationIx] = value;
                     if (value > c.M.MaxRsrp)
                         c.M.MaxRsrp = value;
