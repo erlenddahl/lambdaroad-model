@@ -1,5 +1,6 @@
 ﻿using BitMiracle.LibTiff.Classic;
 using ConsoleUtilities.ConsoleInfoPanel;
+using ConsoleUtilities.ConsoleInfoPanel.Items;
 
 namespace LambdaModel.Utilities
 {

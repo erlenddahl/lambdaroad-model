@@ -24,6 +24,8 @@ namespace LambdaModel.Stations
 
         [JsonIgnore] public string CipName => Name + " (" + Id + ")";
 
+        public RoadLinkBaseStation(){}
+
         public RoadLinkBaseStation(double x, double y, int heightAboveTerrain, int maxRadius, ConsoleInformationPanel cip = null) : base(x, y, heightAboveTerrain, maxRadius, cip)
         {
         }
