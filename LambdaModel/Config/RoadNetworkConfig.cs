@@ -78,8 +78,11 @@ namespace LambdaModel.Config
                     {
                         Cip?.Set("Calculation radius", bs.MaxRadius);
                         Cip?.Set("Relevant road links", bs.Links.Count);
-                            
-                        bs.RemoveLinksTooFarAway(MinimumAllowableRsrp, ReceiverHeightAboveTerrain);
+
+                        if (bs.AntennaType != AntennaType.Los)
+                        {
+                            bs.RemoveLinksTooFarAway(MinimumAllowableRsrp, ReceiverHeightAboveTerrain);
+                        }
 
                         using (var tiles = Terrain.CreateCache(Cip))
                         {
@@ -96,7 +99,10 @@ namespace LambdaModel.Config
                         Cip?.Set("Calculations per second", $"{(long)(calculations / secs):n0} c/s");
                         Cip?.Set("Terrain lookups per second", $"{(long)(distance / secs):n0} tl/s");
 
-                        bs.RemoveLinksWithTooLowRsrp(MinimumAllowableRsrp);
+                        if (bs.AntennaType != AntennaType.Los)
+                        {
+                            bs.RemoveLinksWithTooLowRsrp(MinimumAllowableRsrp);
+                        }
 
                         pb.Increment();
                     });
